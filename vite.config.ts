@@ -13,4 +13,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  preview: {
+    port: 5174,
+    // Allow your domain
+    host: true,
+    allowedHosts: ["gwm.blogstreak.com"],
+  },
 });
