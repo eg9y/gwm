@@ -5,10 +5,11 @@ import WhatsAppButton from "../components/WhatsAppButton";
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 
-// Define the base URL for our Strapi API
-export const STRAPI_API_URL = "http://localhost:1337";
+// Define the base URL for our Strapi API from environment variables
+export const STRAPI_API_URL =
+  import.meta.env.VITE_STRAPI_API_URL || "http://localhost:1337";
 
-export const Route = createRootRouteWithContext<any>()({
+export const Route = createRootRouteWithContext<{}>()({
   component: RootComponent,
 });
 
