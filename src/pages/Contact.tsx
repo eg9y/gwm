@@ -1,8 +1,4 @@
 import { Suspense } from "react";
-// Remove redundant imports
-// import Navbar from "../components/Navbar";
-// import Footer from "../components/Footer";
-import WhatsAppButton from "../components/WhatsAppButton";
 
 const Contact = () => {
   return (

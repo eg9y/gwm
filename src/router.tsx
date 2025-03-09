@@ -38,13 +38,6 @@ export const router = createRouter({
   defaultPreload: "intent", // Preload routes when user hovers over links
 });
 
-// Register the router for type safety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
 // RouterProvider component
 export const Router = () => {
   return <RouterProvider router={router} />;

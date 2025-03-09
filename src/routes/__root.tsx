@@ -1,5 +1,4 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import type { RouterContext } from "../router-context";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppButton from "../components/WhatsAppButton";
@@ -9,7 +8,7 @@ import { Helmet } from "react-helmet";
 // Define the base URL for our Strapi API
 export const STRAPI_API_URL = "http://localhost:1337";
 
-export const Route = createRootRouteWithContext<RouterContext>()({
+export const Route = createRootRouteWithContext<any>()({
   component: RootComponent,
 });
 

@@ -8,6 +8,9 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
+  context: {
+    router: {},
+  },
 });
 
 // Register router for typesafety

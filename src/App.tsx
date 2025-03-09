@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense, lazy, useRef } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { Outlet, useRouter, Link } from "@tanstack/react-router";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -11,9 +11,6 @@ import havalH6Image from "./assets/haval_h6.jpg";
 import havalJolionImage from "./assets/haval_jolion.jpg";
 import tank300Image from "./assets/tank_300.jpg";
 import tank500Image from "./assets/tank_500.jpg";
-
-// Lazy-load the Contact page
-const Contact = lazy(() => import("./pages/Contact"));
 
 // Define section names for better accessibility and keys
 const sections = [

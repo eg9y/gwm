@@ -1,7 +1,6 @@
 import { STRAPI_API_URL } from "../routes/__root";
 import type {
   StrapiResponse,
-  StrapiSingleResponse,
   ArticleAttributes,
   StrapiMeta,
 } from "../types/strapi";
@@ -51,7 +50,7 @@ export async function fetchArticles(
  */
 export async function fetchArticleBySlug(
   slug: string
-): Promise<{ data: ArticleAttributes }> {
+): Promise<{ data: ArticleAttributes; meta: StrapiMeta }> {
   const queryParams = new URLSearchParams({
     "filters[slug][$eq]": slug,
     populate: "featuredImage",
@@ -72,9 +71,9 @@ export async function fetchArticleBySlug(
     throw new Error(`Article with slug "${slug}" not found`);
   }
 
-  // Return as a single response format
+  // Return with proper type structure
   return {
-    data: data.data[0],
+    data: data.data[0].attributes,
     meta: data.meta,
   };
 }

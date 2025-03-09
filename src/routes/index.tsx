@@ -57,7 +57,7 @@ function HomePage() {
       >
         <div className="fixed right-4 md:right-10 top-1/2 -translate-y-1/2 z-40 hidden md:block">
           <div className="flex flex-col gap-4">
-            {sections.map((section, index) => (
+            {sections.map((section) => (
               <a
                 key={`nav-dot-${section.id}`}
                 href={`#${section.id}`}
