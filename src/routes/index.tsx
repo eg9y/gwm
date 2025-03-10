@@ -1,17 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Hero from "../components/Hero";
-import ModelShowcase from "../components/ModelShowcase";
-import { Helmet } from "react-helmet";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
+import {
+  Outlet,
+  useRouter,
+  Link,
+  createFileRoute,
+} from "@tanstack/react-router";
 
 // Import images
 import havalH6Image from "../assets/haval_h6.jpg";
 import havalJolionImage from "../assets/haval_jolion.jpg";
 import tank300Image from "../assets/tank_300.jpg";
 import tank500Image from "../assets/tank_500.jpg";
+import Hero from "../components/Hero";
+import ModelShowcase from "../components/ModelShowcase";
 
 // Define section names for better accessibility and keys
-export const sections = [
+const sections = [
   { id: "hero", name: "Home" },
   { id: "haval-h6", name: "Haval H6" },
   { id: "haval-jolion", name: "Haval Jolion" },
@@ -20,58 +24,143 @@ export const sections = [
   { id: "contact", name: "Contact" },
 ];
 
+// Replace the existing vehicle models section with this updated content
+const vehicleModels = [
+  {
+    id: 1,
+    name: "Tank 300",
+    price: "Rp. 837.000.000",
+    description:
+      "Off-road SUV dengan gaya retro yang menggabungkan kemampuan off-road yang luar biasa dengan kenyamanan premium di dalam kabin.",
+    features: [
+      "Mesin Turbo 2.0 T HEV (342 HP | 648 NM)",
+      "Transmisi 8-Speed Automatic",
+      "4WD dengan Electronic Locking Differentials",
+      "900 mm Wading Depth",
+      "Comfort Luxury Nappa Leather",
+      "Auto Park",
+      "Multi-Terrain Select",
+      "ADAS Lvl 2",
+    ],
+    learnMoreLink: "/tank-300",
+    imageUrl: tank300Image,
+  },
+  {
+    id: 2,
+    name: "Tank 500",
+    price: "Rp. 1.208.000.000",
+    description:
+      "Luxury SUV berukuran besar dengan kemampuan off-road superior dan interior mewah berkapasitas 7 penumpang.",
+    features: [
+      "Mesin Turbo 2.0 T HEV (342 HP | 648 NM)",
+      "Transmisi 8-Speed Automatic",
+      "4WD dengan Electronic Locking Differentials",
+      "900 mm Wading Depth",
+      "Comfort Luxury Nappa Leather",
+      "Auto Park",
+      "Massage Seat",
+      "ADAS Lvl 2",
+    ],
+    learnMoreLink: "/tank-500",
+    imageUrl: tank500Image,
+  },
+  {
+    id: 3,
+    name: "Haval Jolion Ultra",
+    price: "Rp. 418.000.000",
+    description:
+      "Compact SUV stylish yang menggabungkan teknologi mutakhir dengan desain berkelas. Pilihan sempurna untuk mobilitas perkotaan modern.",
+    features: [
+      "Mesin 1.5 HEV (187 HP | 375 NM)",
+      "Transmisi 7-Speed DHT",
+      "Efisien 20 Km/liter",
+      "Panoramic Sunroof",
+      '10.25" Touchscreen Display',
+      "Carplay dan Android auto",
+      "ADAS Lvl 2",
+      "EV Mode",
+    ],
+    learnMoreLink: "/haval-jolion-ultra",
+    imageUrl: havalJolionImage,
+  },
+  {
+    id: 4,
+    name: "Haval H6",
+    price: "Rp. 602.000.000",
+    description:
+      "SUV premium dengan desain elegan dan performa tangguh. Dilengkapi dengan berbagai fitur keselamatan dan kenyamanan terkini.",
+    features: [
+      "Mesin Turbo 1.5 T HEV (235 HP | 530 NM)",
+      "Transmisi 7-Speed DHT",
+      "Panoramic Sunroof",
+      "540° Camera View",
+      "Auto Parking",
+      "ADAS Lvl 2",
+      "Advanced Safety Features",
+      "Smart Connectivity",
+    ],
+    learnMoreLink: "/haval-h6",
+    imageUrl: havalH6Image,
+  },
+];
+
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
-  const [sectionsLoaded, setSectionsLoaded] = useState(false);
+  const router = useRouter();
+  const [currentSection, setCurrentSection] = useState(0);
+  const totalSections = sections.length;
+  const currentRoute = router.state.location.pathname;
+  const isHomePage = currentRoute === "/";
+  const prevRoute = useRef(currentRoute);
 
+  // Reset scroll position on route change
   useEffect(() => {
-    // Start the loading process immediately, but delay just a tiny bit
-    // to allow for a smoother transition
-    const timer = setTimeout(() => {
-      setSectionsLoaded(true);
-    }, 50);
+    if (prevRoute.current !== currentRoute) {
+      window.scrollTo(0, 0);
+      prevRoute.current = currentRoute;
+    }
+  }, [currentRoute]);
 
-    return () => clearTimeout(timer);
-  }, []);
+  // Handle scroll event for sections - only on home page
+  useEffect(() => {
+    if (!isHomePage) return;
+
+    const handleScroll = () => {
+      // Calculate current section based on scroll position
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const newSection = Math.floor(scrollPosition / windowHeight);
+      if (newSection !== currentSection && newSection < totalSections) {
+        setCurrentSection(newSection);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [currentSection, totalSections, isHomePage]);
+
+  const scrollToSection = (sectionIndex: number) => {
+    // For mobile, make sure we're not using a fixed height calculation
+    const sectionElement = document.getElementById(sections[sectionIndex].id);
+    if (sectionElement) {
+      sectionElement.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Fallback to height-based scrolling if element not found
+      window.scrollTo({
+        top: sectionIndex * window.innerHeight,
+        behavior: "smooth",
+      });
+    }
+  };
 
   return (
-    <>
-      <Helmet>
-        <title>GWM Indonesia - Home | Great Wall Motors</title>
-        <meta
-          name="description"
-          content="GWM Indonesia - Discover our range of premium SUVs including Haval H6, Haval Jolion, Tank 300, and Tank 500. Great Wall Motors vehicles combine cutting-edge technology with superior performance."
-        />
-        <meta
-          name="keywords"
-          content="GWM, Great Wall Motors, Indonesia, SUV, Haval H6, Haval Jolion, Tank 300, Tank 500"
-        />
-        <link rel="canonical" href="https://gwm-indonesia.com/" />
-      </Helmet>
-
-      <div
-        className={`snap-y snap-mandatory transition-opacity duration-500 ${sectionsLoaded ? "opacity-100" : "opacity-0"}`}
-      >
-        <div className="fixed right-4 md:right-10 top-1/2 -translate-y-1/2 z-40 hidden md:block">
-          <div className="flex flex-col gap-4">
-            {sections.map((section) => (
-              <a
-                key={`nav-dot-${section.id}`}
-                href={`#${section.id}`}
-                className="w-3 h-3 rounded-full transition-all duration-300 bg-gray-400 hover:bg-gray-600 focus:bg-primary"
-                aria-label={`Scroll to ${section.name}`}
-              >
-                <span className="sr-only">Scroll to {section.name}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Main content with section-based scrolling */}
-        <section id={sections[0].id} className="section-container">
+    <div className="relative min-h-screen overflow-y-auto">
+      <div className="snap-y snap-mandatory">
+        {/* Main content with single scroll context */}
+        <div id={sections[0].id} className="section-container">
           <Hero
             backgroundImage={havalH6Image}
             title="GWM Indonesia"
@@ -79,100 +168,46 @@ function HomePage() {
             primaryButtonText="Jelajahi Mobil"
             secondaryButtonText="Pesan Sekarang"
             primaryButtonLink="/tipe-mobil"
-            secondaryButtonLink="/pesan"
+            secondaryButtonLink="https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20promo%20terbaru%20mobil%20GWM.%20Saya:%20...%20Domisili:%20.."
           />
-        </section>
+        </div>
 
-        <section id={sections[1].id} className="section-container">
-          <ModelShowcase
-            imageUrl={havalH6Image}
-            title="Haval H6"
-            description="SUV premium dengan desain elegan dan performa tangguh. Dilengkapi dengan berbagai fitur keselamatan dan kenyamanan terkini."
-            features={[
-              "Mesin Turbo 2.0L (184 HP)",
-              "Transmisi 7-Speed DCT",
-              "Panoramic Sunroof",
-              "360° Camera View",
-              "Wireless Charging",
-              "Futuristic Audio System",
-              "Advanced Safety Features",
-              "Smart Connectivity",
-            ]}
-            primaryButtonText="Lihat Detail"
-            secondaryButtonText="Test Drive"
-            primaryButtonLink="/haval-h6"
-            secondaryButtonLink="/test-drive"
-          />
-        </section>
+        {/* Vehicle model showcase sections */}
+        {vehicleModels.map((model, index) => {
+          // Determine which section this maps to
+          const sectionIndex = index + 1; // +1 because the first section is the hero
 
-        <section id={sections[2].id} className="section-container">
-          <ModelShowcase
-            imageUrl={havalJolionImage}
-            title="Haval Jolion"
-            description="Compact SUV stylish yang menggabungkan teknologi mutakhir dengan desain berkelas. Pilihan sempurna untuk mobilitas perkotaan modern."
-            features={[
-              "Mesin Turbo 1.5L (147 HP)",
-              "Transmisi 7-Speed DCT",
-              "LED Headlights",
-              "Panoramic Sunroof",
-              '10.25" Touchscreen Display',
-              "Wireless Apple CarPlay",
-              "Hill Descent Control",
-              "Electric Parking Brake",
-            ]}
-            primaryButtonText="Lihat Detail"
-            secondaryButtonText="Test Drive"
-            primaryButtonLink="/haval-jolion"
-            secondaryButtonLink="/test-drive"
-            isReversed={true}
-          />
-        </section>
+          // Get secondary button text and link based on model
+          const isHavalModel = model.name.toLowerCase().includes("haval");
+          const secondaryButtonText = isHavalModel
+            ? "Test Drive"
+            : "Hubungi Kami";
+          const secondaryButtonLink = isHavalModel ? "/test-drive" : "/kontak";
 
-        <section id={sections[3].id} className="section-container">
-          <ModelShowcase
-            imageUrl={tank300Image}
-            title="Tank 300"
-            description="Off-road SUV dengan gaya retro yang menggabungkan kemampuan off-road yang luar biasa dengan kenyamanan premium di dalam kabin."
-            features={[
-              "Mesin Turbo 2.0L (220 HP)",
-              "Transmisi 8-Speed Automatic",
-              "4WD dengan Electronic Locking Differentials",
-              "700mm Wading Depth",
-              "Tank Turn Capability",
-              "Crawl Control",
-              "Multi-Terrain Select",
-              "Luxury Interior",
-            ]}
-            primaryButtonText="Lihat Detail"
-            secondaryButtonText="Test Drive"
-            primaryButtonLink="/tank-300"
-            secondaryButtonLink="/test-drive"
-          />
-        </section>
+          return (
+            <div
+              key={model.id}
+              id={sections[sectionIndex].id}
+              className="section-container"
+            >
+              <ModelShowcase
+                imageUrl={model.imageUrl}
+                title={model.name}
+                price={model.price}
+                description={model.description}
+                features={model.features}
+                primaryButtonText="Lihat Detail"
+                secondaryButtonText={secondaryButtonText}
+                primaryButtonLink={model.learnMoreLink}
+                secondaryButtonLink={secondaryButtonLink}
+                isReversed={index % 2 !== 0} // Alternate isReversed (odd indexes are reversed)
+              />
+            </div>
+          );
+        })}
 
-        <section id={sections[4].id} className="section-container">
-          <ModelShowcase
-            imageUrl={tank500Image}
-            title="Tank 500"
-            description="Luxury SUV berukuran besar dengan kemampuan off-road superior dan interior mewah berkapasitas 7 penumpang."
-            features={[
-              "Mesin Turbo 3.0L V6 (354 HP)",
-              "Transmisi 9-Speed Automatic",
-              "Advanced 4WD System",
-              "Terrain Management System",
-              "Air Suspension",
-              "High-End Leather Interior",
-              "Panoramic Sunroof",
-              "14.6-inch Touchscreen",
-            ]}
-            primaryButtonText="Lihat Detail"
-            secondaryButtonText="Test Drive"
-            primaryButtonLink="/tank-500"
-            secondaryButtonLink="/test-drive"
-            isReversed={true}
-          />
-        </section>
+        {/* Contact section - add a placeholder for the last section */}
       </div>
-    </>
+    </div>
   );
 }

@@ -34,14 +34,14 @@ const Hero = ({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center items-center w-full px-4 sm:px-8 mb-16 sm:mb-20">
-        {primaryButtonText && (
+        {/* {primaryButtonText && (
           <a
             href={primaryButtonLink}
             className="w-full sm:min-w-[180px] md:min-w-[240px] px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-primary/80 text-white text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 hover:bg-primary hover:-translate-y-0.5 active:translate-y-0 animate-fadeIn animation-delay-100 sm:w-auto max-w-xs"
           >
             {primaryButtonText}
           </a>
-        )}
+        )} */}
 
         {secondaryButtonText && (
           <a

@@ -186,27 +186,12 @@ const Footer = () => {
               >
                 <i className="fab fa-twitter text-sm" />
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  window.open(
-                    "https://youtube.com",
-                    "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-                onKeyDown={(e) => handleKeyPress(e, "https://youtube.com")}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
-                aria-label="Kunjungi YouTube GWM Indonesia"
-              >
-                <i className="fab fa-youtube text-sm" />
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-10 pt-5 border-t border-gray-100">
+      <div className="mt-10 pt-5 border-t border-gray-100 px-10">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-xs text-gray-400 order-2 md:order-1">
             © {currentYear} GWM Indonesia. All rights reserved.

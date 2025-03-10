@@ -273,7 +273,7 @@ const Navbar = () => {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="lg:hidden flex items-center justify-center w-9 h-9 text-green-600 hover:text-green-700 transition-colors"
+          className="hidden sm:flex lg:hidden items-center justify-center w-9 h-9 text-green-600 hover:text-green-700 transition-colors"
           aria-label="Chat on WhatsApp"
         >
           <span className="sr-only">Chat with GWM Indonesia on WhatsApp</span>
@@ -291,21 +291,12 @@ const Navbar = () => {
 
         <button
           type="button"
-          className="lg:hidden cursor-pointer w-[30px] h-[30px] relative bg-transparent border-0 p-0"
+          className="lg:hidden flex items-center gap-1 cursor-pointer bg-white/20 border-0 p-1.5 px-2 text-primary font-medium text-sm rounded hover:bg-black/5"
           onClick={toggleMenu}
           onKeyDown={handleKeyPress}
           aria-label="Toggle menu"
         >
-          <span
-            className={`absolute w-[22px] h-[2px] bg-primary top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
-              menuOpen ? "rotate-45" : ""
-            }`}
-          />
-          <span
-            className={`absolute w-[22px] h-[2px] bg-primary top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 before:content-[''] before:absolute before:w-[22px] before:h-[2px] before:bg-primary before:transition-all before:duration-300 before:-top-[6px] after:content-[''] after:absolute after:w-[22px] after:h-[2px] after:bg-primary after:transition-all after:duration-300 after:top-[6px] ${
-              menuOpen ? "before:opacity-0 after:rotate-90 after:top-0" : ""
-            }`}
-          />
+          <span className="font-semibold">Menu</span>
         </button>
       </div>
 

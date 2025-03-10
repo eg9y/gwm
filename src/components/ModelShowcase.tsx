@@ -2,6 +2,7 @@ interface ModelShowcaseProps {
   imageUrl: string;
   title: string;
   description: string;
+  price?: string;
   features?: string[];
   primaryButtonText?: string;
   secondaryButtonText?: string;
@@ -14,6 +15,7 @@ const ModelShowcase = ({
   imageUrl,
   title,
   description,
+  price,
   features = [],
   primaryButtonText,
   secondaryButtonText,
@@ -36,9 +38,16 @@ const ModelShowcase = ({
       </div>
 
       <div className="w-full lg:w-1/2 px-6 py-8 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-center text-primary">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-4 tracking-tight">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium mb-2 tracking-tight">
           {title}
         </h2>
+
+        {price && (
+          <p className="text-xl sm:text-2xl font-semibold text-accent mb-4">
+            {price}
+          </p>
+        )}
+
         <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-6 text-secondary max-w-xl">
           {description}
         </p>
@@ -48,10 +57,12 @@ const ModelShowcase = ({
             {features.map((feature) => (
               <div
                 key={`${title}-${feature.replace(/\s+/g, "-").toLowerCase()}`}
-                className="flex items-start"
+                className="flex items-start gap-x-3"
               >
-                <span className="text-accent mr-2 text-xl font-bold">✓</span>
-                <span className="text-xs sm:text-sm text-secondary">
+                <span className="flex h-[1lh] items-center">
+                  <span className="text-accent text-xl font-bold">✓</span>
+                </span>
+                <span className="text-xs sm:text-base text-secondary">
                   {feature}
                 </span>
               </div>
@@ -59,7 +70,7 @@ const ModelShowcase = ({
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
+        {/* <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
           {primaryButtonText && (
             <a
               href={primaryButtonLink}
@@ -77,7 +88,7 @@ const ModelShowcase = ({
               {secondaryButtonText}
             </a>
           )}
-        </div>
+        </div> */}
       </div>
     </section>
   );

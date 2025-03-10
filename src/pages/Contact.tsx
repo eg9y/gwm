@@ -3,9 +3,6 @@ import { Suspense } from "react";
 const Contact = () => {
   return (
     <div className="min-h-screen bg-white">
-      {/* Remove Navbar since it's already in App component */}
-      {/* <Navbar /> */}
-
       <main className="pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto">
         <section className="mb-16">
           <h1 className="text-3xl md:text-4xl font-medium text-primary mb-6">
@@ -104,7 +101,7 @@ const Contact = () => {
           </div>
         </section>
 
-        <section className="mt-16">
+        {/* <section className="mt-16">
           <h2 className="text-2xl font-medium text-primary mb-6">
             Send Us a Message
           </h2>
@@ -180,7 +177,7 @@ const Contact = () => {
               </div>
             </form>
           </div>
-        </section>
+        </section> */}
       </main>
 
       {/* Remove WhatsApp button and Footer since they're already in App component */}
