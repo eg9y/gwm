@@ -1,10 +1,5 @@
-import { useEffect, useState, Suspense, useRef } from "react";
-import {
-  Outlet,
-  useRouter,
-  Link,
-  createFileRoute,
-} from "@tanstack/react-router";
+import { useEffect, useState, useRef } from "react";
+import { useRouter, createFileRoute } from "@tanstack/react-router";
 
 // Import images
 import havalH6Image from "../assets/haval_h6.jpg";
@@ -141,20 +136,6 @@ function HomePage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [currentSection, totalSections, isHomePage]);
-
-  const scrollToSection = (sectionIndex: number) => {
-    // For mobile, make sure we're not using a fixed height calculation
-    const sectionElement = document.getElementById(sections[sectionIndex].id);
-    if (sectionElement) {
-      sectionElement.scrollIntoView({ behavior: "smooth" });
-    } else {
-      // Fallback to height-based scrolling if element not found
-      window.scrollTo({
-        top: sectionIndex * window.innerHeight,
-        behavior: "smooth",
-      });
-    }
-  };
 
   return (
     <div className="relative min-h-screen overflow-y-auto">

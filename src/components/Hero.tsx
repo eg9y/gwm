@@ -12,9 +12,9 @@ const Hero = ({
   backgroundImage,
   title,
   subtitle,
-  primaryButtonText,
+  // primaryButtonText,
   secondaryButtonText,
-  primaryButtonLink = "/",
+  // primaryButtonLink = "/",
   secondaryButtonLink = "/",
 }: HeroProps) => {
   return (

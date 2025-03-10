@@ -17,10 +17,10 @@ const ModelShowcase = ({
   description,
   price,
   features = [],
-  primaryButtonText,
-  secondaryButtonText,
-  primaryButtonLink = "/",
-  secondaryButtonLink = "/",
+  // primaryButtonText,
+  // secondaryButtonText,
+  // primaryButtonLink = "/",
+  // secondaryButtonLink = "/",
   isReversed = false,
 }: ModelShowcaseProps) => {
   return (

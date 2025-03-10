@@ -4,7 +4,6 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import App from "./App";
 import { lazy } from "react";
 
 // Lazy-load the Contact page for better performance
@@ -12,7 +11,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 
 // Root route - Layout component
 export const rootRoute = createRootRoute({
-  component: () => <App />,
+  component: () => <div />,
 });
 
 // Home route (index)
