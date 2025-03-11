@@ -1,9 +1,5 @@
 import { STRAPI_API_URL } from "../routes/__root";
-import type {
-  StrapiResponse,
-  ArticleAttributes,
-  StrapiMeta,
-} from "../types/strapi";
+import type { ArticleAttributes, StrapiMeta } from "../types/strapi";
 
 /**
  * Fetch a list of articles from Strapi
@@ -50,32 +46,36 @@ export async function fetchArticles(
  */
 export async function fetchArticleBySlug(
   slug: string
-): Promise<{ data: ArticleAttributes; meta: StrapiMeta }> {
-  const queryParams = new URLSearchParams({
+): Promise<ArticleAttributes> {
+  const params = new URLSearchParams({
     "filters[slug][$eq]": slug,
-    populate: "featuredImage",
+    populate: "*",
   });
 
-  const response = await fetch(
-    `${STRAPI_API_URL}/api/articles?${queryParams.toString()}`
-  );
+  try {
+    const response = await fetch(`${STRAPI_API_URL}/api/articles?${params}`);
 
-  if (!response.ok) {
-    throw new Error(`Error fetching article: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("API response:", data);
+
+    if (!data.data || data.data.length === 0) {
+      throw new Error("Article not found");
+    }
+
+    // The article object is already in the format we need
+    const article = data.data[0];
+    console.log("Article:", article);
+
+    // Return the article directly since it already has the structure we need
+    return article;
+  } catch (error) {
+    console.error("Error fetching article by slug:", error);
+    throw error;
   }
-
-  const data: StrapiResponse<ArticleAttributes> = await response.json();
-
-  // Check if article exists
-  if (!data.data || data.data.length === 0) {
-    throw new Error(`Article with slug "${slug}" not found`);
-  }
-
-  // Return with proper type structure
-  return {
-    data: data.data[0].attributes,
-    meta: data.meta,
-  };
 }
 
 /**

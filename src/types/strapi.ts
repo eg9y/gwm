@@ -71,6 +71,7 @@ export interface ArticleAttributes {
   updatedAt: string;
   category: string;
   featuredImage: StrapiImage;
+  youtube_url?: string;
 }
 
 export interface Article {

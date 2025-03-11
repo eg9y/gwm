@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Helmet } from "react-helmet";
 import { useState, useEffect } from "react";
 import { fetchArticles, getStrapiImageUrl } from "../services/strapiService";
@@ -289,8 +289,9 @@ function InfoPromoPage() {
                       <p className="text-gray-600 mb-4 line-clamp-3">
                         {article.excerpt}
                       </p>
-                      <a
-                        href={`/artikel/${article.slug}`}
+                      <Link
+                        to="/artikel/$slug"
+                        params={{ slug: article.slug }}
                         aria-label={`Read more about ${article.title}`}
                         className="text-primary font-medium hover:underline flex items-center"
                       >
@@ -311,7 +312,7 @@ function InfoPromoPage() {
                             d="M14 5l7 7m0 0l-7 7m7-7H3"
                           />
                         </svg>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 ))}
