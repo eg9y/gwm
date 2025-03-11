@@ -1,10 +1,10 @@
 import { useState, useEffect, type KeyboardEvent, useRef } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import gwmLogo from "../assets/gwm_logo.webp";
-import tank300NavShot from "../assets/navbar/tank_300_nav_shot.png";
-import tank500NavShot from "../assets/navbar/tank_500_nav_shot.png";
-import havalH6NavShot from "../assets/navbar/haval_h6_nav_shot.png";
-import havalJolionNavShot from "../assets/navbar/haval_jolion_nav_shot.png";
+// import gwmLogo from "../assets/gwm_logo.webp";
+// import tank300NavShot from "../assets/navbar/tank_300_nav_shot.png";
+// import tank500NavShot from "../assets/navbar/tank_500_nav_shot.png";
+// import havalH6NavShot from "../assets/navbar/haval_h6_nav_shot.png";
+// import havalJolionNavShot from "../assets/navbar/haval_jolion_nav_shot.png";
 
 const Navbar = () => {
   const router = useRouter();
@@ -127,7 +127,8 @@ const Navbar = () => {
           }}
         >
           <img
-            src={gwmLogo}
+            // src={gwmLogo}
+            src="https://gwm.kopimap.com/gwm_logo.webp"
             alt="GWM Indonesia Logo"
             className="h-7 sm:h-9 m-0"
           />
@@ -156,7 +157,7 @@ const Navbar = () => {
               onMouseEnter={showDropdown}
               onMouseLeave={hideDropdown}
             >
-              Tipe Mobil
+              Type Mobil
             </a>
             <div
               className={`absolute left-0 right-0 mt-1 bg-white shadow-lg rounded-md z-10 transition-all duration-300 ease-in-out ${
@@ -174,11 +175,12 @@ const Navbar = () => {
               onMouseLeave={hideDropdown}
             >
               <div className="max-w-7xl mx-auto px-4">
-                <ul className="grid grid-cols-4 gap-2 py-8 max-w-3xl mx-auto">
+                <ul className="flex justify-center items-center gap-12 py-8 max-w-3xl mx-auto">
                   <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
                     <div className="h-24 flex items-center justify-center">
                       <img
-                        src={tank300NavShot}
+                        // src={tank300NavShot}
+                        src="https://gwm.kopimap.com/navbar/tank_300_nav_shot.png"
                         alt="Tank 300"
                         className="max-h-full w-auto object-contain"
                       />
@@ -188,7 +190,8 @@ const Navbar = () => {
                   <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
                     <div className="h-24 flex items-center justify-center">
                       <img
-                        src={tank500NavShot}
+                        // src={tank500NavShot}
+                        src="https://gwm.kopimap.com/navbar/tank_500_nav_shot.png"
                         alt="Tank 500"
                         className="max-h-full w-auto object-contain"
                       />
@@ -196,9 +199,10 @@ const Navbar = () => {
                     <span className="text-primary font-medium">Tank 500</span>
                   </li>
                   <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
-                    <div className="h-24 flex items-center justify-center">
+                    <div className="h-28 flex items-center justify-center">
                       <img
-                        src={havalJolionNavShot}
+                        // src={havalJolionNavShot}
+                        src="https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png"
                         alt="Haval Jolion"
                         className="max-h-full w-auto object-contain"
                       />
@@ -210,7 +214,8 @@ const Navbar = () => {
                   <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
                     <div className="h-24 flex items-center justify-center">
                       <img
-                        src={havalH6NavShot}
+                        // src={havalH6NavShot}
+                        src="https://gwm.kopimap.com/navbar/haval_h6_nav_shot.png"
                         alt="Haval H6"
                         className="max-h-full w-auto object-contain"
                       />
@@ -339,7 +344,7 @@ const Navbar = () => {
                 handleNavigation("/tipe-mobil");
               }}
             >
-              Tipe Mobil
+              Type Mobil
             </a>
           </li>
           <li className="mb-5">

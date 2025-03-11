@@ -2,12 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter, createFileRoute } from "@tanstack/react-router";
 
 // Import images
-import havalH6Image from "../assets/haval_h6.jpg";
-import havalJolionImage from "../assets/haval_jolion.jpg";
-import tank300Image from "../assets/tank_300.jpg";
-import tank500Image from "../assets/tank_500.jpg";
+// import heroImage from "../assets/hero_image.webp";
+// import havalH6Image from "../assets/haval_h6.jpg";
+// import havalJolionImage from "../assets/haval_jolion.webp";
+// import tank300Image from "../assets/tank_300.webp";
+// import tank500Image from "../assets/tank_500.webp";
 import Hero from "../components/Hero";
 import ModelShowcase from "../components/ModelShowcase";
+import Promos from "../components/Promos";
 
 // Define section names for better accessibility and keys
 const sections = [
@@ -16,6 +18,7 @@ const sections = [
   { id: "haval-jolion", name: "Haval Jolion" },
   { id: "tank-300", name: "Tank 300" },
   { id: "tank-500", name: "Tank 500" },
+  { id: "promos", name: "Promos" },
   { id: "contact", name: "Contact" },
 ];
 
@@ -38,7 +41,8 @@ const vehicleModels = [
       "ADAS Lvl 2",
     ],
     learnMoreLink: "/tank-300",
-    imageUrl: tank300Image,
+    // imageUrl: tank300Image,
+    imageUrl: "https://gwm.kopimap.com/tank_300.webp",
   },
   {
     id: 2,
@@ -57,7 +61,8 @@ const vehicleModels = [
       "ADAS Lvl 2",
     ],
     learnMoreLink: "/tank-500",
-    imageUrl: tank500Image,
+    // imageUrl: tank500Image,
+    imageUrl: "https://gwm.kopimap.com/tank_500.webp",
   },
   {
     id: 3,
@@ -76,7 +81,8 @@ const vehicleModels = [
       "EV Mode",
     ],
     learnMoreLink: "/haval-jolion-ultra",
-    imageUrl: havalJolionImage,
+    // imageUrl: havalJolionImage,
+    imageUrl: "https://gwm.kopimap.com/haval_jolion.webp",
   },
   {
     id: 4,
@@ -95,7 +101,8 @@ const vehicleModels = [
       "Smart Connectivity",
     ],
     learnMoreLink: "/haval-h6",
-    imageUrl: havalH6Image,
+    // imageUrl: havalH6Image,
+    imageUrl: "https://gwm.kopimap.com/haval_h6.jpg",
   },
 ];
 
@@ -143,7 +150,8 @@ function HomePage() {
         {/* Main content with single scroll context */}
         <div id={sections[0].id} className="section-container">
           <Hero
-            backgroundImage={havalH6Image}
+            // backgroundImage={heroImage}
+            backgroundImage={"https://gwm.kopimap.com/hero_image.webp"}
             title="GWM Indonesia"
             subtitle="Great Wall Motors - Mobil berkualitas tinggi dengan teknologi terkini"
             primaryButtonText="Jelajahi Mobil"
@@ -186,6 +194,11 @@ function HomePage() {
             </div>
           );
         })}
+
+        {/* Promos section */}
+        <div id={sections[5].id} className="section-container">
+          <Promos />
+        </div>
 
         {/* Contact section - add a placeholder for the last section */}
       </div>

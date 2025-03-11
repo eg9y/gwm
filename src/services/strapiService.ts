@@ -79,6 +79,33 @@ export async function fetchArticleBySlug(
 }
 
 /**
+ * Fetch promos from Strapi
+ */
+export async function fetchPromos(
+  page = 1,
+  pageSize = 4
+): Promise<{ data: any[]; meta: StrapiMeta }> {
+  // Build query parameters
+  const queryParams = new URLSearchParams({
+    "pagination[page]": page.toString(),
+    "pagination[pageSize]": pageSize.toString(),
+    populate: "promo_image",
+    sort: "publishedAt:desc",
+  });
+
+  // Make the API request
+  const response = await fetch(
+    `${STRAPI_API_URL}/api/promos?${queryParams.toString()}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error fetching promos: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
  * Get the full URL for a Strapi image
  */
 export function getStrapiImageUrl(imageUrl: string): string {

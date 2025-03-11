@@ -32,14 +32,6 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="/karir"
-                  className="text-gray-500 hover:text-primary text-xs transition"
-                >
-                  Karir
-                </a>
-              </li>
-              <li>
-                <a
                   href="/berita"
                   className="text-gray-500 hover:text-primary text-xs transition"
                 >
@@ -50,7 +42,7 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h3 className="text-sm font-medium mb-2 sm:mb-3">Tipe Mobil</h3>
+            <h3 className="text-sm font-medium mb-2 sm:mb-3">Type Mobil</h3>
             <ul className="space-y-1 sm:space-y-2">
               <li>
                 <a
@@ -82,36 +74,6 @@ const Footer = () => {
                   className="text-gray-500 hover:text-primary text-xs transition"
                 >
                   Hybrid
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="col-span-1">
-            <h3 className="text-sm font-medium mb-2 sm:mb-3">Bantuan</h3>
-            <ul className="space-y-1 sm:space-y-2">
-              <li>
-                <a
-                  href="/faq"
-                  className="text-gray-500 hover:text-primary text-xs transition"
-                >
-                  FAQ
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/syarat-ketentuan"
-                  className="text-gray-500 hover:text-primary text-xs transition"
-                >
-                  Syarat & Ketentuan
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/kebijakan-privasi"
-                  className="text-gray-500 hover:text-primary text-xs transition"
-                >
-                  Kebijakan Privasi
                 </a>
               </li>
             </ul>
