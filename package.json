@@ -13,11 +13,9 @@
     "@tailwindcss/vite": "^4.0.12",
     "@tanstack/react-router": "^1.112.18",
     "@types/dompurify": "^3.2.0",
-    "@types/react-helmet": "^6.1.11",
     "dompurify": "^3.2.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-helmet": "^6.1.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

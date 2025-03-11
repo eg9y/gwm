@@ -80,3 +80,15 @@ export interface Article {
 }
 
 export type ArticleListItem = ArticleAttributes;
+
+export interface PromoAttributes {
+  id: number;
+  title: string;
+  description: string;
+  publishedAt: string;
+  promo_image?: {
+    url: string;
+    alternativeText?: string;
+  };
+  // Add other promo properties as needed
+}

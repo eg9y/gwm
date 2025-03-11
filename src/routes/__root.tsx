@@ -1,16 +1,40 @@
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  Outlet,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppButton from "../components/WhatsAppButton";
 import { useEffect, useRef, useState } from "react";
-import { Helmet } from "react-helmet";
+
+// Define a proper empty interface instead of using {}
+export interface RootRouteContext {}
 
 // Define the base URL for our Strapi API from environment variables
 export const STRAPI_API_URL =
   import.meta.env.VITE_STRAPI_API_URL || "http://localhost:1337";
 
-export const Route = createRootRouteWithContext<{}>()({
+export const Route = createRootRouteWithContext<RootRouteContext>()({
   component: RootComponent,
+  // Use the updated syntax for head metadata
+  head: () => ({
+    meta: [
+      {
+        title: "GWM Indonesia - Great Wall Motors",
+      },
+      {
+        name: "description",
+        content:
+          "Great Wall Motors Indonesia - Mobil berkualitas tinggi dengan teknologi terkini",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
+      },
+    ],
+  }),
 });
 
 function RootComponent() {
@@ -47,13 +71,8 @@ function RootComponent() {
 
   return (
     <div className="relative min-h-screen overflow-y-auto">
-      <Helmet>
-        <title>GWM Indonesia - Great Wall Motors</title>
-        <meta
-          name="description"
-          content="Great Wall Motors Indonesia - Mobil berkualitas tinggi dengan teknologi terkini"
-        />
-      </Helmet>
+      {/* HeadContent should be at the top level of your component */}
+      <HeadContent />
 
       <Navbar />
       <main>
@@ -84,6 +103,8 @@ function RootComponent() {
       </main>
       <Footer />
       <WhatsAppButton />
+      {/* Scripts should be at the end of your component */}
+      <Scripts />
     </div>
   );
 }

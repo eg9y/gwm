@@ -1,11 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Helmet } from "react-helmet";
 import { useState, useEffect } from "react";
 import { fetchArticles, getStrapiImageUrl } from "../services/strapiService";
 import type { ArticleListItem } from "../types/strapi";
 
 export const Route = createFileRoute("/info-promo")({
   component: InfoPromoPage,
+  head: () => ({
+    meta: [
+      {
+        title: "Info & Promo",
+      },
+      {
+        name: "description",
+        content:
+          "Berita terbaru dan promo spesial dari GWM Indonesia. Dapatkan informasi tentang peluncuran produk, promo penjualan, dan kegiatan GWM lainnya.",
+      },
+      {
+        name: "keywords",
+        content:
+          "GWM Indonesia, promo mobil, berita otomotif, Tank 300, Tank 500, Haval H6, Haval Jolion",
+      },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: "https://gwm-indonesia.com/info-promo",
+      },
+    ],
+  }),
 });
 
 function InfoPromoPage() {
@@ -83,33 +105,6 @@ function InfoPromoPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Info & Promo - GWM Indonesia</title>
-        <meta
-          name="description"
-          content="Berita terbaru dan promo spesial dari GWM Indonesia. Dapatkan informasi tentang peluncuran produk, promo penjualan, dan kegiatan GWM lainnya."
-        />
-        <meta
-          name="keywords"
-          content="GWM Indonesia, promo mobil, berita otomotif, Tank 300, Tank 500, Haval H6, Haval Jolion"
-        />
-        <link rel="canonical" href="https://gwm-indonesia.com/info-promo" />
-        <meta property="og:title" content="Info & Promo - GWM Indonesia" />
-        <meta property="og:type" content="website" />
-        <meta
-          property="og:url"
-          content="https://gwm-indonesia.com/info-promo"
-        />
-        <meta
-          property="og:image"
-          content="https://source.unsplash.com/random/1200x630/?car"
-        />
-        <meta
-          property="og:description"
-          content="Berita terbaru dan promo spesial dari GWM Indonesia"
-        />
-      </Helmet>
-
       <div
         className={`pt-16 bg-gray-50 transition-opacity duration-500 ${isPageLoaded ? "opacity-100" : "opacity-0"}`}
       >
