@@ -100,14 +100,8 @@ function Promos() {
                 <span className="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full mb-2">
                   Promo
                 </span>
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                  {promo.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                  {promo.excerpt}
-                </p>
                 <Link
-                  to={`/artikel/${promo.slug}`}
+                  to={"/info-promo"}
                   className="text-primary font-medium hover:underline flex items-center text-sm"
                 >
                   Selengkapnya
