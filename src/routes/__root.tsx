@@ -8,6 +8,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppButton from "../components/WhatsAppButton";
 import { useEffect, useRef, useState } from "react";
+import formbricks from "@formbricks/js";
 
 // Define a proper empty interface instead of using {}
 export interface RootRouteContext {}
@@ -15,6 +16,14 @@ export interface RootRouteContext {}
 // Define the base URL for our Strapi API from environment variables
 export const STRAPI_API_URL =
   import.meta.env.VITE_STRAPI_API_URL || "http://localhost:1337";
+
+if (typeof window !== "undefined") {
+  console.log("Setting up Formbricks");
+  formbricks.setup({
+    environmentId: "cm8ena0440009l703odp4uqdi",
+    appUrl: "https://app.formbricks.com",
+  });
+}
 
 export const Route = createRootRouteWithContext<RootRouteContext>()({
   component: RootComponent,
