@@ -10,7 +10,6 @@
     "preview": "vite preview --port 5174"
   },
   "dependencies": {
-    "@formbricks/js": "^4.0.0",
     "@tailwindcss/vite": "^4.0.12",
     "@tanstack/react-router": "^1.112.18",
     "@types/dompurify": "^3.2.0",

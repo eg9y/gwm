@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@formbricks/js':
-    specifier: ^4.0.0
-    version: 4.0.0
   '@tailwindcss/vite':
     specifier: ^4.0.12
     version: 4.0.14(vite@6.2.2)
@@ -550,10 +547,6 @@ packages:
       '@eslint/core': 0.12.0
       levn: 0.4.1
     dev: true
-
-  /@formbricks/js@4.0.0:
-    resolution: {integrity: sha512-06cYuf04yZnrScQZnkqRD2zzyk+Xd8xkZzeE10FNBtfRgyi+YVbh+6OVThPMadT/2QPfGep1+X5vwEXywBjjmQ==}
-    dev: false
 
   /@humanfs/core@0.19.1:
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
