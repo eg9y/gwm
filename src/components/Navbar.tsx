@@ -6,13 +6,34 @@ import { Link, useRouter } from "@tanstack/react-router";
 // import havalH6NavShot from "../assets/navbar/haval_h6_nav_shot.png";
 // import havalJolionNavShot from "../assets/navbar/haval_jolion_nav_shot.png";
 
+// Define vehicle models for the dropdown
+const vehicleModels = [
+  { id: "tank-300", name: "Tank 300", category: "SUV" },
+  { id: "tank-500", name: "Tank 500", category: "SUV" },
+  { id: "haval-jolion-ultra", name: "Haval Jolion Ultra", category: "SUV" },
+  { id: "haval-h6", name: "Haval H6", category: "SUV" },
+];
+
+// Add a new ClientOnly wrapper component
+function ClientOnly({ children, fallback = null }) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return isClient ? children : fallback;
+}
+
 const Navbar = () => {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const isHomePage = router.state.location.pathname === "/";
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState(false);
   const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLLIElement | null>(null);
 
   // Handle body scroll locking when mobile menu is open
   useEffect(() => {
@@ -47,6 +68,23 @@ const Navbar = () => {
     };
   }, []);
 
+  // Add click outside listener for dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   // Cleanup timeout on component unmount
   useEffect(() => {
     return () => {
@@ -58,6 +96,10 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+    // Close submenu when main menu is closed
+    if (!menuOpen === false) {
+      setMobileSubmenuOpen(false);
+    }
   };
 
   const handleKeyPress = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -68,20 +110,6 @@ const Navbar = () => {
 
   const whatsappUrl =
     "https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20promo%20terbaru%20mobil%20GWM.%20Saya:%20...%20Domisili:%20..";
-
-  // Close mobile menu when navigating
-  const handleNavigation = (path: string) => {
-    if (menuOpen) {
-      toggleMenu();
-    }
-
-    // Explicitly navigate using the router instead of relying on Link component
-    if (path) {
-      router.navigate({ to: path });
-      // Reset scroll position
-      window.scrollTo(0, 0);
-    }
-  };
 
   // Check if a path is active
   const isActive = (path: string) => {
@@ -110,24 +138,23 @@ const Navbar = () => {
     }, 150); // Small delay to prevent accidental closing
   };
 
+  // Toggle mobile submenu
+  const toggleMobileSubmenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMobileSubmenuOpen(!mobileSubmenuOpen);
+  };
+
   return (
     <nav
-      className={`flex justify-between items-center px-4 sm:px-6 md:px-10 h-[60px] sm:h-[70px] fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`flex justify-between items-center px-4 sm:px-6 md:px-10 h-[60px] sm:h-[70px] w-full transition-all duration-300 ${
         scrolled || !isHomePage ? "bg-white/95 shadow-sm" : "bg-transparent"
       }`}
     >
       {/* Left - Logo */}
       <div className="flex items-center">
-        <Link
-          to="/"
-          className="inline-block"
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavigation("/");
-          }}
-        >
+        <Link to="/" className="inline-block">
           <img
-            // src={gwmLogo}
             src="https://gwm.kopimap.com/gwm_logo.webp"
             alt="GWM Indonesia Logo"
             className="h-7 sm:h-9 m-0"
@@ -142,97 +169,67 @@ const Navbar = () => {
             <Link
               to="/"
               className={`${baseNavClass} ${isActive("/") ? activeClass : ""}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/");
-              }}
             >
               Home
             </Link>
           </li>
-          <li className="relative">
-            <a
-              href="#tipe-mobil"
-              className="text-primary text-sm font-medium transition-colors duration-200 px-3 py-1.5 rounded hover:bg-black/5"
-              onMouseEnter={showDropdown}
-              onMouseLeave={hideDropdown}
+          <li
+            className="relative"
+            ref={dropdownRef}
+            onMouseEnter={showDropdown}
+            onMouseLeave={hideDropdown}
+          >
+            <Link
+              to="/tipe-mobil"
+              className={`${baseNavClass} ${isActive("/models") ? activeClass : ""} flex items-center gap-1`}
             >
               Type Mobil
-            </a>
-            <div
-              className={`absolute left-0 right-0 mt-1 bg-white shadow-lg rounded-md z-10 transition-all duration-300 ease-in-out ${
-                dropdownOpen
-                  ? "opacity-100 visible transform-none"
-                  : "opacity-0 invisible translate-y-2 pointer-events-none"
-              }`}
-              style={{
-                width: "100vw",
-                position: "fixed",
-                left: 0,
-                top: "70px",
-              }}
-              onMouseEnter={showDropdown}
-              onMouseLeave={hideDropdown}
-            >
-              <div className="max-w-7xl mx-auto px-4">
-                <ul className="flex justify-center items-center gap-12 py-8 max-w-3xl mx-auto">
-                  <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
-                    <div className="h-24 flex items-center justify-center">
-                      <img
-                        // src={tank300NavShot}
-                        src="https://gwm.kopimap.com/navbar/tank_300_nav_shot.png"
-                        alt="Tank 300"
-                        className="max-h-full w-auto object-contain"
-                      />
-                    </div>
-                    <span className="text-primary font-medium">Tank 300</span>
-                  </li>
-                  <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
-                    <div className="h-24 flex items-center justify-center">
-                      <img
-                        // src={tank500NavShot}
-                        src="https://gwm.kopimap.com/navbar/tank_500_nav_shot.png"
-                        alt="Tank 500"
-                        className="max-h-full w-auto object-contain"
-                      />
-                    </div>
-                    <span className="text-primary font-medium">Tank 500</span>
-                  </li>
-                  <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
-                    <div className="h-28 flex items-center justify-center">
-                      <img
-                        // src={havalJolionNavShot}
-                        src="https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png"
-                        alt="Haval Jolion"
-                        className="max-h-full w-auto object-contain"
-                      />
-                    </div>
-                    <span className="text-primary font-medium">
-                      Haval Jolion
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </Link>
+
+            {/* Dropdown menu */}
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg py-2 min-w-[240px] z-50">
+                {vehicleModels.map((model) => (
+                  <Link
+                    key={model.id}
+                    to="/models/$type"
+                    params={{
+                      type: model.id,
+                    }}
+                    preload="intent"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <span className="flex-1">{model.name}</span>
+                    <span className="text-xs text-gray-500">
+                      {model.category}
                     </span>
-                  </li>
-                  <li className="flex flex-col items-center gap-3 transform transition-all duration-300 hover:scale-105">
-                    <div className="h-24 flex items-center justify-center">
-                      <img
-                        // src={havalH6NavShot}
-                        src="https://gwm.kopimap.com/navbar/haval_h6_nav_shot.png"
-                        alt="Haval H6"
-                        className="max-h-full w-auto object-contain"
-                      />
-                    </div>
-                    <span className="text-primary font-medium">Haval H6</span>
-                  </li>
-                </ul>
+                  </Link>
+                ))}
               </div>
-            </div>
+            )}
           </li>
           <li>
-            <a
-              href="/info-promo"
-              className="text-primary text-sm font-medium transition-colors duration-200 px-3 py-1.5 rounded hover:bg-black/5"
+            <Link
+              to="/info-promo"
+              className={`${baseNavClass} ${isActive("/info-promo") ? activeClass : ""}`}
             >
               Info & Promo
-            </a>
+            </Link>
           </li>
           <li>
             <Link
@@ -240,10 +237,6 @@ const Navbar = () => {
               className={`${baseNavClass} ${
                 isActive("/kontak") ? activeClass : ""
               }`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/kontak");
-              }}
             >
               Kontak
             </Link>
@@ -327,37 +320,73 @@ const Navbar = () => {
               className={`${baseMobileNavClass} ${
                 isActive("/") ? activeClass : ""
               }`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/");
-              }}
             >
               Home
             </Link>
           </li>
           <li className="mb-5">
-            <a
-              href="/tipe-mobil"
-              className="text-primary no-underline text-base font-medium block py-2.5"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/tipe-mobil");
-              }}
-            >
-              Type Mobil
-            </a>
+            <div className="flex items-center justify-between">
+              <Link
+                to="/tipe-mobil"
+                className={`${baseMobileNavClass} ${isActive("/tipe-mobil") ? activeClass : ""}`}
+              >
+                Type Mobil
+              </Link>
+              <button
+                type="button"
+                onClick={toggleMobileSubmenu}
+                className="py-2 px-3 text-gray-500 hover:text-primary"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`transition-transform duration-200 ${mobileSubmenuOpen ? "rotate-180" : ""}`}
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+            {mobileSubmenuOpen && (
+              <div className="pl-4 mt-2 space-y-2 border-l-2 border-gray-100">
+                {vehicleModels.map((model) => (
+                  <Link
+                    key={model.id}
+                    to="/models/$type"
+                    params={{
+                      type: model.id,
+                    }}
+                    preload="intent"
+                    className="block py-1.5 text-sm text-gray-700 hover:text-primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleMenu();
+                      window.location.href = `/models/${model.id}`;
+                    }}
+                  >
+                    {model.name}{" "}
+                    <span className="text-xs text-gray-500">
+                      ({model.category})
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </li>
           <li className="mb-5">
-            <a
-              href="/info-promo"
-              className="text-primary no-underline text-base font-medium block py-2.5"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/info-promo");
-              }}
+            <Link
+              to="/info-promo"
+              className={`${baseMobileNavClass} ${isActive("/info-promo") ? activeClass : ""}`}
             >
               Info & Promo
-            </a>
+            </Link>
           </li>
           <li className="mb-5">
             <Link
@@ -365,10 +394,6 @@ const Navbar = () => {
               className={`${baseMobileNavClass} ${
                 isActive("/kontak") ? activeClass : ""
               }`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/kontak");
-              }}
             >
               Kontak
             </Link>

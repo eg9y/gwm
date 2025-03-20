@@ -8,7 +8,7 @@ export const Route = createFileRoute("/info-promo")({
   head: () => ({
     meta: [
       {
-        title: "Info & Promo",
+        title: "Info & Promo - GWM Indonesia",
       },
       {
         name: "description",
@@ -20,11 +20,28 @@ export const Route = createFileRoute("/info-promo")({
         content:
           "GWM Indonesia, promo mobil, berita otomotif, Tank 300, Tank 500, Haval H6, Haval Jolion",
       },
+      {
+        property: "og:title",
+        content: "Info & Promo - GWM Indonesia",
+      },
+      {
+        property: "og:description",
+        content:
+          "Berita terbaru dan promo spesial dari GWM Indonesia. Dapatkan informasi tentang peluncuran produk, promo penjualan, dan kegiatan GWM lainnya.",
+      },
+      {
+        property: "og:url",
+        content: "https://gwm.co.id/info-promo",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
     ],
     links: [
       {
         rel: "canonical",
-        href: "https://gwm-indonesia.com/info-promo",
+        href: "https://gwm.co.id/info-promo",
       },
     ],
   }),
@@ -106,7 +123,8 @@ function InfoPromoPage() {
   return (
     <>
       <div
-        className={`pt-16 bg-gray-50 transition-opacity duration-500 ${isPageLoaded ? "opacity-100" : "opacity-0"}`}
+        className={`bg-gray-50 transition-opacity duration-500 ${isPageLoaded ? "opacity-100" : "opacity-0"}`}
+        style={{ viewTransitionName: "main-content" }}
       >
         {/* Hero Section */}
         <div className="bg-primary py-12 md:py-20">
@@ -129,8 +147,8 @@ function InfoPromoPage() {
                 type="button"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                   activeCategory === "All"
-                    ? "bg-primary text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    ? "bg-primary text-slate-700"
+                    : "bg-slate-100 text-gray-700 hover:bg-gray-100"
                 }`}
                 onClick={() => {
                   setActiveCategory("All");
@@ -143,8 +161,8 @@ function InfoPromoPage() {
                 type="button"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                   activeCategory === "News"
-                    ? "bg-primary text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    ? "bg-primary text-slate-700"
+                    : "bg-slate-100 text-gray-700 hover:bg-gray-100"
                 }`}
                 onClick={() => {
                   setActiveCategory("News");
@@ -157,8 +175,8 @@ function InfoPromoPage() {
                 type="button"
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                   activeCategory === "Promo"
-                    ? "bg-primary text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    ? "bg-primary text-slate-700"
+                    : "bg-slate-100 text-gray-700 hover:bg-gray-100"
                 }`}
                 onClick={() => {
                   setActiveCategory("Promo");
@@ -244,25 +262,27 @@ function InfoPromoPage() {
           )}
 
           {/* News Grid */}
-          {!isLoading && filteredArticles.length > 0 ? (
+          {!isLoading && !error && filteredArticles.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 staggered-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 {filteredArticles.map((article) => (
                   <div
                     key={article.id}
-                    className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:shadow-lg"
+                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition duration-300 flex flex-col transform hover:-translate-y-1 content-fade-in"
                   >
-                    <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+                    <Link
+                      to="/artikel/$slug"
+                      params={{ slug: article.slug }}
+                      aria-label={`Read more about ${article.title}`}
+                      className="block h-48 overflow-hidden"
+                      viewTransition={{ types: ["slide-left"] }}
+                    >
                       <img
                         src={getImageUrl(article)}
-                        alt={`Gambar untuk artikel ${article.title}`}
-                        className="object-cover w-full h-48 image-load-transition"
-                        loading="lazy"
-                        onLoad={(e) =>
-                          e.currentTarget.classList.add("image-loaded")
-                        }
+                        alt={article.title}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
-                    </div>
+                    </Link>
                     <div className="p-5">
                       <div className="flex justify-between items-center mb-3">
                         <span
@@ -284,31 +304,32 @@ function InfoPromoPage() {
                       <p className="text-gray-600 mb-4 line-clamp-3">
                         {article.excerpt}
                       </p>
-                      <Link
-                        to="/artikel/$slug"
-                        params={{ slug: article.slug }}
-                        aria-label={`Read more about ${article.title}`}
-                        className="text-primary font-medium hover:underline flex items-center"
-                      >
-                        Baca Selengkapnya
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 ml-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                        >
-                          <title>Arrow Right</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14 5l7 7m0 0l-7 7m7-7H3"
-                          />
-                        </svg>
-                      </Link>
                     </div>
+                    <Link
+                      to="/artikel/$slug"
+                      params={{ slug: article.slug }}
+                      aria-label={`Read more about ${article.title}`}
+                      className="px-3 pb-3 text-primary font-medium hover:underline flex items-center"
+                      viewTransition={{ types: ["slide-left"] }}
+                    >
+                      Baca Selengkapnya
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 ml-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <title>Arrow Right</title>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        />
+                      </svg>
+                    </Link>
                   </div>
                 ))}
               </div>

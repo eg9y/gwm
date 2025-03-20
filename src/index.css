@@ -25,7 +25,7 @@ a {
 /* Set section container heights for mobile */
 @media (max-width: 640px) {
 	.section-container {
-		min-height: 100vh;
+		/* min-height: 100vh; */
 	}
 }
 
@@ -325,4 +325,168 @@ a {
 }
 .staggered-fade-in > *:nth-child(20) {
 	animation-delay: 1s;
+}
+
+/* Main content transition */
+::view-transition-old(main-content),
+::view-transition-new(main-content) {
+	animation-duration: 0.4s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide left transition */
+@keyframes slide-from-right {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-to-left {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+}
+
+::view-transition-old(slide-left) {
+	animation-name: slide-to-left;
+}
+
+::view-transition-new(slide-left) {
+	animation-name: slide-from-right;
+}
+
+/* Slide right transition */
+@keyframes slide-from-left {
+	from {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-to-right {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+}
+
+::view-transition-old(slide-right) {
+	animation-name: slide-to-right;
+}
+
+::view-transition-new(slide-right) {
+	animation-name: slide-from-left;
+}
+
+/* Fade transition */
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+::view-transition-old(fade) {
+	animation-name: fade-out;
+}
+
+::view-transition-new(fade) {
+	animation-name: fade-in;
+}
+
+/* View Transition Styles */
+/* Keep navbar and footer elements stable during transitions */
+::view-transition-old(persistent-navbar),
+::view-transition-new(persistent-navbar),
+::view-transition-old(persistent-footer),
+::view-transition-new(persistent-footer) {
+	animation: none;
+	mix-blend-mode: normal;
+	opacity: 1;
+}
+
+/* Content fade transition */
+@keyframes content-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes content-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+::view-transition-old(content-fade) {
+	animation: content-fade-out 0.3s ease forwards;
+}
+
+::view-transition-new(content-fade) {
+	animation: content-fade-in 0.3s ease forwards;
+}
+
+/* Simplified page transitions */
+.page-transitioning main {
+	opacity: 0.5;
+	transition: opacity 0.1s ease-out;
+}
+
+main {
+	opacity: 1;
+	transition: opacity 0.3s ease-in;
+}
+
+/* Use this instead of view transitions */
+.main-content-enter {
+	opacity: 0;
+}
+
+.main-content-enter-active {
+	opacity: 1;
+	transition: opacity 300ms;
+}
+
+.main-content-exit {
+	opacity: 1;
+}
+
+.main-content-exit-active {
+	opacity: 0;
+	transition: opacity 300ms;
 }

@@ -14,5 +14,23 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    ({ addUtilities }) => {
+      const newUtilities = {
+        ".text-shadow-sm": {
+          textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+        },
+        ".text-shadow": {
+          textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+        },
+        ".text-shadow-lg": {
+          textShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        },
+        ".text-shadow-none": {
+          textShadow: "none",
+        },
+      };
+      addUtilities(newUtilities);
+    },
+  ],
 };

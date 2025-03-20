@@ -4,16 +4,20 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node server",
+    "build": "npm run build:client && npm run build:server",
     "lint": "eslint .",
-    "preview": "vite preview --port 5174"
+    "preview": "vite preview --port 5174",
+    "build:client": "tsc && vite build --outDir dist/client",
+    "build:server": "tsc && vite build --ssr src/entry-server.tsx --outDir dist/server",
+    "serve": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.12",
     "@tanstack/react-router": "^1.112.18",
     "@types/dompurify": "^3.2.0",
     "dompurify": "^3.2.4",
+    "express": "^4.21.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

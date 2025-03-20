@@ -10,43 +10,102 @@ import type { ArticleAttributes } from "../../types/strapi";
 console.log("Article route file loaded");
 
 export const Route = createFileRoute("/artikel/$slug")({
+  // Add a loader to fetch article data on the server
+  loader: async ({ params }) => {
+    try {
+      const article = await fetchArticleBySlug(params.slug);
+      return { article };
+    } catch (error) {
+      console.error("Error loading article:", error);
+      return { article: null, error: "Failed to load article" };
+    }
+  },
+
+  // Use the loaded data for head metadata
+  head: ({ loaderData }) => {
+    const { article } = loaderData;
+
+    if (!article) {
+      return {
+        meta: [
+          {
+            title: "Article Not Found - GWM Indonesia",
+          },
+          {
+            name: "description",
+            content: "The requested article could not be found.",
+          },
+        ],
+      };
+    }
+
+    return {
+      meta: [
+        {
+          title: `${article.title} - GWM Indonesia`,
+        },
+        {
+          name: "description",
+          content:
+            article.excerpt || `${article.title} - Great Wall Motors Indonesia`,
+        },
+        {
+          name: "keywords",
+          content: `GWM, Great Wall Motors, ${article.category}, ${article.title}`,
+        },
+        {
+          property: "og:title",
+          content: `${article.title} - GWM Indonesia`,
+        },
+        {
+          property: "og:description",
+          content:
+            article.excerpt || `${article.title} - Great Wall Motors Indonesia`,
+        },
+        {
+          property: "og:image",
+          content: article.featuredImage?.url
+            ? getStrapiImageUrl(article.featuredImage.url)
+            : "https://gwm.kopimap.com/hero_image.webp",
+        },
+        {
+          property: "og:url",
+          content: `https://gwm.co.id/artikel/${article.slug}`,
+        },
+        {
+          property: "og:type",
+          content: "article",
+        },
+        {
+          property: "article:published_time",
+          content: article.publishedAt,
+        },
+        {
+          property: "article:section",
+          content: article.category || "News",
+        },
+      ],
+      links: [
+        {
+          rel: "canonical",
+          href: `https://gwm.co.id/artikel/${article.slug}`,
+        },
+      ],
+    };
+  },
   component: ArticleDetailPage,
-  // Use the updated syntax for head metadata
-  head: () => ({
-    meta: [
-      {
-        title: "Loading Article...",
-      },
-      {
-        name: "description",
-        content: "Loading article content...",
-      },
-    ],
-  }),
 });
 
 function ArticleDetailPage() {
-  console.log("ArticleDetailPage component rendering");
   const { slug } = Route.useParams();
-  const [article, setArticle] = useState<ArticleAttributes | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { article: loaderArticle, error: loaderError } = Route.useLoaderData();
+  const [article, setArticle] = useState<ArticleAttributes | null>(
+    loaderArticle || null
+  );
+  const [isLoading, setIsLoading] = useState(!loaderArticle);
+  const [error, setError] = useState<string | null>(loaderError || null);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   console.log("kanjai", article);
-
-  // Update document head when article data is loaded
-  useEffect(() => {
-    if (article) {
-      // This updates the title dynamically after data is loaded
-      document.title = article.title;
-
-      // Update meta description if it exists
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc && article.excerpt) {
-        metaDesc.setAttribute("content", article.excerpt);
-      }
-    }
-  }, [article]);
 
   // Load page with a slight delay for smooth transition
   useEffect(() => {
@@ -57,8 +116,11 @@ function ArticleDetailPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fetch article from Strapi
+  // Fetch article from Strapi if it wasn't loaded by SSR
   useEffect(() => {
+    // If we already have the article from the loader, don't fetch again
+    if (loaderArticle) return;
+
     async function loadArticle() {
       try {
         setIsLoading(true);
@@ -78,7 +140,21 @@ function ArticleDetailPage() {
     if (slug) {
       loadArticle();
     }
-  }, [slug]);
+  }, [slug, loaderArticle]);
+
+  // Update document head when article data is loaded
+  useEffect(() => {
+    if (article) {
+      // This updates the title dynamically after data is loaded
+      document.title = article.title;
+
+      // Update meta description if it exists
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc && article.excerpt) {
+        metaDesc.setAttribute("content", article.excerpt);
+      }
+    }
+  }, [article]);
 
   // Format date helper function
   const formatDate = (dateString: string) => {
@@ -125,6 +201,7 @@ function ArticleDetailPage() {
   return (
     <div
       className={`pt-16 bg-gray-50 transition-opacity duration-500 ${isPageLoaded ? "opacity-100" : "opacity-0"}`}
+      style={{ viewTransitionName: "main-content" }}
     >
       {/* Loading State */}
       {isLoading && (
@@ -210,8 +287,9 @@ function ArticleDetailPage() {
 
               <div
                 className="prose prose-lg max-w-none text-gray-700"
-                // Using dangerouslySetInnerHTML is necessary for rendering formatted content
-                // Content is sanitized with DOMPurify to prevent XSS attacks
+                // eslint-disable-next-line react/no-danger
+                // This is safe because we're using DOMPurify to sanitize the HTML
+                // We need to render HTML content from CMS, and DOMPurify removes all XSS risks
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(article.content),
                 }}
@@ -222,6 +300,7 @@ function ArticleDetailPage() {
               <Link
                 to="/info-promo"
                 className="inline-flex items-center text-primary hover:underline"
+                viewTransition={{ types: ["slide-right"] }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

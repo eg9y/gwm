@@ -15,7 +15,7 @@ import Promos from "../components/Promos";
 const sections = [
   { id: "hero", name: "Home" },
   { id: "haval-h6", name: "Haval H6" },
-  { id: "haval-jolion", name: "Haval Jolion" },
+  { id: "haval-jolion-ultra", name: "Haval Jolion" },
   { id: "tank-300", name: "Tank 300" },
   { id: "tank-500", name: "Tank 500" },
   { id: "promos", name: "Promos" },
@@ -108,6 +108,50 @@ const vehicleModels = [
 
 export const Route = createFileRoute("/")({
   component: HomePage,
+  // Add head metadata for the homepage
+  head: () => ({
+    title: "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
+    meta: [
+      {
+        name: "description",
+        content:
+          "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
+      },
+      {
+        name: "keywords",
+        content:
+          "GWM, Great Wall Motors, Haval H6, Haval Jolion, Tank 300, Tank 500, SUV Premium, Mobil Hybrid, Indonesia",
+      },
+      {
+        property: "og:title",
+        content:
+          "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
+      },
+      {
+        property: "og:description",
+        content:
+          "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
+      },
+      {
+        property: "og:image",
+        content: "https://gwm.kopimap.com/hero_image.webp",
+      },
+      {
+        property: "og:url",
+        content: "https://gwm.co.id/",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: "https://gwm.co.id/",
+      },
+    ],
+  }),
 });
 
 function HomePage() {
@@ -151,7 +195,8 @@ function HomePage() {
         <div id={sections[0].id} className="section-container">
           <Hero
             // backgroundImage={heroImage}
-            backgroundImage={"https://gwm.kopimap.com/hero_image.webp"}
+            desktopImage={"https://gwm.kopimap.com/hero_image.webp"}
+            mobileImage={"https://gwm.kopimap.com/hero_image_mobile.png"}
             title="GWM Indonesia"
             subtitle="Great Wall Motors - Mobil berkualitas tinggi dengan teknologi terkini"
             primaryButtonText="Jelajahi Mobil"
