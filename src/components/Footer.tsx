@@ -84,10 +84,10 @@ const Footer = () => {
             <ul className="space-y-1 sm:space-y-2">
               <li>
                 <a
-                  href="tel:+6282123456789"
+                  href="tel:+6287774377422"
                   className="text-gray-500 hover:text-primary text-xs transition"
                 >
-                  +62 821-2345-6789
+                  +62 877 7437 7422
                 </a>
               </li>
               <li>
@@ -95,7 +95,7 @@ const Footer = () => {
                   href="mailto:info@gwm.co.id"
                   className="text-gray-500 hover:text-primary text-xs transition"
                 >
-                  info@gwm.co.id
+                  info@gwmindonesia.co.id
                 </a>
               </li>
               <li className="text-gray-500 text-xs">
@@ -122,12 +122,14 @@ const Footer = () => {
                 type="button"
                 onClick={() =>
                   window.open(
-                    "https://instagram.com",
+                    "https://instagram.com/indo.tank",
                     "_blank",
                     "noopener,noreferrer"
                   )
                 }
-                onKeyDown={(e) => handleKeyPress(e, "https://instagram.com")}
+                onKeyDown={(e) =>
+                  handleKeyPress(e, "https://instagram.com/indo.tank")
+                }
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
                 aria-label="Kunjungi Instagram GWM Indonesia"
               >
@@ -191,13 +193,13 @@ const Footer = () => {
               aria-label="Instagram"
               onClick={() =>
                 window.open(
-                  "https://instagram.com/gwmindonesia",
+                  "https://instagram.com/indo.tank",
                   "_blank",
                   "noopener,noreferrer"
                 )
               }
               onKeyDown={(e) =>
-                handleKeyPress(e, "https://instagram.com/gwmindonesia")
+                handleKeyPress(e, "https://instagram.com/indo.tank")
               }
             >
               <svg

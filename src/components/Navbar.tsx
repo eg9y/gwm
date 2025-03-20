@@ -8,22 +8,31 @@ import { Link, useRouter } from "@tanstack/react-router";
 
 // Define vehicle models for the dropdown
 const vehicleModels = [
-  { id: "tank-300", name: "Tank 300", category: "SUV" },
-  { id: "tank-500", name: "Tank 500", category: "SUV" },
-  { id: "haval-jolion-ultra", name: "Haval Jolion Ultra", category: "SUV" },
-  { id: "haval-h6", name: "Haval H6", category: "SUV" },
+  {
+    id: "tank-300",
+    name: "Tank 300",
+    category: "SUV",
+    image: "https://gwm.kopimap.com/navbar/tank_300_nav_shot.png",
+  },
+  {
+    id: "tank-500",
+    name: "Tank 500",
+    category: "SUV",
+    image: "https://gwm.kopimap.com/navbar/tank_500_nav_shot.png",
+  },
+  {
+    id: "haval-jolion-ultra",
+    name: "Haval Jolion Ultra",
+    category: "SUV",
+    image: "https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png",
+  },
+  {
+    id: "haval-h6",
+    name: "Haval H6",
+    category: "SUV",
+    image: "https://gwm.kopimap.com/navbar/haval_h6_nav_shot.png",
+  },
 ];
-
-// Add a new ClientOnly wrapper component
-function ClientOnly({ children, fallback = null }) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  return isClient ? children : fallback;
-}
 
 const Navbar = () => {
   const router = useRouter();
@@ -31,7 +40,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const isHomePage = router.state.location.pathname === "/";
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState(false);
+  const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState(true);
   const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLLIElement | null>(null);
 
@@ -211,7 +220,7 @@ const Navbar = () => {
 
             {/* Dropdown menu */}
             {dropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg py-2 min-w-[240px] z-50">
+              <div className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg py-2 min-w-[280px] z-50">
                 {vehicleModels.map((model) => (
                   <Link
                     key={model.id}
@@ -222,10 +231,17 @@ const Navbar = () => {
                     preload="intent"
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    <span className="flex-1">{model.name}</span>
-                    <span className="text-xs text-gray-500">
-                      {model.category}
-                    </span>
+                    <img
+                      src={model.image}
+                      alt={model.name}
+                      className="w-14 h-10 object-cover rounded mr-3"
+                    />
+                    <div>
+                      <span className="flex-1 font-medium">{model.name}</span>
+                      <span className="text-xs text-gray-500 block">
+                        {model.category}
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -365,7 +381,7 @@ const Navbar = () => {
               </button>
             </div>
             {mobileSubmenuOpen && (
-              <div className="pl-4 mt-2 space-y-2 border-l-2 border-gray-100">
+              <div className="pl-4 mt-2 space-y-3 border-l-2 border-gray-100">
                 {vehicleModels.map((model) => (
                   <Link
                     key={model.id}
@@ -374,15 +390,22 @@ const Navbar = () => {
                       type: model.id,
                     }}
                     preload="intent"
-                    className="block py-1.5 text-sm text-gray-700 hover:text-primary"
+                    className="flex items-center py-1.5 text-sm text-gray-700 hover:text-primary"
                     onClick={(e) => {
                       closeMenu();
                     }}
                   >
-                    {model.name}{" "}
-                    <span className="text-xs text-gray-500">
-                      ({model.category})
-                    </span>
+                    <img
+                      src={model.image}
+                      alt={model.name}
+                      className="w-12 h-9 object-cover rounded mr-2"
+                    />
+                    <div>
+                      <span>{model.name}</span>
+                      <span className="text-xs text-gray-500 block">
+                        {model.category}
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>
