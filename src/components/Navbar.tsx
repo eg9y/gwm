@@ -145,6 +145,14 @@ const Navbar = () => {
     setMobileSubmenuOpen(!mobileSubmenuOpen);
   };
 
+  const closeMenu = () => {
+    // Add a small timeout to ensure the close happens after navigation starts
+    setTimeout(() => {
+      setMenuOpen(false);
+      setMobileSubmenuOpen(false);
+    }, 10);
+  };
+
   return (
     <nav
       className={`flex justify-between items-center px-4 sm:px-6 md:px-10 h-[60px] sm:h-[70px] w-full transition-all duration-300 ${
@@ -320,6 +328,7 @@ const Navbar = () => {
               className={`${baseMobileNavClass} ${
                 isActive("/") ? activeClass : ""
               }`}
+              onClick={closeMenu}
             >
               Home
             </Link>
@@ -329,6 +338,7 @@ const Navbar = () => {
               <Link
                 to="/tipe-mobil"
                 className={`${baseMobileNavClass} ${isActive("/tipe-mobil") ? activeClass : ""}`}
+                onClick={closeMenu}
               >
                 Type Mobil
               </Link>
@@ -366,9 +376,7 @@ const Navbar = () => {
                     preload="intent"
                     className="block py-1.5 text-sm text-gray-700 hover:text-primary"
                     onClick={(e) => {
-                      e.preventDefault();
-                      toggleMenu();
-                      window.location.href = `/models/${model.id}`;
+                      closeMenu();
                     }}
                   >
                     {model.name}{" "}
@@ -384,6 +392,7 @@ const Navbar = () => {
             <Link
               to="/info-promo"
               className={`${baseMobileNavClass} ${isActive("/info-promo") ? activeClass : ""}`}
+              onClick={closeMenu}
             >
               Info & Promo
             </Link>
@@ -394,6 +403,7 @@ const Navbar = () => {
               className={`${baseMobileNavClass} ${
                 isActive("/kontak") ? activeClass : ""
               }`}
+              onClick={closeMenu}
             >
               Kontak
             </Link>
