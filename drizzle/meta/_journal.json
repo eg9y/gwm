@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1742633498941,
+      "tag": "0000_striped_cable",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1742699102239,
+      "tag": "0001_complex_celestials",
+      "breakpoints": true
+    }
+  ]
+}

@@ -10,202 +10,480 @@
 
 // Import Routes
 
-import { Route as rootRoute } from "./routes/__root";
-import { Route as TipeMobilImport } from "./routes/tipe-mobil";
-import { Route as KontakImport } from "./routes/kontak";
-import { Route as InfoPromoImport } from "./routes/info-promo";
-import { Route as AdminImport } from "./routes/admin";
-import { Route as IndexImport } from "./routes/index";
-import { Route as ModelsTypeImport } from "./routes/models/$type";
-import { Route as ArtikelSlugImport } from "./routes/artikel/$slug";
+import { Route as rootRoute } from './routes/__root'
+import { Route as SignUpImport } from './routes/sign-up'
+import { Route as SignInImport } from './routes/sign-in'
+import { Route as KontakImport } from './routes/kontak'
+import { Route as DeferredImport } from './routes/deferred'
+import { Route as AdminImport } from './routes/admin'
+import { Route as PathlessLayoutImport } from './routes/_pathlessLayout'
+import { Route as TipeMobileRouteImport } from './routes/tipe-mobile.route'
+import { Route as InfoPromoRouteImport } from './routes/info-promo.route'
+import { Route as IndexImport } from './routes/index'
+import { Route as TipeMobilIndexImport } from './routes/tipe-mobil.index'
+import { Route as InfoPromoIndexImport } from './routes/info-promo.index'
+import { Route as AdminIndexImport } from './routes/admin.index'
+import { Route as TipeMobilModelImport } from './routes/tipe-mobil.$model'
+import { Route as InfoPromoSlugImport } from './routes/info-promo.$slug'
+import { Route as AdminKontakImport } from './routes/admin.kontak'
+import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
+import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathlessLayout/_nested-layout/route-b'
+import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathlessLayout/_nested-layout/route-a'
 
 // Create/Update Routes
 
-const TipeMobilRoute = TipeMobilImport.update({
-  id: "/tipe-mobil",
-  path: "/tipe-mobil",
+const SignUpRoute = SignUpImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
+
+const SignInRoute = SignInImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const KontakRoute = KontakImport.update({
-  id: "/kontak",
-  path: "/kontak",
+  id: '/kontak',
+  path: '/kontak',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
 
-const InfoPromoRoute = InfoPromoImport.update({
-  id: "/info-promo",
-  path: "/info-promo",
+const DeferredRoute = DeferredImport.update({
+  id: '/deferred',
+  path: '/deferred',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
 
 const AdminRoute = AdminImport.update({
-  id: "/admin",
-  path: "/admin",
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
+
+const PathlessLayoutRoute = PathlessLayoutImport.update({
+  id: '/_pathlessLayout',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TipeMobileRouteRoute = TipeMobileRouteImport.update({
+  id: '/tipe-mobile',
+  path: '/tipe-mobile',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const InfoPromoRouteRoute = InfoPromoRouteImport.update({
+  id: '/info-promo',
+  path: '/info-promo',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
 
-const ModelsTypeRoute = ModelsTypeImport.update({
-  id: "/models/$type",
-  path: "/models/$type",
+const TipeMobilIndexRoute = TipeMobilIndexImport.update({
+  id: '/tipe-mobil/',
+  path: '/tipe-mobil/',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
 
-const ArtikelSlugRoute = ArtikelSlugImport.update({
-  id: "/artikel/$slug",
-  path: "/artikel/$slug",
+const InfoPromoIndexRoute = InfoPromoIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InfoPromoRouteRoute,
+} as any)
+
+const AdminIndexRoute = AdminIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+
+const TipeMobilModelRoute = TipeMobilModelImport.update({
+  id: '/tipe-mobil/$model',
+  path: '/tipe-mobil/$model',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
+
+const InfoPromoSlugRoute = InfoPromoSlugImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => InfoPromoRouteRoute,
+} as any)
+
+const AdminKontakRoute = AdminKontakImport.update({
+  id: '/kontak',
+  path: '/kontak',
+  getParentRoute: () => AdminRoute,
+} as any)
+
+const PathlessLayoutNestedLayoutRoute = PathlessLayoutNestedLayoutImport.update(
+  {
+    id: '/_nested-layout',
+    getParentRoute: () => PathlessLayoutRoute,
+  } as any,
+)
+
+const PathlessLayoutNestedLayoutRouteBRoute =
+  PathlessLayoutNestedLayoutRouteBImport.update({
+    id: '/route-b',
+    path: '/route-b',
+    getParentRoute: () => PathlessLayoutNestedLayoutRoute,
+  } as any)
+
+const PathlessLayoutNestedLayoutRouteARoute =
+  PathlessLayoutNestedLayoutRouteAImport.update({
+    id: '/route-a',
+    path: '/route-a',
+    getParentRoute: () => PathlessLayoutNestedLayoutRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/admin": {
-      id: "/admin";
-      path: "/admin";
-      fullPath: "/admin";
-      preLoaderRoute: typeof AdminImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/info-promo": {
-      id: "/info-promo";
-      path: "/info-promo";
-      fullPath: "/info-promo";
-      preLoaderRoute: typeof InfoPromoImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/kontak": {
-      id: "/kontak";
-      path: "/kontak";
-      fullPath: "/kontak";
-      preLoaderRoute: typeof KontakImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/tipe-mobil": {
-      id: "/tipe-mobil";
-      path: "/tipe-mobil";
-      fullPath: "/tipe-mobil";
-      preLoaderRoute: typeof TipeMobilImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/artikel/$slug": {
-      id: "/artikel/$slug";
-      path: "/artikel/$slug";
-      fullPath: "/artikel/$slug";
-      preLoaderRoute: typeof ArtikelSlugImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/models/$type": {
-      id: "/models/$type";
-      path: "/models/$type";
-      fullPath: "/models/$type";
-      preLoaderRoute: typeof ModelsTypeImport;
-      parentRoute: typeof rootRoute;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/info-promo': {
+      id: '/info-promo'
+      path: '/info-promo'
+      fullPath: '/info-promo'
+      preLoaderRoute: typeof InfoPromoRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/tipe-mobile': {
+      id: '/tipe-mobile'
+      path: '/tipe-mobile'
+      fullPath: '/tipe-mobile'
+      preLoaderRoute: typeof TipeMobileRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/_pathlessLayout': {
+      id: '/_pathlessLayout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof PathlessLayoutImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminImport
+      parentRoute: typeof rootRoute
+    }
+    '/deferred': {
+      id: '/deferred'
+      path: '/deferred'
+      fullPath: '/deferred'
+      preLoaderRoute: typeof DeferredImport
+      parentRoute: typeof rootRoute
+    }
+    '/kontak': {
+      id: '/kontak'
+      path: '/kontak'
+      fullPath: '/kontak'
+      preLoaderRoute: typeof KontakImport
+      parentRoute: typeof rootRoute
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpImport
+      parentRoute: typeof rootRoute
+    }
+    '/_pathlessLayout/_nested-layout': {
+      id: '/_pathlessLayout/_nested-layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof PathlessLayoutNestedLayoutImport
+      parentRoute: typeof PathlessLayoutImport
+    }
+    '/admin/kontak': {
+      id: '/admin/kontak'
+      path: '/kontak'
+      fullPath: '/admin/kontak'
+      preLoaderRoute: typeof AdminKontakImport
+      parentRoute: typeof AdminImport
+    }
+    '/info-promo/$slug': {
+      id: '/info-promo/$slug'
+      path: '/$slug'
+      fullPath: '/info-promo/$slug'
+      preLoaderRoute: typeof InfoPromoSlugImport
+      parentRoute: typeof InfoPromoRouteImport
+    }
+    '/tipe-mobil/$model': {
+      id: '/tipe-mobil/$model'
+      path: '/tipe-mobil/$model'
+      fullPath: '/tipe-mobil/$model'
+      preLoaderRoute: typeof TipeMobilModelImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexImport
+      parentRoute: typeof AdminImport
+    }
+    '/info-promo/': {
+      id: '/info-promo/'
+      path: '/'
+      fullPath: '/info-promo/'
+      preLoaderRoute: typeof InfoPromoIndexImport
+      parentRoute: typeof InfoPromoRouteImport
+    }
+    '/tipe-mobil/': {
+      id: '/tipe-mobil/'
+      path: '/tipe-mobil'
+      fullPath: '/tipe-mobil'
+      preLoaderRoute: typeof TipeMobilIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/_pathlessLayout/_nested-layout/route-a': {
+      id: '/_pathlessLayout/_nested-layout/route-a'
+      path: '/route-a'
+      fullPath: '/route-a'
+      preLoaderRoute: typeof PathlessLayoutNestedLayoutRouteAImport
+      parentRoute: typeof PathlessLayoutNestedLayoutImport
+    }
+    '/_pathlessLayout/_nested-layout/route-b': {
+      id: '/_pathlessLayout/_nested-layout/route-b'
+      path: '/route-b'
+      fullPath: '/route-b'
+      preLoaderRoute: typeof PathlessLayoutNestedLayoutRouteBImport
+      parentRoute: typeof PathlessLayoutNestedLayoutImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface InfoPromoRouteRouteChildren {
+  InfoPromoSlugRoute: typeof InfoPromoSlugRoute
+  InfoPromoIndexRoute: typeof InfoPromoIndexRoute
+}
+
+const InfoPromoRouteRouteChildren: InfoPromoRouteRouteChildren = {
+  InfoPromoSlugRoute: InfoPromoSlugRoute,
+  InfoPromoIndexRoute: InfoPromoIndexRoute,
+}
+
+const InfoPromoRouteRouteWithChildren = InfoPromoRouteRoute._addFileChildren(
+  InfoPromoRouteRouteChildren,
+)
+
+interface PathlessLayoutNestedLayoutRouteChildren {
+  PathlessLayoutNestedLayoutRouteARoute: typeof PathlessLayoutNestedLayoutRouteARoute
+  PathlessLayoutNestedLayoutRouteBRoute: typeof PathlessLayoutNestedLayoutRouteBRoute
+}
+
+const PathlessLayoutNestedLayoutRouteChildren: PathlessLayoutNestedLayoutRouteChildren =
+  {
+    PathlessLayoutNestedLayoutRouteARoute:
+      PathlessLayoutNestedLayoutRouteARoute,
+    PathlessLayoutNestedLayoutRouteBRoute:
+      PathlessLayoutNestedLayoutRouteBRoute,
+  }
+
+const PathlessLayoutNestedLayoutRouteWithChildren =
+  PathlessLayoutNestedLayoutRoute._addFileChildren(
+    PathlessLayoutNestedLayoutRouteChildren,
+  )
+
+interface PathlessLayoutRouteChildren {
+  PathlessLayoutNestedLayoutRoute: typeof PathlessLayoutNestedLayoutRouteWithChildren
+}
+
+const PathlessLayoutRouteChildren: PathlessLayoutRouteChildren = {
+  PathlessLayoutNestedLayoutRoute: PathlessLayoutNestedLayoutRouteWithChildren,
+}
+
+const PathlessLayoutRouteWithChildren = PathlessLayoutRoute._addFileChildren(
+  PathlessLayoutRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminKontakRoute: typeof AdminKontakRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminKontakRoute: AdminKontakRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/admin": typeof AdminRoute;
-  "/info-promo": typeof InfoPromoRoute;
-  "/kontak": typeof KontakRoute;
-  "/tipe-mobil": typeof TipeMobilRoute;
-  "/artikel/$slug": typeof ArtikelSlugRoute;
-  "/models/$type": typeof ModelsTypeRoute;
+  '/': typeof IndexRoute
+  '/info-promo': typeof InfoPromoRouteRouteWithChildren
+  '/tipe-mobile': typeof TipeMobileRouteRoute
+  '': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
+  '/deferred': typeof DeferredRoute
+  '/kontak': typeof KontakRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/admin/kontak': typeof AdminKontakRoute
+  '/info-promo/$slug': typeof InfoPromoSlugRoute
+  '/tipe-mobil/$model': typeof TipeMobilModelRoute
+  '/admin/': typeof AdminIndexRoute
+  '/info-promo/': typeof InfoPromoIndexRoute
+  '/tipe-mobil': typeof TipeMobilIndexRoute
+  '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
+  '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/admin": typeof AdminRoute;
-  "/info-promo": typeof InfoPromoRoute;
-  "/kontak": typeof KontakRoute;
-  "/tipe-mobil": typeof TipeMobilRoute;
-  "/artikel/$slug": typeof ArtikelSlugRoute;
-  "/models/$type": typeof ModelsTypeRoute;
+  '/': typeof IndexRoute
+  '/tipe-mobile': typeof TipeMobileRouteRoute
+  '': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/deferred': typeof DeferredRoute
+  '/kontak': typeof KontakRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/admin/kontak': typeof AdminKontakRoute
+  '/info-promo/$slug': typeof InfoPromoSlugRoute
+  '/tipe-mobil/$model': typeof TipeMobilModelRoute
+  '/admin': typeof AdminIndexRoute
+  '/info-promo': typeof InfoPromoIndexRoute
+  '/tipe-mobil': typeof TipeMobilIndexRoute
+  '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
+  '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute;
-  "/": typeof IndexRoute;
-  "/admin": typeof AdminRoute;
-  "/info-promo": typeof InfoPromoRoute;
-  "/kontak": typeof KontakRoute;
-  "/tipe-mobil": typeof TipeMobilRoute;
-  "/artikel/$slug": typeof ArtikelSlugRoute;
-  "/models/$type": typeof ModelsTypeRoute;
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/info-promo': typeof InfoPromoRouteRouteWithChildren
+  '/tipe-mobile': typeof TipeMobileRouteRoute
+  '/_pathlessLayout': typeof PathlessLayoutRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
+  '/deferred': typeof DeferredRoute
+  '/kontak': typeof KontakRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
+  '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/admin/kontak': typeof AdminKontakRoute
+  '/info-promo/$slug': typeof InfoPromoSlugRoute
+  '/tipe-mobil/$model': typeof TipeMobilModelRoute
+  '/admin/': typeof AdminIndexRoute
+  '/info-promo/': typeof InfoPromoIndexRoute
+  '/tipe-mobil/': typeof TipeMobilIndexRoute
+  '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
+  '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/admin"
-    | "/info-promo"
-    | "/kontak"
-    | "/tipe-mobil"
-    | "/artikel/$slug"
-    | "/models/$type";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/info-promo'
+    | '/tipe-mobile'
+    | ''
+    | '/admin'
+    | '/deferred'
+    | '/kontak'
+    | '/sign-in'
+    | '/sign-up'
+    | '/admin/kontak'
+    | '/info-promo/$slug'
+    | '/tipe-mobil/$model'
+    | '/admin/'
+    | '/info-promo/'
+    | '/tipe-mobil'
+    | '/route-a'
+    | '/route-b'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/admin"
-    | "/info-promo"
-    | "/kontak"
-    | "/tipe-mobil"
-    | "/artikel/$slug"
-    | "/models/$type";
+    | '/'
+    | '/tipe-mobile'
+    | ''
+    | '/deferred'
+    | '/kontak'
+    | '/sign-in'
+    | '/sign-up'
+    | '/admin/kontak'
+    | '/info-promo/$slug'
+    | '/tipe-mobil/$model'
+    | '/admin'
+    | '/info-promo'
+    | '/tipe-mobil'
+    | '/route-a'
+    | '/route-b'
   id:
-    | "__root__"
-    | "/"
-    | "/admin"
-    | "/info-promo"
-    | "/kontak"
-    | "/tipe-mobil"
-    | "/artikel/$slug"
-    | "/models/$type";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/info-promo'
+    | '/tipe-mobile'
+    | '/_pathlessLayout'
+    | '/admin'
+    | '/deferred'
+    | '/kontak'
+    | '/sign-in'
+    | '/sign-up'
+    | '/_pathlessLayout/_nested-layout'
+    | '/admin/kontak'
+    | '/info-promo/$slug'
+    | '/tipe-mobil/$model'
+    | '/admin/'
+    | '/info-promo/'
+    | '/tipe-mobil/'
+    | '/_pathlessLayout/_nested-layout/route-a'
+    | '/_pathlessLayout/_nested-layout/route-b'
+  fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  AdminRoute: typeof AdminRoute;
-  InfoPromoRoute: typeof InfoPromoRoute;
-  KontakRoute: typeof KontakRoute;
-  TipeMobilRoute: typeof TipeMobilRoute;
-  ArtikelSlugRoute: typeof ArtikelSlugRoute;
-  ModelsTypeRoute: typeof ModelsTypeRoute;
+  IndexRoute: typeof IndexRoute
+  InfoPromoRouteRoute: typeof InfoPromoRouteRouteWithChildren
+  TipeMobileRouteRoute: typeof TipeMobileRouteRoute
+  PathlessLayoutRoute: typeof PathlessLayoutRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
+  DeferredRoute: typeof DeferredRoute
+  KontakRoute: typeof KontakRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
+  TipeMobilModelRoute: typeof TipeMobilModelRoute
+  TipeMobilIndexRoute: typeof TipeMobilIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
-  InfoPromoRoute: InfoPromoRoute,
+  InfoPromoRouteRoute: InfoPromoRouteRouteWithChildren,
+  TipeMobileRouteRoute: TipeMobileRouteRoute,
+  PathlessLayoutRoute: PathlessLayoutRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
+  DeferredRoute: DeferredRoute,
   KontakRoute: KontakRoute,
-  TipeMobilRoute: TipeMobilRoute,
-  ArtikelSlugRoute: ArtikelSlugRoute,
-  ModelsTypeRoute: ModelsTypeRoute,
-};
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
+  TipeMobilModelRoute: TipeMobilModelRoute,
+  TipeMobilIndexRoute: TipeMobilIndexRoute,
+}
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
 /* ROUTE_MANIFEST_START
 {
@@ -214,34 +492,93 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/admin",
         "/info-promo",
+        "/tipe-mobile",
+        "/_pathlessLayout",
+        "/admin",
+        "/deferred",
         "/kontak",
-        "/tipe-mobil",
-        "/artikel/$slug",
-        "/models/$type"
+        "/sign-in",
+        "/sign-up",
+        "/tipe-mobil/$model",
+        "/tipe-mobil/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/admin": {
-      "filePath": "admin.tsx"
-    },
     "/info-promo": {
-      "filePath": "info-promo.tsx"
+      "filePath": "info-promo.route.tsx",
+      "children": [
+        "/info-promo/$slug",
+        "/info-promo/"
+      ]
+    },
+    "/tipe-mobile": {
+      "filePath": "tipe-mobile.route.tsx"
+    },
+    "/_pathlessLayout": {
+      "filePath": "_pathlessLayout.tsx",
+      "children": [
+        "/_pathlessLayout/_nested-layout"
+      ]
+    },
+    "/admin": {
+      "filePath": "admin.tsx",
+      "children": [
+        "/admin/kontak",
+        "/admin/"
+      ]
+    },
+    "/deferred": {
+      "filePath": "deferred.tsx"
     },
     "/kontak": {
       "filePath": "kontak.tsx"
     },
-    "/tipe-mobil": {
-      "filePath": "tipe-mobil.tsx"
+    "/sign-in": {
+      "filePath": "sign-in.tsx"
     },
-    "/artikel/$slug": {
-      "filePath": "artikel/$slug.tsx"
+    "/sign-up": {
+      "filePath": "sign-up.tsx"
     },
-    "/models/$type": {
-      "filePath": "models/$type.tsx"
+    "/_pathlessLayout/_nested-layout": {
+      "filePath": "_pathlessLayout/_nested-layout.tsx",
+      "parent": "/_pathlessLayout",
+      "children": [
+        "/_pathlessLayout/_nested-layout/route-a",
+        "/_pathlessLayout/_nested-layout/route-b"
+      ]
+    },
+    "/admin/kontak": {
+      "filePath": "admin.kontak.tsx",
+      "parent": "/admin"
+    },
+    "/info-promo/$slug": {
+      "filePath": "info-promo.$slug.tsx",
+      "parent": "/info-promo"
+    },
+    "/tipe-mobil/$model": {
+      "filePath": "tipe-mobil.$model.tsx"
+    },
+    "/admin/": {
+      "filePath": "admin.index.tsx",
+      "parent": "/admin"
+    },
+    "/info-promo/": {
+      "filePath": "info-promo.index.tsx",
+      "parent": "/info-promo"
+    },
+    "/tipe-mobil/": {
+      "filePath": "tipe-mobil.index.tsx"
+    },
+    "/_pathlessLayout/_nested-layout/route-a": {
+      "filePath": "_pathlessLayout/_nested-layout/route-a.tsx",
+      "parent": "/_pathlessLayout/_nested-layout"
+    },
+    "/_pathlessLayout/_nested-layout/route-b": {
+      "filePath": "_pathlessLayout/_nested-layout/route-b.tsx",
+      "parent": "/_pathlessLayout/_nested-layout"
     }
   }
 }

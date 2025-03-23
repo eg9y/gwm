@@ -1,15 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, createFileRoute } from "@tanstack/react-router";
 
-// Import images
-// import heroImage from "../assets/hero_image.webp";
-// import havalH6Image from "../assets/haval_h6.jpg";
-// import havalJolionImage from "../assets/haval_jolion.webp";
-// import tank300Image from "../assets/tank_300.webp";
-// import tank500Image from "../assets/tank_500.webp";
 import Hero from "../components/Hero";
 import ModelShowcase from "../components/ModelShowcase";
 import Promos from "../components/Promos";
+import { seo } from "../utils/seo";
 
 // Define section names for better accessibility and keys
 const sections = [
@@ -110,40 +105,15 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   // Add head metadata for the homepage
   head: () => ({
-    title: "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
     meta: [
-      {
-        name: "description",
-        content:
+      ...seo({
+        title: "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
+        description:
           "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
-      },
-      {
-        name: "keywords",
-        content:
+        keywords:
           "GWM, Great Wall Motors, Haval H6, Haval Jolion, Tank 300, Tank 500, SUV Premium, Mobil Hybrid, Indonesia",
-      },
-      {
-        property: "og:title",
-        content:
-          "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
-      },
-      {
-        property: "og:description",
-        content:
-          "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
-      },
-      {
-        property: "og:image",
-        content: "https://gwm.kopimap.com/hero_image.webp",
-      },
-      {
-        property: "og:url",
-        content: "https://gwm.co.id/",
-      },
-      {
-        property: "og:type",
-        content: "website",
-      },
+        image: "https://gwm.kopimap.com/hero_image.webp",
+      }),
     ],
     links: [
       {
@@ -160,15 +130,6 @@ function HomePage() {
   const totalSections = sections.length;
   const currentRoute = router.state.location.pathname;
   const isHomePage = currentRoute === "/";
-  const prevRoute = useRef(currentRoute);
-
-  // Reset scroll position on route change
-  useEffect(() => {
-    if (prevRoute.current !== currentRoute) {
-      window.scrollTo(0, 0);
-      prevRoute.current = currentRoute;
-    }
-  }, [currentRoute]);
 
   // Handle scroll event for sections - only on home page
   useEffect(() => {

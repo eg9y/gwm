@@ -71,24 +71,24 @@ const ModelShowcase = ({
         )}
 
         {/* <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
-          {primaryButtonText && (
-            <a
-              href={primaryButtonLink}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-primary text-white text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {primaryButtonText}
-            </a>
-          )}
-
-          {secondaryButtonText && (
-            <a
-              href={secondaryButtonLink}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-gray-100 text-secondary text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 border border-gray-200 hover:bg-gray-200 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {secondaryButtonText}
-            </a>
-          )}
-        </div> */}
+            {primaryButtonText && (
+              <a
+                href={primaryButtonLink}
+                className="px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-primary text-white text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0"
+              >
+                {primaryButtonText}
+              </a>
+            )}
+  
+            {secondaryButtonText && (
+              <a
+                href={secondaryButtonLink}
+                className="px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-gray-100 text-secondary text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 border border-gray-200 hover:bg-gray-200 hover:-translate-y-0.5 active:translate-y-0"
+              >
+                {secondaryButtonText}
+              </a>
+            )}
+          </div> */}
       </div>
     </section>
   );
