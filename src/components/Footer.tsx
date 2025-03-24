@@ -42,7 +42,7 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h3 className="text-sm font-medium mb-2 sm:mb-3">Type Mobil</h3>
+            <h3 className="text-sm font-medium mb-2 sm:mb-3">Tipe Mobil</h3>
             <ul className="space-y-1 sm:space-y-2">
               <li>
                 <a

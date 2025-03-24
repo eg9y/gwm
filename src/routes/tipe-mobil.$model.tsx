@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { seo } from "../utils/seo";
+import { ModelColorPicker } from "../components/ModelColorPicker";
 
 // Vehicle data organized by model ID
 const vehiclesById = {
@@ -23,7 +24,34 @@ const vehiclesById = {
       "ADAS Lvl 2",
     ],
     imageUrl: "https://gwm.kopimap.com/tank_300.webp",
-    relatedModels: ["tank-500", "haval-h6", "haval-jolion-ultra"], // related models by ID
+    relatedModels: ["tank-500", "haval-h6", "haval-jolion"], // related models by ID
+    colors: [
+      {
+        id: "dusk_orange",
+        name: "Dusk Orange",
+        hex: "#FF6B00",
+        backgroundColor: "#FFF0E6", // Light orange background
+      },
+      {
+        id: "crystal_black",
+        name: "Crystal Black",
+        hex: "#000000",
+        backgroundColor: "#E6E6E6", // Light gray background for black vehicle
+      },
+      {
+        id: "fossil_grey",
+        name: "Fossil Grey",
+        hex: "#808080",
+        backgroundColor: "#F5F5F5", // Light silver background for grey vehicle
+      },
+      {
+        id: "pearl_white",
+        name: "Pearl White",
+        hex: "#FFFFFF",
+        backgroundColor: "#EBF4FF", // Light blue tint background for white vehicle
+      },
+    ],
+    has180View: true,
   },
   "tank-500": {
     id: "tank-500",
@@ -44,10 +72,18 @@ const vehiclesById = {
       "ADAS Lvl 2",
     ],
     imageUrl: "https://gwm.kopimap.com/tank_500.webp",
-    relatedModels: ["tank-300", "haval-h6", "haval-jolion-ultra"],
+    relatedModels: ["tank-300", "haval-h6", "haval-jolion"],
+    colors: [
+      {
+        id: "onyx_silver",
+        name: "Onyx Silver",
+        hex: "#4D5157",
+        backgroundColor: "#F0F0F0",
+      },
+    ],
   },
-  "haval-jolion-ultra": {
-    id: "haval-jolion-ultra",
+  "haval-jolion": {
+    id: "haval-jolion",
     name: "Haval Jolion Ultra",
     price: "Rp. 418.000.000",
     category: "suv",
@@ -66,6 +102,44 @@ const vehiclesById = {
     ],
     imageUrl: "https://gwm.kopimap.com/haval_jolion.webp",
     relatedModels: ["haval-h6", "tank-300", "tank-500"],
+    colors: [
+      {
+        id: "ayers_grey",
+        name: "Ayers Grey",
+        hex: "#6C6C6C",
+        backgroundColor: "#F5F5F5",
+      },
+      {
+        id: "azure_blue",
+        name: "Azure Blue",
+        hex: "#0077B6",
+        backgroundColor: "#E6F0F5",
+      },
+      {
+        id: "golden_black",
+        name: "Golden Black",
+        hex: "#1A1A1A",
+        backgroundColor: "#E8E8E8",
+      },
+      {
+        id: "hamilton_white",
+        name: "Hamilton White",
+        hex: "#FFFFFF",
+        backgroundColor: "#F0F4F8",
+      },
+      {
+        id: "mars_red",
+        name: "Mars Red",
+        hex: "#D62828",
+        backgroundColor: "#FFF0F0",
+      },
+      {
+        id: "pale_blue",
+        name: "Pale Blue",
+        hex: "#8ECAE6",
+        backgroundColor: "#F0F8FF",
+      },
+    ],
   },
   "haval-h6": {
     id: "haval-h6",
@@ -86,7 +160,21 @@ const vehiclesById = {
       "Smart Connectivity",
     ],
     imageUrl: "https://gwm.kopimap.com/haval_h6.jpg",
-    relatedModels: ["haval-jolion-ultra", "tank-300", "tank-500"],
+    relatedModels: ["haval-jolion", "tank-300", "tank-500"],
+    colors: [
+      {
+        id: "energy_green",
+        name: "Energy Green",
+        hex: "#2A9D8F",
+        backgroundColor: "#E6F5F3",
+      },
+      {
+        id: "sapphire_blue",
+        name: "Sapphire Blue",
+        hex: "#1E3A8A",
+        backgroundColor: "#E6EAF5",
+      },
+    ],
   },
 };
 
@@ -130,9 +218,9 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
     return {
       meta: [
         ...seo({
-          title: `${vehicle.name} - Type Mobil GWM Indonesia | Great Wall Motors`,
+          title: `${vehicle.name} - Tipe Mobil GWM Indonesia | Great Wall Motors`,
           description: `${vehicle.name} - ${vehicle.description} Dapatkan informasi lengkap mengenai spesifikasi, harga, dan fitur ${vehicle.name}.`,
-          keywords: `GWM, Great Wall Motors, ${vehicle.name}, ${vehicle.categoryDisplay}, Type Mobil GWM, ${vehicle.name} Indonesia, ${vehicle.name} Spesifikasi`,
+          keywords: `GWM, Great Wall Motors, ${vehicle.name}, ${vehicle.categoryDisplay}, Tipe Mobil GWM, ${vehicle.name} Indonesia, ${vehicle.name} Spesifikasi`,
           image: vehicle.imageUrl,
         }),
       ],
@@ -239,38 +327,53 @@ function VehicleDetailPage() {
           </div>
         </div>
 
-        {/* Vehicle description */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Tentang {vehicle.name}
-          </h2>
-          <div className="prose prose-lg max-w-none">
-            <p>
-              {vehicle.name} dirancang untuk memenuhi kebutuhan pengguna yang
-              menginginkan kendaraan dengan performa tinggi dan fitur modern.
-              Setiap detail dalam desain dan teknologi dipilih untuk memberikan
-              pengalaman berkendara yang optimal.
-            </p>
-            <p className="mt-4">
-              Dengan {vehicle.features[0].toLowerCase()}, {vehicle.name}{" "}
-              memberikan tenaga dan torsi yang cukup untuk menghadapi berbagai
-              kondisi jalan. Kombinasi dengan{" "}
-              {vehicle.features[1].toLowerCase()} menawarkan perpindahan gigi
-              yang halus dan responsif.
-            </p>
-            <p className="mt-4">
-              Interior {vehicle.name} dirancang dengan mengutamakan kenyamanan
-              dan kemudahan penggunaan. Teknologi-teknologi canggih
-              diintegrasikan untuk meningkatkan keselamatan dan kenyamanan
-              berkendara.
-            </p>
+        {/* Vehicle description and color picker in a side-by-side layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+          {/* Vehicle description */}
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Tentang {vehicle.name}
+            </h2>
+            <div className="prose prose-lg max-w-none">
+              <p>
+                {vehicle.name} dirancang untuk memenuhi kebutuhan pengguna yang
+                menginginkan kendaraan dengan performa tinggi dan fitur modern.
+                Setiap detail dalam desain dan teknologi dipilih untuk
+                memberikan pengalaman berkendara yang optimal.
+              </p>
+              <p className="mt-4">
+                Dengan {vehicle.features[0].toLowerCase()}, {vehicle.name}{" "}
+                memberikan tenaga dan torsi yang cukup untuk menghadapi berbagai
+                kondisi jalan. Kombinasi dengan{" "}
+                {vehicle.features[1].toLowerCase()} menawarkan perpindahan gigi
+                yang halus dan responsif.
+              </p>
+              <p className="mt-4">
+                Interior {vehicle.name} dirancang dengan mengutamakan kenyamanan
+                dan kemudahan penggunaan. Teknologi-teknologi canggih
+                diintegrasikan untuk meningkatkan keselamatan dan kenyamanan
+                berkendara.
+              </p>
+            </div>
+          </div>
+
+          {/* Color picker - only show for models that have color options */}
+          <div>
+            {"colors" in vehicle &&
+              Array.isArray(vehicle.colors) &&
+              vehicle.colors.length > 0 && (
+                <ModelColorPicker
+                  modelId={vehicle.id}
+                  colors={vehicle.colors}
+                />
+              )}
           </div>
         </div>
 
         {/* Related vehicles */}
         <div>
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Type Mobil GWM Lainnya
+            Tipe Mobil GWM Lainnya
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

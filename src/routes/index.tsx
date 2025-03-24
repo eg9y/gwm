@@ -10,7 +10,7 @@ import { seo } from "../utils/seo";
 const sections = [
   { id: "hero", name: "Home" },
   { id: "haval-h6", name: "Haval H6" },
-  { id: "haval-jolion-ultra", name: "Haval Jolion" },
+  { id: "haval-jolion", name: "Haval Jolion" },
   { id: "tank-300", name: "Tank 300" },
   { id: "tank-500", name: "Tank 500" },
   { id: "promos", name: "Promos" },
@@ -75,7 +75,7 @@ const vehicleModels = [
       "ADAS Lvl 2",
       "EV Mode",
     ],
-    learnMoreLink: "/haval-jolion-ultra",
+    learnMoreLink: "/haval-jolion",
     // imageUrl: havalJolionImage,
     imageUrl: "https://gwm.kopimap.com/haval_jolion.webp",
   },
