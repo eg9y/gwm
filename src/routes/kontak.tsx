@@ -70,6 +70,7 @@ function ContactPage() {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -178,55 +179,33 @@ function ContactPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Add Hero Section with darker background */}
+      {/* Hero Section with darker background */}
       <Hero
         desktopImage="https://gwm.kopimap.com/kontak.webp"
         mobileImage="https://gwm.kopimap.com/kontak.webp"
         title="Hubungi Kami"
         tagline="GWM Jakarta"
-        subtitle="Diskusikan kebutuhan mobil Anda dengan tim kami yang siap membantu Anda menemukan kendaraan GWM yang sempurna"
-        overlayOpacity={0.4}
+        subtitle="Diskusikan kebutuhan mobil Anda dengan tim kami yang siap membantu"
+        overlayOpacity={0.6}
         highlightColor="#CF0E0E"
-        imageDarkenAmount={50}
+        imageDarkenAmount={60}
       />
 
-      <main className="py-16 px-4 md:px-8 max-w-7xl mx-auto -mt-16 relative z-10">
-        <section className="mb-16">
-          <h1 className="text-3xl md:text-4xl font-medium text-primary mb-6">
-            Kontak GWM Jakarta
-          </h1>
-          <p className="text-base text-secondary max-w-3xl mb-10 leading-relaxed">
-            GWM, merek otomotif global yang inovatif, resmi hadir di Jakarta
-            dengan membawa semangat baru dalam industri otomotif Indonesia.
-            Dengan desain yang modern, performa tangguh, dan teknologi terkini,
-            GWM siap memenuhi kebutuhan konsumen Indonesia. Dealer Resmi GWM
-            Jakarta hadir untuk memberikan pengalaman berkendara yang tak
-            terlupakan dan menjadi pilihan utama bagi para pecinta otomotif.
-          </p>
+      <main className="py-8 px-4 md:px-6 max-w-7xl mx-auto -mt-20 relative z-10">
+        {/* Split Content - Contact Info and Form Side by Side for desktop */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="md:flex">
+            {/* Left Side - Contact Information */}
+            <div className="md:w-2/5 bg-gradient-to-br from-gray-50 to-white p-6">
+              <h1 className="text-2xl md:text-3xl font-medium text-primary mb-3">
+                Kontak GWM Jakarta
+              </h1>
+              <p className="text-sm text-secondary mb-6">
+                Dealer resmi GWM Jakarta siap membantu kebutuhan mobil Anda
+                dengan layanan terbaik
+              </p>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-gray-50 to-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md">
-              <h2 className="text-xl font-medium text-primary mb-6 flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 mr-2 text-red-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <title>Information Icon</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Informasi Kontak
-              </h2>
-
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="flex items-start">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -250,16 +229,13 @@ function ContactPage() {
                     />
                   </svg>
                   <div>
-                    <h3 className="text-lg font-medium text-primary mb-2">
-                      Lokasi
-                    </h3>
-                    <p className="text-secondary">
+                    <h3 className="text-sm font-medium text-primary">Lokasi</h3>
+                    <p className="text-xs text-secondary">
                       GWM Jakarta – Indonesia
                       <br />
                       Agora Mall Thamrin
                       <br />
-                      Jl. M.H. Thamrin No.10, Kb. Melati, Tanah Abang, Jakarta
-                      Pusat, DKI Jakarta 10230
+                      Jl. M.H. Thamrin No.10, Jakarta Pusat
                     </p>
                   </div>
                 </div>
@@ -281,12 +257,12 @@ function ContactPage() {
                     />
                   </svg>
                   <div>
-                    <h3 className="text-lg font-medium text-primary mb-2">
+                    <h3 className="text-sm font-medium text-primary">
                       Telepon
                     </h3>
                     <a
                       href="tel:+6287774377422"
-                      className="text-secondary hover:text-red-500 transition-colors flex items-center"
+                      className="text-xs text-secondary hover:text-red-500 transition-colors"
                     >
                       0877 7437 7422 (Call/WA)
                     </a>
@@ -310,12 +286,10 @@ function ContactPage() {
                     />
                   </svg>
                   <div>
-                    <h3 className="text-lg font-medium text-primary mb-2">
-                      Email
-                    </h3>
+                    <h3 className="text-sm font-medium text-primary">Email</h3>
                     <a
                       href="mailto:ramarkan.pratama@inchcape.co.id"
-                      className="text-secondary hover:text-red-500 transition-colors"
+                      className="text-xs text-secondary hover:text-red-500 transition-colors"
                     >
                       ramarkan.pratama@inchcape.co.id
                     </a>
@@ -339,52 +313,25 @@ function ContactPage() {
                     />
                   </svg>
                   <div>
-                    <h3 className="text-lg font-medium text-primary mb-2">
+                    <h3 className="text-sm font-medium text-primary">
                       Jam Buka
                     </h3>
-                    <ul className="text-secondary space-y-1">
-                      <li className="flex justify-between">
-                        <span>Senin</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Selasa</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Rabu</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Kamis</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Jumat</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Sabtu</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span>Minggu</span>
-                        <span>9am – 9pm</span>
-                      </li>
-                    </ul>
+                    <p className="text-xs text-secondary">
+                      Setiap hari: 9am – 9pm
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Quick Action Buttons */}
-              <div className="mt-8 space-y-3">
+              <div className="mt-6 space-y-2">
                 <a
                   href="tel:+6287774377422"
-                  className="flex items-center justify-center w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 shadow-sm"
+                  className="flex items-center justify-center w-full py-2 px-3 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-all"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
+                    className="h-4 w-4 mr-2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -399,15 +346,16 @@ function ContactPage() {
                   </svg>
                   Hubungi Sekarang
                 </a>
+
                 <a
                   href="https://wa.me/6287774377422"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center w-full py-3 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all transform hover:-translate-y-0.5 shadow-sm"
+                  className="flex items-center justify-center w-full py-2 px-3 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-all"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
+                    className="h-4 w-4 mr-2"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -416,15 +364,19 @@ function ContactPage() {
                   </svg>
                   Chat WhatsApp
                 </a>
+              </div>
+
+              {/* Map Button - Smaller for Mobile */}
+              <div className="mt-4 md:hidden">
                 <a
                   href="https://www.google.com/maps/dir//AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center w-full py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all transform hover:-translate-y-0.5 shadow-sm"
+                  className="flex items-center justify-center w-full py-2 px-3 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-all"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
+                    className="h-4 w-4 mr-2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -446,37 +398,9 @@ function ContactPage() {
                   Petunjuk Arah
                 </a>
               </div>
-            </div>
 
-            <div className="h-[400px] md:h-auto rounded-xl overflow-hidden shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md">
-              <Suspense
-                fallback={
-                  <div className="w-full h-full bg-gray-100 animate-pulse flex items-center justify-center">
-                    <svg
-                      className="animate-spin h-8 w-8 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <title>Loading Spinner</title>
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                  </div>
-                }
-              >
+              {/* Small Map for desktop */}
+              <div className="hidden md:block mt-6 h-32 rounded-lg overflow-hidden">
                 <iframe
                   src="https://www.google.com/maps/embed/v1/place?q=AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
                   width="100%"
@@ -486,447 +410,614 @@ function ContactPage() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   title="GWM Jakarta Location"
-                  className="w-full h-full min-h-[400px]"
+                  className="w-full h-full"
                 />
-              </Suspense>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-medium text-primary mb-4">
-              Formulir Kontak
-            </h2>
-            <p className="text-secondary max-w-xl mx-auto">
-              Tertarik dengan mobil GWM? Isi formulir di bawah ini dan kami akan
-              segera menghubungi Anda untuk mengatur test drive atau memberikan
-              informasi lebih lanjut.
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-gray-50 to-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md">
-            {/* Form Benefits */}
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-8 rounded-r-lg">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <title>Benefits Icon</title>
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    Dapatkan keuntungan eksklusif:
-                  </h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Jadwal test drive prioritas</li>
-                      <li>Konsultasi harga dan pembiayaan khusus</li>
-                      <li>Info promo terbaru langsung ke email Anda</li>
-                      <li>Penawaran khusus untuk pemesanan melalui website</li>
-                    </ul>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <form
-              className="grid md:grid-cols-2 gap-6"
-              onSubmit={handleSubmit(onSubmit)}
-            >
-              <div className="space-y-2">
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium text-primary"
-                >
-                  Nama Lengkap <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="h-5 w-5 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>User Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    id="fullName"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors ${
-                      errors.fullName
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    placeholder="Masukkan nama lengkap"
-                    {...register("fullName")}
-                  />
-                </div>
-                {errors.fullName && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center">
-                    <svg
-                      className="h-3 w-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <title>Form Error Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {errors.fullName.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-primary"
-                >
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="h-5 w-5 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Email Icon</title>
-                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="email"
-                    id="email"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors ${
-                      errors.email
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    placeholder="Masukkan alamat email"
-                    {...register("email")}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center">
-                    <svg
-                      className="h-3 w-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <title>Form Error Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="phoneNumber"
-                  className="block text-sm font-medium text-primary"
-                >
-                  Nomor Telepon <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="h-5 w-5 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Phone Icon</title>
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.948.684l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors ${
-                      errors.phoneNumber
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    placeholder="Masukkan nomor telepon"
-                    {...register("phoneNumber")}
-                  />
-                </div>
-                {errors.phoneNumber && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center">
-                    <svg
-                      className="h-3 w-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <title>Form Error Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {errors.phoneNumber.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="location"
-                  className="block text-sm font-medium text-primary"
-                >
-                  Tempat Tinggal <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="h-5 w-5 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Location Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <select
-                    id="location"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors ${
-                      errors.location
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    {...register("location")}
-                  >
-                    <option value="">Pilih kota</option>
-                    <option value="Jakarta">Jakarta</option>
-                    <option value="Surabaya">Surabaya</option>
-                    <option value="Bandung">Bandung</option>
-                    <option value="Bali">Bali</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                    <svg
-                      className="w-5 h-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Dropdown Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {errors.location && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center">
-                    <svg
-                      className="h-3 w-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <title>Form Error Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {errors.location.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <label
-                  htmlFor="carModelInterest"
-                  className="block text-sm font-medium text-primary"
-                >
-                  Minat Unit <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="h-5 w-5 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Car Icon</title>
-                      <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                      <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-1h3a1 1 0 001-1v-3a1 1 0 00-.7-.7l-3.3-1.1V7h1a1 1 0 001-1V5a1 1 0 00-1-1H3zM2 5a2 2 0 012-2h9a2 2 0 012 2v1a2 2 0 01-2 2h-1v1.38l3.3 1.1A2 2 0 0116 10.5v3a2 2 0 01-2 2h-3v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
-                    </svg>
-                  </div>
-                  <select
-                    id="carModelInterest"
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors ${
-                      errors.carModelInterest
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    {...register("carModelInterest")}
-                  >
-                    <option value="">Pilih model</option>
-                    <option value="Haval">Haval</option>
-                    <option value="Tank">Tank</option>
-                    <option value="Ora">Ora</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                    <svg
-                      className="w-5 h-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Dropdown Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {errors.carModelInterest && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center">
-                    <svg
-                      className="h-3 w-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <title>Form Error Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {errors.carModelInterest.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="md:col-span-2 mt-4">
-                {/* reCAPTCHA */}
-                <div className="mb-6 flex justify-center">
-                  <div
-                    className="g-recaptcha"
-                    data-sitekey="6LcVRf0qAAAAADuDcfd1Stg2VyLc88m_WkqqMXup"
-                    data-callback="onRecaptchaSuccess"
-                  />
-                </div>
-                {errors.recaptchaToken && (
-                  <p className="text-red-500 text-xs mt-1 flex items-center justify-center mb-4">
-                    <svg
-                      className="h-3 w-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <title>Form Error Icon</title>
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {errors.recaptchaToken.message}
-                  </p>
-                )}
-
-                {/* Privacy note */}
-                <p className="text-xs text-gray-500 mb-4">
-                  Dengan mengirimkan formulir ini, Anda menyetujui bahwa data
-                  Anda akan diproses sesuai dengan kebijakan privasi kami. Kami
-                  tidak akan membagikan informasi Anda kepada pihak ketiga tanpa
-                  persetujuan Anda.
+            {/* Right Side - Contact Form */}
+            <div className="md:w-3/5 p-6">
+              <div className="mb-4">
+                <h2 className="text-xl font-medium text-primary">
+                  Hubungi Kami
+                </h2>
+                <p className="text-sm text-secondary">
+                  Isi formulir di bawah ini untuk mendapatkan informasi atau
+                  jadwalkan test drive
                 </p>
-                <button
-                  type="submit"
-                  className="px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/30 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform transition-transform hover:-translate-y-0.5 active:translate-y-0 w-full text-lg font-medium"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center">
+              </div>
+
+              {/* Form Benefits - Compact Version */}
+              <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4 rounded-r-lg">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-4 w-4 text-red-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <title>Benefits Icon</title>
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-2">
+                    <h3 className="text-xs font-medium text-red-800">
+                      Dapatkan keuntungan eksklusif
+                    </h3>
+                    <div className="text-xs text-red-700 grid grid-cols-2 gap-x-2 gap-y-1 mt-1">
+                      <span>• Test drive prioritas</span>
+                      <span>• Konsultasi harga khusus</span>
+                      <span>• Info promo terbaru</span>
+                      <span>• Penawaran khusus</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <form
+                className="grid grid-cols-1 gap-4"
+                onSubmit={handleSubmit(onSubmit)}
+              >
+                {/* Two column layout for desktop */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="fullName"
+                      className="block text-xs font-medium text-primary"
+                    >
+                      Nama Lengkap <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <svg
+                          className="h-4 w-4 text-gray-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <title>User Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        id="fullName"
+                        className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors ${
+                          errors.fullName
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-300"
+                        }`}
+                        placeholder="Masukkan nama lengkap"
+                        {...register("fullName")}
+                      />
+                    </div>
+                    {errors.fullName && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <title>Form Error Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {errors.fullName.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="email"
+                      className="block text-xs font-medium text-primary"
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <svg
+                          className="h-4 w-4 text-gray-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <title>Email Icon</title>
+                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="email"
+                        id="email"
+                        className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors ${
+                          errors.email
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-300"
+                        }`}
+                        placeholder="Masukkan alamat email"
+                        {...register("email")}
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <title>Form Error Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="phoneNumber"
+                      className="block text-xs font-medium text-primary"
+                    >
+                      Nomor Telepon <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <svg
+                          className="h-4 w-4 text-gray-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <title>Phone Icon</title>
+                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.948.684l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="tel"
+                        id="phoneNumber"
+                        className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors ${
+                          errors.phoneNumber
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-300"
+                        }`}
+                        placeholder="Masukkan nomor telepon"
+                        {...register("phoneNumber")}
+                      />
+                    </div>
+                    {errors.phoneNumber && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <title>Form Error Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {errors.phoneNumber.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="location"
+                      className="block text-xs font-medium text-primary"
+                    >
+                      Tempat Tinggal <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <svg
+                          className="h-4 w-4 text-gray-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <title>Location Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <select
+                        id="location"
+                        className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg appearance-none bg-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors ${
+                          errors.location
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-300"
+                        }`}
+                        {...register("location")}
+                      >
+                        <option value="">Pilih kota</option>
+                        <option value="Jakarta">Jakarta</option>
+                        <option value="Surabaya">Surabaya</option>
+                        <option value="Bandung">Bandung</option>
+                        <option value="Bali">Bali</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg
+                          className="w-4 h-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <title>Dropdown Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    {errors.location && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <title>Form Error Icon</title>
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {errors.location.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="carModelInterest"
+                    className="block text-xs font-medium text-primary mb-1"
+                  >
+                    Model Mobil yang Diminati *
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {/* Tank 300 */}
+                    <button
+                      type="button"
+                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
+                        watch("carModelInterest") === "Tank 300"
+                          ? "border-red-500 ring-2 ring-red-500/20"
+                          : "border-gray-200 hover:border-red-500/50"
+                      }`}
+                      onClick={() =>
+                        setValue("carModelInterest", "Tank 300", {
+                          shouldValidate: true,
+                        })
+                      }
+                      aria-pressed={watch("carModelInterest") === "Tank 300"}
+                      aria-label="Select Tank 300 model"
+                    >
+                      <div className="aspect-[4/3] relative">
+                        <img
+                          src="https://gwm.kopimap.com/navbar/tank_300_nav_shot.png"
+                          alt="Tank 300"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <div
+                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
+                          watch("carModelInterest") === "Tank 300"
+                            ? "bg-red-500 text-white"
+                            : "bg-white text-primary"
+                        }`}
+                      >
+                        Tank 300
+                      </div>
+                      {watch("carModelInterest") === "Tank 300" && (
+                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3 text-white"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <title>Selected Model</title>
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Tank 500 */}
+                    <button
+                      type="button"
+                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
+                        watch("carModelInterest") === "Tank 500"
+                          ? "border-red-500 ring-2 ring-red-500/20"
+                          : "border-gray-200 hover:border-red-500/50"
+                      }`}
+                      onClick={() =>
+                        setValue("carModelInterest", "Tank 500", {
+                          shouldValidate: true,
+                        })
+                      }
+                      aria-pressed={watch("carModelInterest") === "Tank 500"}
+                      aria-label="Select Tank 500 model"
+                    >
+                      <div className="aspect-[4/3] relative">
+                        <img
+                          src="https://gwm.kopimap.com/navbar/tank_500_nav_shot.png"
+                          alt="Tank 500"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <div
+                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
+                          watch("carModelInterest") === "Tank 500"
+                            ? "bg-red-500 text-white"
+                            : "bg-white text-primary"
+                        }`}
+                      >
+                        Tank 500
+                      </div>
+                      {watch("carModelInterest") === "Tank 500" && (
+                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3 text-white"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <title>Selected Model</title>
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Haval Jolion */}
+                    <button
+                      type="button"
+                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
+                        watch("carModelInterest") === "Haval Jolion"
+                          ? "border-red-500 ring-2 ring-red-500/20"
+                          : "border-gray-200 hover:border-red-500/50"
+                      }`}
+                      onClick={() =>
+                        setValue("carModelInterest", "Haval Jolion", {
+                          shouldValidate: true,
+                        })
+                      }
+                      aria-pressed={
+                        watch("carModelInterest") === "Haval Jolion"
+                      }
+                      aria-label="Select Haval Jolion model"
+                    >
+                      <div className="aspect-[4/3] relative">
+                        <img
+                          src="https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png"
+                          alt="Haval Jolion"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <div
+                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
+                          watch("carModelInterest") === "Haval Jolion"
+                            ? "bg-red-500 text-white"
+                            : "bg-white text-primary"
+                        }`}
+                      >
+                        Haval Jolion
+                      </div>
+                      {watch("carModelInterest") === "Haval Jolion" && (
+                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3 text-white"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <title>Selected Model</title>
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Haval H6 */}
+                    <button
+                      type="button"
+                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
+                        watch("carModelInterest") === "Haval H6"
+                          ? "border-red-500 ring-2 ring-red-500/20"
+                          : "border-gray-200 hover:border-red-500/50"
+                      }`}
+                      onClick={() =>
+                        setValue("carModelInterest", "Haval H6", {
+                          shouldValidate: true,
+                        })
+                      }
+                      aria-pressed={watch("carModelInterest") === "Haval H6"}
+                      aria-label="Select Haval H6 model"
+                    >
+                      <div className="aspect-[4/3] relative">
+                        <img
+                          src="https://gwm.kopimap.com/navbar/haval_h6_nav_shot.png"
+                          alt="Haval H6"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <div
+                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
+                          watch("carModelInterest") === "Haval H6"
+                            ? "bg-red-500 text-white"
+                            : "bg-white text-primary"
+                        }`}
+                      >
+                        Haval H6
+                      </div>
+                      {watch("carModelInterest") === "Haval H6" && (
+                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3 text-white"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <title>Selected Model</title>
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Hidden input for form submission */}
+                  <input
+                    type="hidden"
+                    id="carModelInterest"
+                    {...register("carModelInterest")}
+                  />
+
+                  {errors.carModelInterest && (
+                    <p className="text-red-500 text-xs mt-1 flex items-center">
                       <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                        className="h-3 w-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
                         aria-hidden="true"
                       >
-                        <title>Button Loading Spinner</title>
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
+                        <title>Form Error Icon</title>
                         <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
                         />
                       </svg>
-                      Mengirim...
-                    </span>
-                  ) : (
-                    <>
+                      {errors.carModelInterest.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-1">
+                  {/* reCAPTCHA */}
+                  <div className="mb-2 flex justify-center">
+                    <div
+                      className="g-recaptcha"
+                      data-sitekey="6LcVRf0qAAAAADuDcfd1Stg2VyLc88m_WkqqMXup"
+                      data-callback="onRecaptchaSuccess"
+                      data-size="compact"
+                    />
+                  </div>
+                  {errors.recaptchaToken && (
+                    <p className="text-red-500 text-xs mt-1 flex items-center justify-center mb-2">
+                      <svg
+                        className="h-3 w-3 mr-1"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <title>Form Error Icon</title>
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {errors.recaptchaToken.message}
+                    </p>
+                  )}
+
+                  {/* Privacy note */}
+                  <p className="text-xs text-gray-500 mb-3">
+                    Dengan mengirimkan formulir ini, Anda menyetujui bahwa data
+                    Anda akan diproses sesuai dengan kebijakan privasi kami.
+                  </p>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/30 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg w-full text-sm font-medium flex items-center justify-center"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <title>Button Loading Spinner</title>
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        Mengirim...
+                      </span>
+                    ) : (
                       <span className="flex items-center justify-center">
                         Kirim Permintaan
                         <svg
-                          className="ml-2 h-5 w-5"
+                          className="ml-2 h-4 w-4"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -940,73 +1031,73 @@ function ContactPage() {
                           />
                         </svg>
                       </span>
-                    </>
-                  )}
-                </button>
+                    )}
+                  </button>
 
-                {/* Notification area with ref for scrolling */}
-                <div ref={notificationRef} className="mt-4 scroll-mt-6">
-                  {formStatus.success ? (
-                    <div className="bg-green-50 border border-green-400 text-green-700 px-4 py-5 rounded-lg animate-notification shadow-md">
-                      <div className="flex items-center">
-                        <svg
-                          className="h-6 w-6 text-green-500 mr-3"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                        >
-                          <title>Success Icon</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <p className="font-medium text-base">
-                          {formStatus.message}
-                        </p>
+                  {/* Notification area with ref for scrolling */}
+                  <div ref={notificationRef} className="mt-3 scroll-mt-6">
+                    {formStatus.success ? (
+                      <div className="bg-green-50 border border-green-400 text-green-700 px-3 py-2 text-sm rounded-lg animate-notification shadow-md">
+                        <div className="flex items-center">
+                          <svg
+                            className="h-4 w-4 text-green-500 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            aria-hidden="true"
+                          >
+                            <title>Success Icon</title>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          <p className="font-medium text-sm">
+                            {formStatus.message}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ) : formStatus.message ? (
-                    <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-5 rounded-lg animate-notification shadow-md">
-                      <div className="flex items-center">
-                        <svg
-                          className="h-6 w-6 text-red-500 mr-3"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                        >
-                          <title>Error Icon</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                          />
-                        </svg>
-                        <p className="font-medium text-base">
-                          {formStatus.message}
-                        </p>
+                    ) : formStatus.message ? (
+                      <div className="bg-red-50 border border-red-400 text-red-700 px-3 py-2 text-sm rounded-lg animate-notification shadow-md">
+                        <div className="flex items-center">
+                          <svg
+                            className="h-4 w-4 text-red-500 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            aria-hidden="true"
+                          >
+                            <title>Error Icon</title>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                          </svg>
+                          <p className="font-medium text-sm">
+                            {formStatus.message}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </section>
+        </div>
 
         {/* Add animated trust indicators */}
-        <section className="mt-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-              <div className="text-red-500 mx-auto mb-3">
+        <section className="mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+              <div className="text-red-500 mx-auto mb-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 mx-auto"
+                  className="h-8 w-8 mx-auto"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1021,16 +1112,18 @@ function ContactPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-medium text-primary">Kualitas Premium</h3>
+              <h3 className="font-medium text-sm text-primary">
+                Kualitas Premium
+              </h3>
               <p className="text-xs text-secondary mt-1">
-                Teknologi dan kualitas terbaik untuk pengalaman berkendara
+                Teknologi dan kualitas terbaik
               </p>
             </div>
-            <div className="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-              <div className="text-red-500 mx-auto mb-3">
+            <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+              <div className="text-red-500 mx-auto mb-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 mx-auto"
+                  className="h-8 w-8 mx-auto"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1045,16 +1138,18 @@ function ContactPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-medium text-primary">Layanan Prima</h3>
+              <h3 className="font-medium text-sm text-primary">
+                Layanan Prima
+              </h3>
               <p className="text-xs text-secondary mt-1">
-                Tim profesional kami siap memberikan pelayanan terbaik
+                Tim profesional siap membantu
               </p>
             </div>
-            <div className="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-              <div className="text-red-500 mx-auto mb-3">
+            <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+              <div className="text-red-500 mx-auto mb-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 mx-auto"
+                  className="h-8 w-8 mx-auto"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1069,16 +1164,18 @@ function ContactPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-medium text-primary">Garansi Panjang</h3>
+              <h3 className="font-medium text-sm text-primary">
+                Garansi Panjang
+              </h3>
               <p className="text-xs text-secondary mt-1">
-                Perlindungan kendaraan dengan garansi pabrik hingga 5 tahun
+                Garansi pabrik hingga 5 tahun
               </p>
             </div>
-            <div className="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-              <div className="text-red-500 mx-auto mb-3">
+            <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+              <div className="text-red-500 mx-auto mb-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 mx-auto"
+                  className="h-8 w-8 mx-auto"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1093,41 +1190,42 @@ function ContactPage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-medium text-primary">Layanan 24/7</h3>
+              <h3 className="font-medium text-sm text-primary">Layanan 24/7</h3>
               <p className="text-xs text-secondary mt-1">
-                Dukungan purna jual dan bantuan darurat 24 jam sehari
+                Dukungan darurat 24 jam sehari
               </p>
             </div>
           </div>
         </section>
 
-        {/* Customer Testimonials Section */}
-        <section className="mt-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-medium text-primary mb-4">
+        {/* Customer Testimonials Section - Compact horizontal scroll for mobile */}
+        <section className="mt-8">
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-medium text-primary mb-2">
               Apa Kata Pelanggan Kami
             </h2>
-            <p className="text-secondary max-w-xl mx-auto">
-              Lihat pengalaman pelanggan yang telah membeli dan menggunakan
-              kendaraan GWM
+            <p className="text-sm text-secondary">
+              Pengalaman pelanggan yang telah membeli kendaraan GWM
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="flex overflow-x-auto pb-2 space-x-4 md:grid md:grid-cols-3 md:gap-4 md:space-x-0">
             {/* Testimonial 1 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl mr-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md flex-shrink-0 w-[280px] md:w-auto">
+              <div className="flex items-center mb-3">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg mr-3">
                   AB
                 </div>
                 <div>
-                  <h4 className="font-medium text-primary">Andi Budiman</h4>
+                  <h4 className="font-medium text-sm text-primary">
+                    Andi Budiman
+                  </h4>
                   <p className="text-xs text-secondary">Pemilik GWM Haval</p>
                 </div>
               </div>
-              <div className="flex text-yellow-400 mb-3">
+              <div className="flex text-yellow-400 mb-2">
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1135,7 +1233,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1143,7 +1241,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1151,7 +1249,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1159,7 +1257,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1167,27 +1265,28 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <p className="text-secondary italic">
-                "Saya sangat puas dengan Haval saya. Fitur keselamatan dan
-                kenyamanannya luar biasa, dan konsumsi bahan bakarnya juga
-                hemat. Layanan purna jual GWM juga sangat membantu."
+              <p className="text-secondary text-xs italic">
+                "Fitur keselamatan dan kenyamanan Haval luar biasa, dan konsumsi
+                bahan bakarnya juga hemat."
               </p>
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl mr-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md flex-shrink-0 w-[280px] md:w-auto">
+              <div className="flex items-center mb-3">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg mr-3">
                   RS
                 </div>
                 <div>
-                  <h4 className="font-medium text-primary">Ratna Sari</h4>
+                  <h4 className="font-medium text-sm text-primary">
+                    Ratna Sari
+                  </h4>
                   <p className="text-xs text-secondary">Pemilik GWM Tank</p>
                 </div>
               </div>
-              <div className="flex text-yellow-400 mb-3">
+              <div className="flex text-yellow-400 mb-2">
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1195,7 +1294,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1203,7 +1302,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1211,7 +1310,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1219,7 +1318,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1227,28 +1326,28 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <p className="text-secondary italic">
-                "Tank 300 adalah SUV yang tangguh namun tetap nyaman. Saya
-                sering menggunakannya untuk bepergian ke luar kota dan
-                performanya tidak pernah mengecewakan. Tim sales GWM juga sangat
-                informatif."
+              <p className="text-secondary text-xs italic">
+                "Tank 300 adalah SUV yang tangguh namun tetap nyaman.
+                Performanya tidak pernah mengecewakan."
               </p>
             </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl mr-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 transform transition-all duration-300 hover:shadow-md flex-shrink-0 w-[280px] md:w-auto">
+              <div className="flex items-center mb-3">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg mr-3">
                   DW
                 </div>
                 <div>
-                  <h4 className="font-medium text-primary">Denny Wijaya</h4>
+                  <h4 className="font-medium text-sm text-primary">
+                    Denny Wijaya
+                  </h4>
                   <p className="text-xs text-secondary">Pemilik GWM Ora</p>
                 </div>
               </div>
-              <div className="flex text-yellow-400 mb-3">
+              <div className="flex text-yellow-400 mb-2">
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1256,7 +1355,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1264,7 +1363,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1272,7 +1371,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1280,7 +1379,7 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -1288,25 +1387,24 @@ function ContactPage() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <p className="text-secondary italic">
-                "Mobil listrik Ora sangat menghemat biaya operasional saya.
-                Pengisian daya cepat dan jangkauan baterai yang luar biasa.
-                Pilihan terbaik untuk mobilitas ramah lingkungan di kota."
+              <p className="text-secondary text-xs italic">
+                "Mobil listrik Ora sangat menghemat biaya operasional. Pilihan
+                terbaik untuk mobilitas ramah lingkungan."
               </p>
             </div>
           </div>
 
           {/* CTA Button */}
-          <div className="text-center mt-8">
+          <div className="text-center mt-6">
             <a
               href="https://wa.me/6287774377422?text=Halo,%20saya%20tertarik%20dengan%20mobil%20GWM.%20Bisa%20bantu%20informasi%20lebih%20lanjut?"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-3 bg-red-600 text-white font-medium rounded-lg shadow-md hover:bg-red-700 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/30"
+              className="inline-flex items-center justify-center px-5 py-2 bg-red-600 text-white text-sm font-medium rounded-lg shadow-md hover:bg-red-700 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/30"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
+                className="h-4 w-4 mr-2"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -1334,6 +1432,16 @@ function ContactPage() {
         }
         .animate-notification {
           animation: fadeIn 0.5s ease-in-out forwards, pulse 2s ease-in-out 0.5s;
+        }
+        
+        /* Add horizontal scroll mask */
+        .overflow-x-auto {
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+        .overflow-x-auto::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
 
