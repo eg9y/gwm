@@ -33,6 +33,8 @@ export function ModelColorPicker({
 
   // Refs
   const preloadImageRef = useRef<Record<string, HTMLImageElement>>({});
+  const loadingTimeoutRef = useRef<number | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // Format model ID (replace hyphens with underscores)
   const formattedModelId = modelId.replace(/-/g, "_");
@@ -44,6 +46,50 @@ export function ModelColorPicker({
   const selectedColorHex = selectedColorData?.hex || "#FFFFFF";
   const selectedBackgroundColor =
     selectedColorData?.backgroundColor || "#F5F5F5";
+
+  // Check if the image is already cached by the browser on initial load
+  useEffect(() => {
+    // Function to check if image is already cached
+    const checkInitialImageCache = () => {
+      if (selectedColor) {
+        const initialImageUrl = `${baseUrl}/${formattedModelId}/${selectedColor}.webp`;
+        const img = new Image();
+
+        img.onload = () => {
+          // If image loads immediately (from cache), update states
+          setIsLoading(false);
+          setPreloadedImages((prev) => ({
+            ...prev,
+            [selectedColor]: true,
+          }));
+        };
+
+        img.src = initialImageUrl;
+
+        // If the image is complete already, it was cached
+        if (img.complete) {
+          setIsLoading(false);
+          setPreloadedImages((prev) => ({
+            ...prev,
+            [selectedColor]: true,
+          }));
+        }
+      }
+    };
+
+    checkInitialImageCache();
+
+    // Safety timeout to prevent infinite loading state
+    loadingTimeoutRef.current = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 5000) as unknown as number;
+
+    return () => {
+      if (loadingTimeoutRef.current !== null) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [baseUrl, formattedModelId, selectedColor]);
 
   // Reset selectedColor when colors change
   useEffect(() => {
@@ -61,13 +107,28 @@ export function ModelColorPicker({
   // Reset loading state when color changes
   useEffect(() => {
     if (selectedColor) {
-      // Only set loading state if the image hasn't been preloaded
       if (preloadedImages[selectedColor]) {
         // If preloaded, we can skip the loading state
         setIsLoading(false);
       } else {
         setIsLoading(true);
         setImageError(false);
+
+        // Safety timeout to prevent infinite loading state
+        if (loadingTimeoutRef.current !== null) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+
+        loadingTimeoutRef.current = window.setTimeout(() => {
+          // Check if image is already loaded but event wasn't captured
+          if (imgRef.current?.complete && imgRef.current.naturalWidth !== 0) {
+            setIsLoading(false);
+            setPreloadedImages((prev) => ({
+              ...prev,
+              [selectedColor]: true,
+            }));
+          }
+        }, 1000) as unknown as number;
       }
     }
   }, [selectedColor, preloadedImages]);
@@ -232,7 +293,7 @@ export function ModelColorPicker({
 
       {/* Image container */}
       <div
-        className="relative rounded-lg overflow-hidden h-[250px] sm:h-[300px] md:h-[350px] shadow-inner border border-gray-200"
+        className="relative rounded-lg overflow-hidden shadow-inner border border-gray-200"
         style={{ backgroundColor: selectedBackgroundColor }}
       >
         {/* Loading indicator */}
@@ -255,6 +316,7 @@ export function ModelColorPicker({
 
         {/* The vehicle image */}
         <img
+          ref={imgRef}
           src={imageUrl}
           alt={`${modelId.replace(/-/g, " ")} warna ${
             selectedColorData?.name || selectedColor
@@ -263,6 +325,11 @@ export function ModelColorPicker({
           style={{ opacity: isLoading || imageError ? 0 : 1 }}
           onLoad={() => {
             setIsLoading(false);
+            // Clear any pending timeout
+            if (loadingTimeoutRef.current !== null) {
+              clearTimeout(loadingTimeoutRef.current);
+              loadingTimeoutRef.current = null;
+            }
             // Mark this color as preloaded
             setPreloadedImages((prev) => ({
               ...prev,
@@ -277,6 +344,11 @@ export function ModelColorPicker({
           onError={() => {
             setIsLoading(false);
             setImageError(true);
+            // Clear any pending timeout
+            if (loadingTimeoutRef.current !== null) {
+              clearTimeout(loadingTimeoutRef.current);
+              loadingTimeoutRef.current = null;
+            }
             // Mark this color as failed
             setPreloadedImages((prev) => ({
               ...prev,
