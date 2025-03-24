@@ -22,7 +22,7 @@ const vehicleModels = [
     image: "https://gwm.kopimap.com/navbar/tank_500_nav_shot.png",
   },
   {
-    id: "haval-jolion-ultra",
+    id: "haval-jolion",
     name: "Haval Jolion Ultra",
     category: "SUV",
     image: "https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png",

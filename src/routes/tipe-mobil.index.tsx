@@ -6,10 +6,10 @@ function TipeMobilPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-            Type Mobil GWM
+            Tipe Mobil GWM
           </h1>
           <p className="mt-3 text-xl text-gray-500">
-            Temukan berbagai type mobil GWM yang sesuai dengan kebutuhan Anda
+            Temukan berbagai tipe mobil GWM yang sesuai dengan kebutuhan Anda
           </p>
         </div>
 
@@ -81,7 +81,7 @@ function TipeMobilPage() {
               </p>
               <Link
                 to="/tipe-mobil/$model"
-                params={{ model: "haval-jolion-ultra" }}
+                params={{ model: "haval-jolion" }}
                 className="mt-3 inline-block text-primary font-medium"
               >
                 Lihat Detail
@@ -125,12 +125,12 @@ export const Route = createFileRoute("/tipe-mobil/")({
     meta: [
       {
         title:
-          "Type Mobil GWM Indonesia - Tank, Haval, ORA | Great Wall Motors",
+          "Tipe Mobil GWM Indonesia - Tank, Haval, ORA | Great Wall Motors",
       },
       {
         name: "description",
         content:
-          "Temukan berbagai type mobil GWM Indonesia - Tank 300, Tank 500, Haval H6, Haval Jolion, dan lainnya. Pilih kendaraan yang sesuai dengan gaya hidup dan kebutuhan Anda.",
+          "Temukan berbagai tipe mobil GWM Indonesia - Tank 300, Tank 500, Haval H6, Haval Jolion, dan lainnya. Pilih kendaraan yang sesuai dengan gaya hidup dan kebutuhan Anda.",
       },
     ],
   }),
