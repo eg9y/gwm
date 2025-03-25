@@ -26,6 +26,7 @@ import { Route as AdminIndexImport } from './routes/admin.index'
 import { Route as TipeMobilModelImport } from './routes/tipe-mobil.$model'
 import { Route as InfoPromoSlugImport } from './routes/info-promo.$slug'
 import { Route as AdminKontakImport } from './routes/admin.kontak'
+import { Route as AdminContactInfoImport } from './routes/admin.contact-info'
 import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
 import { Route as AdminArticlesRouteImport } from './routes/admin.articles.route'
 import { Route as AdminArticlesIndexImport } from './routes/admin.articles.index'
@@ -122,6 +123,12 @@ const InfoPromoSlugRoute = InfoPromoSlugImport.update({
 const AdminKontakRoute = AdminKontakImport.update({
   id: '/kontak',
   path: '/kontak',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+const AdminContactInfoRoute = AdminContactInfoImport.update({
+  id: '/contact-info',
+  path: '/contact-info',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 
@@ -251,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathlessLayoutNestedLayoutImport
       parentRoute: typeof PathlessLayoutImport
     }
+    '/admin/contact-info': {
+      id: '/admin/contact-info'
+      path: '/contact-info'
+      fullPath: '/admin/contact-info'
+      preLoaderRoute: typeof AdminContactInfoImport
+      parentRoute: typeof AdminRouteImport
+    }
     '/admin/kontak': {
       id: '/admin/kontak'
       path: '/kontak'
@@ -350,12 +364,14 @@ const AdminArticlesRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminArticlesRouteRoute: typeof AdminArticlesRouteRouteWithChildren
+  AdminContactInfoRoute: typeof AdminContactInfoRoute
   AdminKontakRoute: typeof AdminKontakRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminArticlesRouteRoute: AdminArticlesRouteRouteWithChildren,
+  AdminContactInfoRoute: AdminContactInfoRoute,
   AdminKontakRoute: AdminKontakRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -419,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
+  '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/kontak': typeof AdminKontakRoute
   '/info-promo/$slug': typeof InfoPromoSlugRoute
   '/tipe-mobil/$model': typeof TipeMobilModelRoute
@@ -440,6 +457,7 @@ export interface FileRoutesByTo {
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/kontak': typeof AdminKontakRoute
   '/info-promo/$slug': typeof InfoPromoSlugRoute
   '/tipe-mobil/$model': typeof TipeMobilModelRoute
@@ -466,6 +484,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/kontak': typeof AdminKontakRoute
   '/info-promo/$slug': typeof InfoPromoSlugRoute
   '/tipe-mobil/$model': typeof TipeMobilModelRoute
@@ -492,6 +511,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/admin/articles'
+    | '/admin/contact-info'
     | '/admin/kontak'
     | '/info-promo/$slug'
     | '/tipe-mobil/$model'
@@ -512,6 +532,7 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
+    | '/admin/contact-info'
     | '/admin/kontak'
     | '/info-promo/$slug'
     | '/tipe-mobil/$model'
@@ -536,6 +557,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin/articles'
     | '/_pathlessLayout/_nested-layout'
+    | '/admin/contact-info'
     | '/admin/kontak'
     | '/info-promo/$slug'
     | '/tipe-mobil/$model'
@@ -608,6 +630,7 @@ export const routeTree = rootRoute
       "filePath": "admin.route.tsx",
       "children": [
         "/admin/articles",
+        "/admin/contact-info",
         "/admin/kontak",
         "/admin/"
       ]
@@ -656,6 +679,10 @@ export const routeTree = rootRoute
         "/_pathlessLayout/_nested-layout/route-a",
         "/_pathlessLayout/_nested-layout/route-b"
       ]
+    },
+    "/admin/contact-info": {
+      "filePath": "admin.contact-info.tsx",
+      "parent": "/admin"
     },
     "/admin/kontak": {
       "filePath": "admin.kontak.tsx",

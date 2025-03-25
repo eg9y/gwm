@@ -28,3 +28,7 @@ export type NewContactSubmission =
 // Type for articles
 export type Article = typeof schema.articles.$inferSelect;
 export type NewArticle = typeof schema.articles.$inferInsert;
+
+// Type for contact info
+export type ContactInfo = typeof schema.contactInfo.$inferSelect;
+export type NewContactInfo = typeof schema.contactInfo.$inferInsert;
