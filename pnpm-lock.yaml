@@ -44,6 +44,9 @@ dependencies:
   '@tiptap/extension-text-align':
     specifier: ^2.11.5
     version: 2.11.5(@tiptap/core@2.11.5)
+  '@tiptap/extension-youtube':
+    specifier: ^2.11.5
+    version: 2.11.5(@tiptap/core@2.11.5)
   '@tiptap/pm':
     specifier: ^2.11.5
     version: 2.11.5
@@ -4435,6 +4438,14 @@ packages:
 
   /@tiptap/extension-text@2.11.5(@tiptap/core@2.11.5):
     resolution: {integrity: sha512-Gq1WwyhFpCbEDrLPIHt5A8aLSlf8bfz4jm417c8F/JyU0J5dtYdmx0RAxjnLw1i7ZHE7LRyqqAoS0sl7JHDNSQ==}
+    peerDependencies:
+      '@tiptap/core': ^2.7.0
+    dependencies:
+      '@tiptap/core': 2.11.5(@tiptap/pm@2.11.5)
+    dev: false
+
+  /@tiptap/extension-youtube@2.11.5(@tiptap/core@2.11.5):
+    resolution: {integrity: sha512-9XEH/zx/FlL/liJsncstcze98C73iupCbWlhAfC8+9O0wDmHEwaFyLSj+5LDqozWwzFnJmFOy7uZXfOY90kWGg==}
     peerDependencies:
       '@tiptap/core': ^2.7.0
     dependencies:
