@@ -3,6 +3,7 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type * as React from "react";
@@ -14,6 +15,7 @@ import { seo } from "~/utils/seo";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppButton from "~/components/WhatsAppButton";
+import { LoadingSpinner } from "~/components/LoadingSpinner";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -56,20 +58,20 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
       { rel: "icon", href: "https://gwm.kopimap.com/favicon.png" },
     ],
-    // scripts: [
-    //   {
-    //     async: true,
-    //     src: "https://www.googletagmanager.com/gtag/js?id=G-RYBLP114YY",
-    //   },
-    //   {
-    //     children: `
-    //       window.dataLayer = window.dataLayer || [];
-    //       function gtag(){dataLayer.push(arguments);}
-    //       gtag('js', new Date());
-    //       gtag('config', 'G-RYBLP114YY');
-    //     `,
-    //   },
-    // ],
+    scripts: [
+      {
+        async: true,
+        src: "https://www.googletagmanager.com/gtag/js?id=G-RYBLP114YY",
+      },
+      {
+        children: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-RYBLP114YY');
+        `,
+      },
+    ],
   }),
   errorComponent: (props) => {
     return (
@@ -91,6 +93,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // Get the router state to detect when routes are loading
+  const { isLoading } = useRouterState();
+
   return (
     <ClerkProvider>
       <html lang="id">
@@ -102,11 +107,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             className="relative min-h-screen overflow-y-auto"
             data-react-root="true"
           >
+            {/* Show loading spinner when routes are transitioning */}
+            {isLoading && <LoadingSpinner />}
             {/* Keep navbar fixed at the top and outside of any transition effects */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-transparent">
               <Navbar />
             </div>
-
             {/* Add padding to account for fixed navbar */}
             <div className="">
               <main>
