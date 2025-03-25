@@ -61,6 +61,7 @@ function sanitizeContent(content: string): string {
         "tr",
         "th",
         "td",
+        "iframe",
       ],
       ALLOWED_ATTR: [
         "href",
@@ -73,6 +74,10 @@ function sanitizeContent(content: string): string {
         "width",
         "height",
         "id",
+        "frameborder",
+        "allowfullscreen",
+        "allow",
+        "data-youtube-video",
       ],
     });
   } catch (error) {
@@ -90,7 +95,6 @@ interface ArticleInput {
   category: string;
   featuredImageUrl?: string;
   featuredImageAlt?: string;
-  youtubeUrl?: string;
   published?: boolean;
 }
 
@@ -107,7 +111,6 @@ export const createArticle = createServerFn({ method: "POST" })
     const category = formData.get("category")?.toString();
     const featuredImageUrl = formData.get("featuredImageUrl")?.toString();
     const featuredImageAlt = formData.get("featuredImageAlt")?.toString();
-    const youtubeUrl = formData.get("youtubeUrl")?.toString();
     const published = formData.get("published") === "true";
 
     if (!title || !content || !excerpt || !category) {
@@ -121,7 +124,6 @@ export const createArticle = createServerFn({ method: "POST" })
       category,
       featuredImageUrl,
       featuredImageAlt,
-      youtubeUrl,
       published,
     };
   })
@@ -142,7 +144,6 @@ export const createArticle = createServerFn({ method: "POST" })
         category: data.category,
         featuredImageUrl: data.featuredImageUrl,
         featuredImageAlt: data.featuredImageAlt,
-        youtubeUrl: data.youtubeUrl,
         published: data.published ? 1 : 0,
         publishedAt: data.published ? new Date().toISOString() : null,
       };
@@ -184,7 +185,6 @@ export const updateArticle = createServerFn({ method: "POST" })
     const category = formData.get("category")?.toString();
     const featuredImageUrl = formData.get("featuredImageUrl")?.toString();
     const featuredImageAlt = formData.get("featuredImageAlt")?.toString();
-    const youtubeUrl = formData.get("youtubeUrl")?.toString();
     const published = formData.get("published") === "true";
 
     if (!id || Number.isNaN(id)) {
@@ -203,7 +203,6 @@ export const updateArticle = createServerFn({ method: "POST" })
       category,
       featuredImageUrl,
       featuredImageAlt,
-      youtubeUrl,
       published,
     };
   })
@@ -253,7 +252,6 @@ export const updateArticle = createServerFn({ method: "POST" })
           category: data.category,
           featuredImageUrl: data.featuredImageUrl ?? null,
           featuredImageAlt: data.featuredImageAlt ?? null,
-          youtubeUrl: data.youtubeUrl ?? null,
           published: data.published ? 1 : 0,
           publishedAt,
           updatedAt: new Date().toISOString(),

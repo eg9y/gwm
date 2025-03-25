@@ -21,12 +21,13 @@ import {
   Undo,
   Code,
   Quote,
+  Youtube as YoutubeIcon,
 } from "lucide-react";
 // Import the resizable image extension
 // @ts-ignore - tiptap-extension-resize-image doesn't have TypeScript definitions
 import ResizableImage from "tiptap-extension-resize-image";
-// Import types for TypeScript
-import { Node as ProseMirrorNode } from "@tiptap/pm/model";
+// Import YouTube extension
+import Youtube from "@tiptap/extension-youtube";
 
 // Define the additional types for the resizable image extension
 declare module "@tiptap/core" {
@@ -85,6 +86,9 @@ const TiptapEditor = ({
   const [showImageInput, setShowImageInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
+  // Add YouTube state
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   // Store local images here
   const [localImages, setLocalImages] = useState<LocalImage[]>([]);
   // Store URLs of removed images here
@@ -119,6 +123,15 @@ const TiptapEditor = ({
         // @ts-ignore - defaultAlignment is not in the type definitions
         // Default alignment
         defaultAlignment: "center",
+      }),
+      // Add YouTube extension
+      Youtube.configure({
+        controls: true,
+        modestBranding: true,
+        nocookie: true, // Use privacy-enhanced mode
+        HTMLAttributes: {
+          class: "youtube-video my-6 rounded-lg overflow-hidden mx-auto",
+        },
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -255,6 +268,22 @@ const TiptapEditor = ({
     setLinkUrl("");
     setShowLinkInput(false);
   }, [editor, linkUrl]);
+
+  // Add function to insert YouTube video
+  const insertYoutubeVideo = useCallback(() => {
+    if (!editor || !youtubeUrl) return;
+
+    editor
+      .chain()
+      .focus()
+      .setYoutubeVideo({
+        src: youtubeUrl,
+        // No need to specify width and height, the CSS will handle it
+      })
+      .run();
+    setYoutubeUrl("");
+    setShowYoutubeInput(false);
+  }, [editor, youtubeUrl]);
 
   // Call this when editor content changes
   const handleContentChange = useCallback(
@@ -495,6 +524,20 @@ const TiptapEditor = ({
         <ImageIcon size={18} />
       </button>
 
+      {/* Add YouTube button */}
+      <button
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => {
+          editor.chain().focus().run();
+          setShowYoutubeInput(!showYoutubeInput);
+        }}
+        className="p-2 rounded hover:bg-gray-200 text-gray-700"
+        title="YouTube Video"
+        type="button"
+      >
+        <YoutubeIcon size={18} />
+      </button>
+
       {/* Image alignment controls - these will apply to the selected image */}
       <div className="flex gap-1 ml-1 border-l border-gray-300 pl-1">
         <button
@@ -632,18 +675,90 @@ const TiptapEditor = ({
         </div>
       )}
 
+      {/* Add YouTube input UI */}
+      {showYoutubeInput && (
+        <div className="p-2 bg-gray-100 flex items-center gap-2">
+          <input
+            type="url"
+            placeholder="Enter YouTube URL (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            className="flex-1 p-2 border rounded"
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              insertYoutubeVideo();
+            }}
+            className="bg-primary text-white px-3 py-2 rounded"
+            type="button"
+          >
+            Embed Video
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setShowYoutubeInput(false);
+            }}
+            className="bg-gray-300 px-3 py-2 rounded"
+            type="button"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       <EditorContent
         editor={editor}
         className="tiptap-editor-content border rounded-b-md border-gray-300 min-h-[400px] prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-ul:list-disc prose-ol:list-decimal"
       />
 
-      {/* Help text for image resizing */}
+      {/* Help text for image resizing and YouTube */}
       <div className="mt-2 text-sm text-gray-500">
         <p>
           💡 Tip: Click on an image to activate resize handles. Drag to resize,
-          and use the alignment buttons to position images.
+          and use the alignment buttons to position images. Use the YouTube
+          button to embed videos directly in your content.
         </p>
       </div>
+
+      {/* Add global styles for YouTube embeds */}
+      <style>
+        {`
+          /* Make YouTube videos responsive */
+          .tiptap-editor-content [data-youtube-video] {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            width: 100% !important;
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+          }
+          
+          .tiptap-editor-content [data-youtube-video] iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+          }
+
+          /* Add responsive styling for the ProseMirror editor */
+          .ProseMirror {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+          }
+
+          /* Ensure videos don't exceed container width */
+          .ProseMirror iframe {
+            max-width: 100%;
+          }
+        `}
+      </style>
     </div>
   );
 };
