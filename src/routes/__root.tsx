@@ -56,20 +56,20 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
       { rel: "icon", href: "https://gwm.kopimap.com/favicon.png" },
     ],
-    scripts: [
-      {
-        async: true,
-        src: "https://www.googletagmanager.com/gtag/js?id=G-RYBLP114YY",
-      },
-      {
-        children: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-RYBLP114YY');
-        `,
-      },
-    ],
+    // scripts: [
+    //   {
+    //     async: true,
+    //     src: "https://www.googletagmanager.com/gtag/js?id=G-RYBLP114YY",
+    //   },
+    //   {
+    //     children: `
+    //       window.dataLayer = window.dataLayer || [];
+    //       function gtag(){dataLayer.push(arguments);}
+    //       gtag('js', new Date());
+    //       gtag('config', 'G-RYBLP114YY');
+    //     `,
+    //   },
+    // ],
   }),
   errorComponent: (props) => {
     return (

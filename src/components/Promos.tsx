@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { fetchPromos, getStrapiImageUrl } from "../services/strapiService";
-
-// Define a more specific type for promos
-interface Promo {
-  id: string | number;
-  publishedAt: string;
-  promo_image?: {
-    url: string;
-  };
-  promo_text: string;
-}
+import { getAllArticles } from "../server/articles";
+import type { Article } from "../db";
 
 function Promos() {
-  const [promos, setPromos] = useState<Promo[]>([]);
+  const [promos, setPromos] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +14,15 @@ function Promos() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch promos from Strapi
-        const response = await fetchPromos(1, 4);
+        // Fetch promo articles from SQLite database
+        const response = await getAllArticles({
+          data: {
+            page: 1,
+            pageSize: 4,
+            category: "Promo",
+            publishedOnly: true,
+          },
+        });
         setPromos(response.data);
       } catch (err) {
         console.error("Error fetching promos:", err);
@@ -91,8 +89,11 @@ function Promos() {
             >
               <div className="aspect-w-16 aspect-h-9">
                 <img
-                  src={getStrapiImageUrl(promo.promo_image!.url)}
-                  alt={promo.promo_text || "promo"}
+                  src={
+                    promo.featuredImageUrl ||
+                    "https://source.unsplash.com/random/800x600/?car"
+                  }
+                  alt={promo.featuredImageAlt || promo.title}
                   className="object-cover w-full h-48"
                 />
               </div>
@@ -101,7 +102,8 @@ function Promos() {
                   Promo
                 </span>
                 <Link
-                  to={"/info-promo"}
+                  to="/info-promo/$slug"
+                  params={{ slug: promo.slug }}
                   className="text-primary font-medium hover:underline flex items-center text-sm"
                 >
                   Selengkapnya

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { seo } from "../utils/seo";
 import { submitContactForm } from "../server/contact";
 import { useForm } from "react-hook-form";
