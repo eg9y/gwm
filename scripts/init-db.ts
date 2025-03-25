@@ -4,6 +4,7 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { sql } from "drizzle-orm";
 import path from "node:path";
 import fs from "node:fs";
+import { initContactInfo } from "../src/server/contact-info";
 
 async function main() {
   console.log("Initializing database...");
@@ -158,6 +159,11 @@ async function main() {
       throw error;
     }
   }
+
+  // Initialize contact info with default values if it doesn't exist
+  console.log("Initializing contact information...");
+  await initContactInfo();
+  console.log("Contact information initialized!");
 }
 
 main().catch((error) => {

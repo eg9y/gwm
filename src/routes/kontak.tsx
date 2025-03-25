@@ -2,10 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { seo } from "../utils/seo";
 import { submitContactForm } from "../server/contact";
+import { getContactInfo } from "../server/contact-info";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Hero from "../components/Hero";
+import type { ContactInfo } from "../db";
 
 // Define the form validation schema with Zod
 const contactFormSchema = z.object({
@@ -62,6 +64,24 @@ function ContactPage() {
   }>({});
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const notificationRef = useRef<HTMLDivElement>(null);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch contact info
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const info = await getContactInfo();
+        setContactInfo(info);
+      } catch (error) {
+        console.error("Error fetching contact info:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
 
   // React Hook Form setup with Zod validation
   const {
@@ -231,11 +251,8 @@ function ContactPage() {
                   <div>
                     <h3 className="text-sm font-medium text-primary">Lokasi</h3>
                     <p className="text-xs text-secondary">
-                      GWM Jakarta – Indonesia
-                      <br />
-                      Agora Mall Thamrin
-                      <br />
-                      Jl. M.H. Thamrin No.10, Jakarta Pusat
+                      {contactInfo?.address ||
+                        "Jl. M.H. Thamrin No.10, Jakarta Pusat"}
                     </p>
                   </div>
                 </div>
@@ -261,10 +278,10 @@ function ContactPage() {
                       Telepon
                     </h3>
                     <a
-                      href="tel:+6287774377422"
+                      href={`tel:${contactInfo?.phone || "+6287774377422"}`}
                       className="text-xs text-secondary hover:text-red-500 transition-colors"
                     >
-                      0877 7437 7422 (Call/WA)
+                      {contactInfo?.phone || "0877 7437 7422"} (Call/WA)
                     </a>
                   </div>
                 </div>
@@ -288,10 +305,10 @@ function ContactPage() {
                   <div>
                     <h3 className="text-sm font-medium text-primary">Email</h3>
                     <a
-                      href="mailto:ramarkan.pratama@inchcape.co.id"
+                      href={`mailto:${contactInfo?.email || "info@gwmindonesia.co.id"}`}
                       className="text-xs text-secondary hover:text-red-500 transition-colors"
                     >
-                      ramarkan.pratama@inchcape.co.id
+                      {contactInfo?.email || "info@gwmindonesia.co.id"}
                     </a>
                   </div>
                 </div>
@@ -348,7 +365,7 @@ function ContactPage() {
                 </a>
 
                 <a
-                  href="https://wa.me/6287774377422"
+                  href={`https://wa.me/${contactInfo?.phone?.replace(/\D/g, "") || "6287774377422"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-full py-2 px-3 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-all"

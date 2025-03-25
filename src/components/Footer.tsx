@@ -1,7 +1,28 @@
 import type { KeyboardEvent } from "react";
+import { useEffect, useState } from "react";
+import { getContactInfo } from "../server/contact-info";
+import type { ContactInfo } from "../db";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch contact info
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const info = await getContactInfo();
+        setContactInfo(info);
+      } catch (error) {
+        console.error("Error fetching contact info:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
 
   const handleKeyPress = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -84,22 +105,23 @@ const Footer = () => {
             <ul className="space-y-1 sm:space-y-2">
               <li>
                 <a
-                  href="tel:+6287774377422"
+                  href={`tel:${contactInfo?.phone || "+6287774377422"}`}
                   className="text-gray-500 hover:text-primary text-xs transition"
                 >
-                  +62 877 7437 7422
+                  {contactInfo?.phone || "+62 877 7437 7422"}
                 </a>
               </li>
               <li>
                 <a
-                  href="mailto:info@gwm.co.id"
+                  href={`mailto:${contactInfo?.email || "info@gwmindonesia.co.id"}`}
                   className="text-gray-500 hover:text-primary text-xs transition"
                 >
-                  info@gwmindonesia.co.id
+                  {contactInfo?.email || "info@gwmindonesia.co.id"}
                 </a>
               </li>
               <li className="text-gray-500 text-xs">
-                Jl. Gatot Subroto Kav. 36-38, Jakarta Selatan
+                {contactInfo?.address ||
+                  "Jl. Gatot Subroto Kav. 36-38, Jakarta Selatan"}
               </li>
             </ul>
             <div className="flex gap-4 mt-5">
@@ -107,12 +129,17 @@ const Footer = () => {
                 type="button"
                 onClick={() =>
                   window.open(
-                    "https://facebook.com",
+                    contactInfo?.facebook || "https://facebook.com",
                     "_blank",
                     "noopener,noreferrer"
                   )
                 }
-                onKeyDown={(e) => handleKeyPress(e, "https://facebook.com")}
+                onKeyDown={(e) =>
+                  handleKeyPress(
+                    e,
+                    contactInfo?.facebook || "https://facebook.com"
+                  )
+                }
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
                 aria-label="Kunjungi Facebook GWM Indonesia"
               >
@@ -122,13 +149,16 @@ const Footer = () => {
                 type="button"
                 onClick={() =>
                   window.open(
-                    "https://instagram.com/indo.tank",
+                    contactInfo?.instagram || "https://instagram.com/indo.tank",
                     "_blank",
                     "noopener,noreferrer"
                   )
                 }
                 onKeyDown={(e) =>
-                  handleKeyPress(e, "https://instagram.com/indo.tank")
+                  handleKeyPress(
+                    e,
+                    contactInfo?.instagram || "https://instagram.com/indo.tank"
+                  )
                 }
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
                 aria-label="Kunjungi Instagram GWM Indonesia"
@@ -139,12 +169,14 @@ const Footer = () => {
                 type="button"
                 onClick={() =>
                   window.open(
-                    "https://twitter.com",
+                    contactInfo?.x || "https://twitter.com",
                     "_blank",
                     "noopener,noreferrer"
                   )
                 }
-                onKeyDown={(e) => handleKeyPress(e, "https://twitter.com")}
+                onKeyDown={(e) =>
+                  handleKeyPress(e, contactInfo?.x || "https://twitter.com")
+                }
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
                 aria-label="Kunjungi Twitter GWM Indonesia"
               >
@@ -169,13 +201,16 @@ const Footer = () => {
               aria-label="Facebook"
               onClick={() =>
                 window.open(
-                  "https://facebook.com/gwmindonesia",
+                  contactInfo?.facebook || "https://facebook.com/gwmindonesia",
                   "_blank",
                   "noopener,noreferrer"
                 )
               }
               onKeyDown={(e) =>
-                handleKeyPress(e, "https://facebook.com/gwmindonesia")
+                handleKeyPress(
+                  e,
+                  contactInfo?.facebook || "https://facebook.com/gwmindonesia"
+                )
               }
             >
               <svg
@@ -193,13 +228,16 @@ const Footer = () => {
               aria-label="Instagram"
               onClick={() =>
                 window.open(
-                  "https://instagram.com/indo.tank",
+                  contactInfo?.instagram || "https://instagram.com/indo.tank",
                   "_blank",
                   "noopener,noreferrer"
                 )
               }
               onKeyDown={(e) =>
-                handleKeyPress(e, "https://instagram.com/indo.tank")
+                handleKeyPress(
+                  e,
+                  contactInfo?.instagram || "https://instagram.com/indo.tank"
+                )
               }
             >
               <svg
@@ -217,13 +255,16 @@ const Footer = () => {
               aria-label="YouTube"
               onClick={() =>
                 window.open(
-                  "https://youtube.com/gwmindonesia",
+                  contactInfo?.youtube || "https://youtube.com/gwmindonesia",
                   "_blank",
                   "noopener,noreferrer"
                 )
               }
               onKeyDown={(e) =>
-                handleKeyPress(e, "https://youtube.com/gwmindonesia")
+                handleKeyPress(
+                  e,
+                  contactInfo?.youtube || "https://youtube.com/gwmindonesia"
+                )
               }
             >
               <svg

@@ -26,13 +26,6 @@
     {
       "idx": 3,
       "version": "6",
-      "when": 1742835955803,
-      "tag": "0003_tricky_argent",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
       "when": 1742900032403,
       "tag": "0004_marvelous_human_robot",
       "breakpoints": true
@@ -42,6 +35,27 @@
       "version": "6",
       "when": 1742906328464,
       "tag": "0005_same_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1742909950345,
+      "tag": "0006_narrow_triton",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1742911800825,
+      "tag": "0007_public_kabuki",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1742911840400,
+      "tag": "0008_oval_dracula",
       "breakpoints": true
     }
   ]

@@ -24,7 +24,6 @@ export const articles = sqliteTable("articles", {
   category: text("category").notNull(),
   featuredImageUrl: text("featured_image_url"),
   featuredImageAlt: text("featured_image_alt"),
-  youtubeUrl: text("youtube_url"),
   publishedAt: text("published_at"),
   createdAt: text("created_at")
     .notNull()
@@ -33,4 +32,19 @@ export const articles = sqliteTable("articles", {
     .notNull()
     .$default(() => new Date().toISOString()),
   published: integer("published").notNull().default(0),
+});
+
+// Define contact information table that can be edited in admin
+export const contactInfo = sqliteTable("contact_info", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  address: text("address").notNull(),
+  facebook: text("facebook").notNull(),
+  instagram: text("instagram").notNull(),
+  x: text("x").notNull(), // Twitter/X
+  youtube: text("youtube").notNull(),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$default(() => new Date().toISOString()),
 });
