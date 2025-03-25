@@ -15,6 +15,20 @@
       "when": 1742699102239,
       "tag": "0001_complex_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1742830306651,
+      "tag": "0002_melodic_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1742835955803,
+      "tag": "0003_tricky_argent",
+      "breakpoints": true
     }
   ]
 }

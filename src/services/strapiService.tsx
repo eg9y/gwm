@@ -1,8 +1,13 @@
 import { STRAPI_API_URL } from "../constants";
-import type { ArticleAttributes, StrapiMeta } from "../types/strapi";
+import type {
+  ArticleAttributes,
+  StrapiMeta,
+  PromoAttributes,
+} from "../types/strapi";
+import { getAllArticles, getArticleBySlug } from "../server/articles";
 
 /**
- * Fetch a list of articles from Strapi
+ * Fetch a list of articles from local database (formerly Strapi)
  */
 export async function fetchArticles(
   page = 1,
@@ -10,68 +15,81 @@ export async function fetchArticles(
   category?: string,
   searchQuery?: string
 ): Promise<{ data: ArticleAttributes[] } & StrapiMeta> {
-  // Build query parameters
-  const queryParams = new URLSearchParams({
-    "pagination[page]": page.toString(),
-    "pagination[pageSize]": pageSize.toString(),
-    populate: "featuredImage",
-    sort: "publishedAt:desc",
-  });
+  try {
+    // Fetch articles from local database
+    const response = await getAllArticles({
+      data: {
+        page,
+        pageSize,
+        category,
+        searchQuery,
+        publishedOnly: true,
+      },
+    });
 
-  // Add category filter if provided
-  if (category && category !== "All") {
-    queryParams.append("filters[category][$eq]", category);
+    // Map response to match the Strapi API format
+    return {
+      data: response.data.map((article) => ({
+        id: article.id,
+        documentId: article.id.toString(),
+        title: article.title,
+        content: article.content,
+        excerpt: article.excerpt,
+        slug: article.slug,
+        publishedAt: article.publishedAt,
+        createdAt: article.createdAt,
+        updatedAt: article.updatedAt,
+        category: article.category,
+        featuredImage: article.featuredImageUrl
+          ? {
+              url: article.featuredImageUrl,
+              alternativeText: article.featuredImageAlt || "",
+            }
+          : undefined,
+        youtube_url: article.youtubeUrl,
+      })),
+      pagination: response.pagination,
+    };
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    throw new Error(`Error fetching articles: ${error}`);
   }
-
-  // Add search filter if provided
-  if (searchQuery) {
-    queryParams.append("filters[$or][0][title][$containsi]", searchQuery);
-    queryParams.append("filters[$or][1][content][$containsi]", searchQuery);
-  }
-
-  // Make the API request
-  const response = await fetch(
-    `${STRAPI_API_URL}/api/articles?${queryParams.toString()}`
-  );
-
-  if (!response.ok) {
-    throw new Error(`Error fetching articles: ${response.statusText}`);
-  }
-
-  return response.json();
 }
 
 /**
- * Fetch a single article by slug
+ * Fetch a single article by slug from local database (formerly Strapi)
  */
 export async function fetchArticleBySlug(
   slug: string
 ): Promise<ArticleAttributes> {
-  const params = new URLSearchParams({
-    "filters[slug][$eq]": slug,
-    populate: "*",
-  });
-
   try {
-    const response = await fetch(`${STRAPI_API_URL}/api/articles?${params}`);
+    // Fetch article from local database
+    const article = await getArticleBySlug({ data: { slug } });
 
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("API response:", data);
-
-    if (!data.data || data.data.length === 0) {
+    if (!article) {
       throw new Error("Article not found");
     }
 
-    // The article object is already in the format we need
-    const article = data.data[0];
-    console.log("Article:", article);
-
-    // Return the article directly since it already has the structure we need
-    return article;
+    // Map response to match the Strapi API format
+    return {
+      id: article.id,
+      documentId: article.id.toString(),
+      title: article.title,
+      content: article.content,
+      excerpt: article.excerpt,
+      slug: article.slug,
+      publishedAt: article.publishedAt,
+      createdAt: article.createdAt,
+      updatedAt: article.updatedAt,
+      category: article.category,
+      featuredImage: article.featuredImageUrl
+        ? {
+            url: article.featuredImageUrl,
+            alternativeText: article.featuredImageAlt || "",
+          }
+        : undefined,
+      youtube_url: article.youtubeUrl,
+    };
   } catch (error) {
     console.error("Error fetching article by slug:", error);
     throw error;
@@ -79,34 +97,49 @@ export async function fetchArticleBySlug(
 }
 
 /**
- * Fetch promos from Strapi
+ * Fetch promos from local database (formerly Strapi)
  */
 export async function fetchPromos(
   page = 1,
   pageSize = 4
-): Promise<{ data: any[]; meta: StrapiMeta }> {
-  // Build query parameters
-  const queryParams = new URLSearchParams({
-    "pagination[page]": page.toString(),
-    "pagination[pageSize]": pageSize.toString(),
-    populate: "promo_image",
-    sort: "publishedAt:desc",
-  });
+): Promise<{ data: PromoAttributes[]; meta: StrapiMeta }> {
+  // Filter articles to only show promos
+  try {
+    const response = await getAllArticles({
+      data: {
+        page,
+        pageSize,
+        category: "Promo",
+        publishedOnly: true,
+      },
+    });
 
-  // Make the API request
-  const response = await fetch(
-    `${STRAPI_API_URL}/api/promos?${queryParams.toString()}`
-  );
-
-  if (!response.ok) {
-    throw new Error(`Error fetching promos: ${response.statusText}`);
+    // Map response to match the Strapi API format
+    return {
+      data: response.data.map((promo) => ({
+        id: promo.id,
+        title: promo.title,
+        description: promo.excerpt,
+        publishedAt: promo.publishedAt,
+        promo_image: promo.featuredImageUrl
+          ? {
+              url: promo.featuredImageUrl,
+              alternativeText: promo.featuredImageAlt || "",
+            }
+          : undefined,
+      })),
+      meta: {
+        pagination: response.pagination,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching promos:", error);
+    throw new Error(`Error fetching promos: ${error}`);
   }
-
-  return response.json();
 }
 
 /**
- * Get the full URL for a Strapi image
+ * Get the full URL for an image
  */
 export function getStrapiImageUrl(imageUrl: string): string {
   if (!imageUrl) return "";
@@ -116,5 +149,6 @@ export function getStrapiImageUrl(imageUrl: string): string {
     return imageUrl;
   }
 
+  // Legacy Strapi images - maintain compatibility
   return `${STRAPI_API_URL}${imageUrl}`;
 }

@@ -1,19 +1,50 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import DOMPurify from "dompurify";
-import {
-  fetchArticleBySlug,
-  getStrapiImageUrl,
-} from "../services/strapiService";
-import type { ArticleAttributes } from "../types/strapi";
+import { getArticleBySlug } from "../server/articles";
+import type { Article } from "../db";
 
-console.log("Article route file loaded");
+// Add CSS for resizable images
+const articleStyles = `
+  .resize-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .resize-image.align-left {
+    float: left;
+    margin-right: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .resize-image.align-right {
+    float: right;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .resize-image.align-center {
+    margin-left: auto;
+    margin-right: auto;
+    float: none;
+  }
+  
+  /* Clear floats after images to prevent text from being cut off */
+  .article-content:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+`;
 
 export const Route = createFileRoute("/info-promo/$slug")({
   // Add a loader to fetch article data on the server
   loader: async ({ params }) => {
     try {
-      const article = await fetchArticleBySlug(params.slug);
+      const article = await getArticleBySlug({ data: { slug: params.slug } });
       return { article };
     } catch (error) {
       console.error("Error loading article:", error);
@@ -64,13 +95,12 @@ export const Route = createFileRoute("/info-promo/$slug")({
         },
         {
           property: "og:image",
-          content: article.featuredImage?.url
-            ? getStrapiImageUrl(article.featuredImage.url)
-            : "https://gwm.kopimap.com/hero_image.webp",
+          content:
+            article.featuredImageUrl || "https://gwm.co.id/hero_image.webp",
         },
         {
           property: "og:url",
-          content: `https://gwm.co.id/artikel/${article.slug}`,
+          content: `https://gwm.co.id/info-promo/${article.slug}`,
         },
         {
           property: "og:type",
@@ -78,7 +108,7 @@ export const Route = createFileRoute("/info-promo/$slug")({
         },
         {
           property: "article:published_time",
-          content: article.publishedAt,
+          content: article.publishedAt || new Date().toISOString(),
         },
         {
           property: "article:section",
@@ -88,7 +118,7 @@ export const Route = createFileRoute("/info-promo/$slug")({
       links: [
         {
           rel: "canonical",
-          href: `https://gwm.co.id/artikel/${article.slug}`,
+          href: `https://gwm.co.id/info-promo/${article.slug}`,
         },
       ],
     };
@@ -99,13 +129,11 @@ export const Route = createFileRoute("/info-promo/$slug")({
 function ArticleDetailPage() {
   const { slug } = Route.useParams();
   const { article: loaderArticle, error: loaderError } = Route.useLoaderData();
-  const [article, setArticle] = useState<ArticleAttributes | null>(
-    loaderArticle || null
-  );
+  const [article, setArticle] = useState<Article | null>(loaderArticle || null);
   const [isLoading, setIsLoading] = useState(!loaderArticle);
   const [error, setError] = useState<string | null>(loaderError || null);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
-  console.log("kanjai", article);
+  console.log("Article data:", article);
 
   // Load page with a slight delay for smooth transition
   useEffect(() => {
@@ -116,7 +144,7 @@ function ArticleDetailPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fetch article from Strapi if it wasn't loaded by SSR
+  // Fetch article from SQLite if it wasn't loaded by SSR
   useEffect(() => {
     // If we already have the article from the loader, don't fetch again
     if (loaderArticle) return;
@@ -126,7 +154,7 @@ function ArticleDetailPage() {
         setIsLoading(true);
         setError(null);
 
-        const articleData = await fetchArticleBySlug(slug);
+        const articleData = await getArticleBySlug({ data: { slug } });
         console.log("Article data:", articleData);
         setArticle(articleData);
       } catch (err) {
@@ -157,7 +185,9 @@ function ArticleDetailPage() {
   }, [article]);
 
   // Format date helper function
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "long",
@@ -245,6 +275,9 @@ function ArticleDetailPage() {
       {/* Article Content */}
       {!isLoading && article && (
         <div className="container mx-auto px-4 py-12">
+          {/* Add the resizable image styles */}
+          <style dangerouslySetInnerHTML={{ __html: articleStyles }} />
+
           <div className="max-w-3xl mx-auto">
             <div className="mb-8 content-fade-in">
               <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
@@ -266,11 +299,11 @@ function ArticleDetailPage() {
                 </span>
               </div>
 
-              {article?.featuredImage?.url && (
+              {article.featuredImageUrl && (
                 <div className="mb-8">
                   <img
-                    src={getStrapiImageUrl(article.featuredImage.url)}
-                    alt={article.title}
+                    src={article.featuredImageUrl}
+                    alt={article.featuredImageAlt || article.title}
                     className="rounded-lg w-full h-auto object-cover max-h-[500px] image-load-transition"
                     loading="lazy"
                     onLoad={(e) =>
@@ -281,17 +314,17 @@ function ArticleDetailPage() {
               )}
 
               {/* YouTube Video Embed if available */}
-              {article.youtube_url && (
-                <YouTubeEmbed url={article.youtube_url} />
-              )}
+              {article.youtubeUrl && <YouTubeEmbed url={article.youtubeUrl} />}
 
+              {/* Content rendered using DOMPurify to sanitize HTML */}
               <div
-                className="prose prose-lg max-w-none text-gray-700"
+                className="prose prose-lg max-w-none text-gray-700 tiptap-content article-content prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-ul:list-disc prose-ul:pl-5 prose-ol:list-decimal prose-ol:pl-5 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:rounded-sm"
+                // We use DOMPurify to sanitize HTML from Tiptap to prevent XSS attacks
                 // eslint-disable-next-line react/no-danger
-                // This is safe because we're using DOMPurify to sanitize the HTML
-                // We need to render HTML content from CMS, and DOMPurify removes all XSS risks
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(article.content),
+                  __html: DOMPurify.sanitize(article.content, {
+                    ADD_ATTR: ["alignment", "width", "height", "class"],
+                  }),
                 }}
               />
             </div>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { fetchArticles, getStrapiImageUrl } from "../services/strapiService";
-import type { ArticleListItem } from "../types/strapi";
+import { getAllArticles } from "../server/articles";
+import type { Article } from "../db";
 import { seo } from "../utils/seo";
 
 export const Route = createFileRoute("/info-promo/")({
@@ -29,7 +29,7 @@ function InfoPromoPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isPageLoaded, setIsPageLoaded] = useState(false);
-  const [articles, setArticles] = useState<ArticleListItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,22 +44,23 @@ function InfoPromoPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Fetch articles from Strapi
+  // Fetch articles from SQLite
   useEffect(() => {
     async function loadArticles() {
       try {
         setIsLoading(true);
         setError(null);
 
-        // Fetch articles from Strapi
-        const response = await fetchArticles(
-          currentPage,
-          9,
-          activeCategory === "All" ? undefined : activeCategory,
-          searchQuery || undefined
-        );
-
-        console.log("response", response);
+        // Fetch articles from SQLite database
+        const response = await getAllArticles({
+          data: {
+            page: currentPage,
+            pageSize: 9,
+            category: activeCategory === "All" ? undefined : activeCategory,
+            searchQuery: searchQuery || undefined,
+            publishedOnly: true, // Only fetch published articles for the public page
+          },
+        });
 
         setArticles(response.data);
 
@@ -69,7 +70,7 @@ function InfoPromoPage() {
         }
       } catch (err) {
         console.error("Error fetching articles:", err);
-        setError("Failed to load articles. Using mock data instead.");
+        setError("Failed to load articles. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -79,15 +80,17 @@ function InfoPromoPage() {
   }, [activeCategory, searchQuery, currentPage]);
 
   // Get image URL from article
-  const getImageUrl = (article: ArticleListItem) => {
-    if (article.featuredImage?.url) {
-      return getStrapiImageUrl(article.featuredImage.url);
+  const getImageUrl = (article: Article) => {
+    if (article.featuredImageUrl) {
+      return article.featuredImageUrl;
     }
-    return "https://source.unsplash.com/random/800x600/?car";
+    return "https://gwm.kopimap.com/gwm_logo.webp";
   };
 
   // Format date helper function
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "long",
@@ -257,7 +260,7 @@ function InfoPromoPage() {
                     >
                       <img
                         src={getImageUrl(article)}
-                        alt={article.title}
+                        alt={article.featuredImageAlt || article.title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
                     </Link>
