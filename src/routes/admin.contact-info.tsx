@@ -21,6 +21,17 @@ const contactInfoSchema = z.object({
 // Type based on the schema
 type ContactInfoFormData = z.infer<typeof contactInfoSchema>;
 
+// Default contact info for new records
+const defaultContactInfo: Omit<ContactInfoFormData, "id"> = {
+  phone: "+62 812 3456 7890",
+  email: "contact@carsales.example.com",
+  address: "Jl. Sudirman No. 123, Jakarta Pusat",
+  facebook: "https://facebook.com/carsales",
+  instagram: "https://instagram.com/carsales",
+  x: "https://twitter.com/carsales",
+  youtube: "https://youtube.com/carsales",
+};
+
 export const Route = createFileRoute("/admin/contact-info")({
   component: AdminContactInfoPage,
   loader: async () => {
@@ -43,6 +54,7 @@ function AdminContactInfoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const isNewRecord = !contactInfo && !error;
 
   // React Hook Form setup
   const {
@@ -53,14 +65,8 @@ function AdminContactInfoPage() {
   } = useForm<ContactInfoFormData>({
     resolver: zodResolver(contactInfoSchema),
     defaultValues: contactInfo || {
-      id: 0,
-      phone: "",
-      email: "",
-      address: "",
-      facebook: "",
-      instagram: "",
-      x: "",
-      youtube: "",
+      id: 0, // New records start with ID 0
+      ...defaultContactInfo,
     },
   });
 
@@ -96,22 +102,6 @@ function AdminContactInfoPage() {
     }
   };
 
-  // If no contact info is found or there was an error
-  if (!contactInfo && !error) {
-    return (
-      <div className="p-8">
-        <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-2xl font-medium text-primary mb-6">
-            Contact Information
-          </h2>
-          <div className="text-center py-8">
-            <p className="text-gray-500">No contact information found.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // If there was an error
   if (error) {
     return (
@@ -132,12 +122,27 @@ function AdminContactInfoPage() {
     <div className="p-8">
       <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-2xl font-medium text-primary mb-6">
-          Contact Information
+          {isNewRecord
+            ? "Create Contact Information"
+            : "Edit Contact Information"}
         </h2>
+
+        {isNewRecord && (
+          <div className="bg-blue-50 p-4 rounded-md mb-6">
+            <p className="text-blue-700">
+              No contact information has been set up yet. Please fill out the
+              form below to create your contact details.
+            </p>
+          </div>
+        )}
 
         {saveSuccess && (
           <div className="bg-green-50 p-4 rounded-md mb-6">
-            <p className="text-green-700">Changes saved successfully!</p>
+            <p className="text-green-700">
+              {isNewRecord
+                ? "Contact information created successfully!"
+                : "Contact information updated successfully!"}
+            </p>
           </div>
         )}
 
@@ -306,7 +311,13 @@ function AdminContactInfoPage() {
               disabled={isSubmitting}
               className="w-full md:w-auto px-6 py-3 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isSubmitting
+                ? isNewRecord
+                  ? "Creating..."
+                  : "Saving..."
+                : isNewRecord
+                  ? "Create Contact Info"
+                  : "Save Changes"}
             </button>
           </div>
         </form>
