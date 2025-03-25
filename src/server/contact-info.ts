@@ -50,7 +50,7 @@ const updateContactInfoSchema = z.object({
   youtube: z.string().min(1, "YouTube URL is required"),
 });
 
-// Update contact info
+// Update or create contact info (upsert)
 export const updateContactInfo = createServerFn()
   .validator((data: unknown) => {
     try {
@@ -64,7 +64,30 @@ export const updateContactInfo = createServerFn()
   })
   .handler(async ({ data }) => {
     try {
-      // Update record
+      // Check if this is a new record (id = 0) or an update
+      if (data.id === 0) {
+        // New record - insert
+        const newData: NewContactInfo = {
+          phone: data.phone,
+          email: data.email,
+          address: data.address,
+          facebook: data.facebook,
+          instagram: data.instagram,
+          x: data.x,
+          youtube: data.youtube,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const result = await db.insert(contactInfo).values(newData).returning();
+
+        return {
+          success: true,
+          id: result[0].id,
+          message: "Contact information created successfully",
+        };
+      }
+
+      // Existing record - update
       await db
         .update(contactInfo)
         .set({
@@ -73,9 +96,13 @@ export const updateContactInfo = createServerFn()
         })
         .where(eq(contactInfo.id, data.id));
 
-      return { success: true };
+      return {
+        success: true,
+        id: data.id,
+        message: "Contact information updated successfully",
+      };
     } catch (error) {
       console.error("Error updating contact info:", error);
-      throw new Error("Failed to update contact info");
+      throw new Error("Failed to update contact information");
     }
   });

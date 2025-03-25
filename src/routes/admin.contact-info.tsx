@@ -80,6 +80,12 @@ function AdminContactInfoPage() {
       const result = await updateContactInfo({ data });
       if (result.success) {
         setSaveSuccess(true);
+
+        // If this was a new record, update the ID with the one from the server
+        if (isNewRecord && result.id) {
+          data.id = result.id;
+        }
+
         // Reset form with the updated values to ensure id is maintained
         reset(data);
 
