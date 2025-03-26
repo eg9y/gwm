@@ -2,214 +2,77 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { seo } from "../utils/seo";
 import { ModelColorPicker } from "../components/ModelColorPicker";
-
-// Vehicle data organized by model ID
-const vehiclesById = {
-  "tank-300": {
-    id: "tank-300",
-    name: "Tank 300",
-    price: "Rp. 837.000.000",
-    category: "suv",
-    categoryDisplay: "SUV",
-    description:
-      "Off-road SUV dengan gaya retro yang menggabungkan kemampuan off-road yang luar biasa dengan kenyamanan premium di dalam kabin.",
-    features: [
-      "Mesin Turbo 2.0 T HEV (342 HP | 648 NM)",
-      "Transmisi 8-Speed Automatic",
-      "4WD dengan Electronic Locking Differentials",
-      "900 mm Wading Depth",
-      "Comfort Luxury Nappa Leather",
-      "Auto Park",
-      "Multi-Terrain Select",
-      "ADAS Lvl 2",
-    ],
-    imageUrl: "https://gwm.kopimap.com/tank_300.webp",
-    relatedModels: ["tank-500", "haval-h6", "haval-jolion"], // related models by ID
-    colors: [
-      {
-        id: "dusk_orange",
-        name: "Dusk Orange",
-        hex: "#FF6B00",
-        backgroundColor: "#FFF0E6", // Light orange background
-      },
-      {
-        id: "crystal_black",
-        name: "Crystal Black",
-        hex: "#000000",
-        backgroundColor: "#E6E6E6", // Light gray background for black vehicle
-      },
-      {
-        id: "fossil_grey",
-        name: "Fossil Grey",
-        hex: "#808080",
-        backgroundColor: "#F5F5F5", // Light silver background for grey vehicle
-      },
-      {
-        id: "pearl_white",
-        name: "Pearl White",
-        hex: "#FFFFFF",
-        backgroundColor: "#EBF4FF", // Light blue tint background for white vehicle
-      },
-    ],
-    has180View: true,
-  },
-  "tank-500": {
-    id: "tank-500",
-    name: "Tank 500",
-    price: "Rp. 1.208.000.000",
-    category: "suv",
-    categoryDisplay: "SUV",
-    description:
-      "Luxury SUV berukuran besar dengan kemampuan off-road superior dan interior mewah berkapasitas 7 penumpang.",
-    features: [
-      "Mesin Turbo 2.0 T HEV (342 HP | 648 NM)",
-      "Transmisi 8-Speed Automatic",
-      "4WD dengan Electronic Locking Differentials",
-      "900 mm Wading Depth",
-      "Comfort Luxury Nappa Leather",
-      "Auto Park",
-      "Massage Seat",
-      "ADAS Lvl 2",
-    ],
-    imageUrl: "https://gwm.kopimap.com/tank_500.webp",
-    relatedModels: ["tank-300", "haval-h6", "haval-jolion"],
-    colors: [
-      {
-        id: "onyx_silver",
-        name: "Onyx Silver",
-        hex: "#4D5157",
-        backgroundColor: "#F0F0F0",
-      },
-    ],
-  },
-  "haval-jolion": {
-    id: "haval-jolion",
-    name: "Haval Jolion Ultra",
-    price: "Rp. 418.000.000",
-    category: "suv",
-    categoryDisplay: "SUV",
-    description:
-      "Compact SUV stylish yang menggabungkan teknologi mutakhir dengan desain berkelas. Pilihan sempurna untuk mobilitas perkotaan modern.",
-    features: [
-      "Mesin 1.5 HEV (187 HP | 375 NM)",
-      "Transmisi 7-Speed DHT",
-      "Efisien 20 Km/liter",
-      "Panoramic Sunroof",
-      '10.25" Touchscreen Display',
-      "Carplay dan Android auto",
-      "ADAS Lvl 2",
-      "EV Mode",
-    ],
-    imageUrl: "https://gwm.kopimap.com/haval_jolion.webp",
-    relatedModels: ["haval-h6", "tank-300", "tank-500"],
-    colors: [
-      {
-        id: "ayers_grey",
-        name: "Ayers Grey",
-        hex: "#6C6C6C",
-        backgroundColor: "#F5F5F5",
-      },
-      {
-        id: "azure_blue",
-        name: "Azure Blue",
-        hex: "#0077B6",
-        backgroundColor: "#E6F0F5",
-      },
-      {
-        id: "golden_black",
-        name: "Golden Black",
-        hex: "#1A1A1A",
-        backgroundColor: "#E8E8E8",
-      },
-      {
-        id: "hamilton_white",
-        name: "Hamilton White",
-        hex: "#FFFFFF",
-        backgroundColor: "#F0F4F8",
-      },
-      {
-        id: "mars_red",
-        name: "Mars Red",
-        hex: "#D62828",
-        backgroundColor: "#FFF0F0",
-      },
-      {
-        id: "pale_blue",
-        name: "Pale Blue",
-        hex: "#8ECAE6",
-        backgroundColor: "#F0F8FF",
-      },
-    ],
-  },
-  "haval-h6": {
-    id: "haval-h6",
-    name: "Haval H6",
-    price: "Rp. 602.000.000",
-    category: "suv",
-    categoryDisplay: "SUV",
-    description:
-      "SUV premium dengan desain elegan dan performa tangguh. Dilengkapi dengan berbagai fitur keselamatan dan kenyamanan terkini.",
-    features: [
-      "Mesin Turbo 1.5 T HEV (235 HP | 530 NM)",
-      "Transmisi 7-Speed DHT",
-      "Panoramic Sunroof",
-      "540° Camera View",
-      "Auto Parking",
-      "ADAS Lvl 2",
-      "Advanced Safety Features",
-      "Smart Connectivity",
-    ],
-    imageUrl: "https://gwm.kopimap.com/haval_h6.jpg",
-    relatedModels: ["haval-jolion", "tank-300", "tank-500"],
-    colors: [
-      {
-        id: "energy_green",
-        name: "Energy Green",
-        hex: "#2A9D8F",
-        backgroundColor: "#E6F5F3",
-      },
-      {
-        id: "sapphire_blue",
-        name: "Sapphire Blue",
-        hex: "#1E3A8A",
-        backgroundColor: "#E6EAF5",
-      },
-    ],
-  },
-};
+import { ModelGallery } from "../components/ModelGallery";
+import {
+  getCarModelById,
+  getAllPublishedCarModels,
+} from "../server/frontend-car-models";
+import type { CarModelColor, GalleryImage } from "../db/schema";
 
 // Define the expected types for loader data
 type LoaderData = {
-  vehicle: (typeof vehiclesById)[keyof typeof vehiclesById];
-  relatedVehicles: (typeof vehiclesById)[keyof typeof vehiclesById][];
+  vehicle: {
+    id: string;
+    name: string;
+    featuredImage: string;
+    price: string;
+    description: string;
+    features: string[];
+    mainProductImage: string;
+    colors: CarModelColor[];
+    gallery?: GalleryImage[];
+    category: string;
+    categoryDisplay: string;
+    published: number;
+  };
+  relatedVehicles: Array<{
+    id: string;
+    name: string;
+    featuredImage: string;
+    price: string;
+    description: string;
+    features: string[];
+    mainProductImage: string;
+    colors: CarModelColor[];
+    category: string;
+    categoryDisplay: string;
+    published: number;
+  }>;
 };
 
 export const Route = createFileRoute("/tipe-mobil/$model")({
   beforeLoad: ({ params }) => {
+    // This is executed first - just to check the model ID exists
+    // The actual loading happens in the loader function
     const { model } = params;
-    // Check if the vehicle model exists
-    if (!vehiclesById[model as keyof typeof vehiclesById]) {
-      throw new Error(`Invalid vehicle model: ${model}`);
+    if (!model) {
+      throw new Error("Model ID is required");
     }
   },
 
-  loader: ({ params }) => {
-    const { model } = params;
-    const vehicle = vehiclesById[model as keyof typeof vehiclesById];
+  loader: async ({ params }) => {
+    const { model: modelId } = params;
 
-    if (!vehicle) {
-      throw new Error(`No vehicle found with ID: ${model}`);
+    // Get the vehicle details
+    try {
+      const model = await getCarModelById({ data: { id: modelId } });
+
+      // Get all other models for related vehicles
+      const allModels = await getAllPublishedCarModels();
+
+      // Filter out the current model and limit to 3 related models
+      const relatedVehicles = allModels
+        .filter((relatedModel) => relatedModel.id !== modelId)
+        .slice(0, 3);
+
+      return {
+        vehicle: model,
+        relatedVehicles,
+      } satisfies LoaderData;
+    } catch (error) {
+      console.error(`Failed to load model ${modelId}:`, error);
+      throw new Error(`No vehicle found with ID: ${modelId}`);
     }
-
-    // Get related vehicles
-    const relatedVehicles = vehicle.relatedModels
-      .map((id) => vehiclesById[id as keyof typeof vehiclesById])
-      .filter((v) => v !== undefined);
-
-    return {
-      vehicle,
-      relatedVehicles,
-    } satisfies LoaderData;
   },
 
   head: ({ loaderData }) => {
@@ -221,7 +84,7 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
           title: `${vehicle.name} - Tipe Mobil GWM Indonesia | Great Wall Motors`,
           description: `${vehicle.name} - ${vehicle.description} Dapatkan informasi lengkap mengenai spesifikasi, harga, dan fitur ${vehicle.name}.`,
           keywords: `GWM, Great Wall Motors, ${vehicle.name}, ${vehicle.categoryDisplay}, Tipe Mobil GWM, ${vehicle.name} Indonesia, ${vehicle.name} Spesifikasi`,
-          image: vehicle.imageUrl,
+          image: vehicle.featuredImage,
         }),
       ],
       links: [
@@ -258,7 +121,7 @@ function VehicleDetailPage() {
         <div
           className="absolute inset-0 bg-cover bg-center opacity-30"
           style={{
-            backgroundImage: `url(${vehicle.imageUrl})`,
+            backgroundImage: `url(${vehicle.featuredImage})`,
           }}
         />
         <div className="relative container mx-auto px-4 py-24 sm:py-32">
@@ -280,7 +143,7 @@ function VehicleDetailPage() {
           {/* Image */}
           <div className="rounded-lg overflow-hidden shadow-lg">
             <img
-              src={vehicle.imageUrl}
+              src={vehicle.featuredImage}
               alt={vehicle.name}
               className="w-full h-full object-cover"
             />
@@ -293,17 +156,19 @@ function VehicleDetailPage() {
             </h2>
             <div className="bg-gray-50 p-6 rounded-lg">
               <ul className="space-y-4">
-                {vehicle.features.map((feature, idx) => (
-                  <li
-                    key={`${vehicle.id}-feature-${idx}`}
-                    className="flex items-start gap-3"
-                  >
-                    <span className="flex-shrink-0 mt-1 text-primary font-bold">
-                      ✓
-                    </span>
-                    <span className="text-gray-700">{feature}</span>
-                  </li>
-                ))}
+                {vehicle.features &&
+                  Array.isArray(vehicle.features) &&
+                  vehicle.features.map((feature, idx) => (
+                    <li
+                      key={`${vehicle.id}-feature-${idx}`}
+                      className="flex items-start gap-3"
+                    >
+                      <span className="flex-shrink-0 mt-1 text-primary font-bold">
+                        ✓
+                      </span>
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
               </ul>
             </div>
 
@@ -341,13 +206,17 @@ function VehicleDetailPage() {
                 Setiap detail dalam desain dan teknologi dipilih untuk
                 memberikan pengalaman berkendara yang optimal.
               </p>
-              <p className="mt-4">
-                Dengan {vehicle.features[0].toLowerCase()}, {vehicle.name}{" "}
-                memberikan tenaga dan torsi yang cukup untuk menghadapi berbagai
-                kondisi jalan. Kombinasi dengan{" "}
-                {vehicle.features[1].toLowerCase()} menawarkan perpindahan gigi
-                yang halus dan responsif.
-              </p>
+              {vehicle.features && vehicle.features[0] && (
+                <p className="mt-4">
+                  Dengan {vehicle.features[0].toLowerCase()}, {vehicle.name}{" "}
+                  memberikan tenaga dan torsi yang cukup untuk menghadapi
+                  berbagai kondisi jalan. Kombinasi dengan{" "}
+                  {vehicle.features[1]
+                    ? vehicle.features[1].toLowerCase()
+                    : "transmisi modern"}{" "}
+                  menawarkan perpindahan gigi yang halus dan responsif.
+                </p>
+              )}
               <p className="mt-4">
                 Interior {vehicle.name} dirancang dengan mengutamakan kenyamanan
                 dan kemudahan penggunaan. Teknologi-teknologi canggih
@@ -359,7 +228,7 @@ function VehicleDetailPage() {
 
           {/* Color picker - only show for models that have color options */}
           <div>
-            {"colors" in vehicle &&
+            {vehicle.colors &&
               Array.isArray(vehicle.colors) &&
               vehicle.colors.length > 0 && (
                 <ModelColorPicker
@@ -369,6 +238,17 @@ function VehicleDetailPage() {
               )}
           </div>
         </div>
+
+        {/* Gallery Section - only show if gallery images exist */}
+        {vehicle.gallery?.length > 0 && (
+          <div className="mb-16">
+            <ModelGallery
+              modelId={vehicle.id}
+              modelName={vehicle.name}
+              gallery={vehicle.gallery}
+            />
+          </div>
+        )}
 
         {/* Related vehicles */}
         <div>
@@ -389,7 +269,7 @@ function VehicleDetailPage() {
                 >
                   <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
                     <img
-                      src={relatedVehicle.imageUrl}
+                      src={relatedVehicle.featuredImage}
                       alt={relatedVehicle.name}
                       className="w-full h-full object-cover"
                     />

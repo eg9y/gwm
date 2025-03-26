@@ -10,8 +10,20 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Connect to SQLite database
-const sqlite = new Database("storage/gwm-database.db");
+// Connect to SQLite database with optimized configuration to prevent locking
+const sqlite = new Database("storage/gwm-database.db", {
+  // WAL mode helps prevent db locks by allowing reads during writes
+  // and improves concurrent access
+  fileMustExist: false,
+  timeout: 5000, // 5 second timeout on database locks
+  verbose: process.env.NODE_ENV === "development" ? console.log : undefined,
+});
+
+// Enable WAL mode
+sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("synchronous = NORMAL");
+sqlite.pragma("foreign_keys = ON");
+sqlite.pragma("busy_timeout = 5000"); // 5000ms before giving up on a lock
 
 // Create a Drizzle ORM instance with snake_case to camelCase conversion
 export const db = drizzle(sqlite, {

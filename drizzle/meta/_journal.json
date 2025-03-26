@@ -57,6 +57,20 @@
       "when": 1742911840400,
       "tag": "0008_oval_dracula",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1742920201948,
+      "tag": "0009_pale_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1742978320980,
+      "tag": "0010_slimy_molten_man",
+      "breakpoints": true
     }
   ]
 }

@@ -94,7 +94,8 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   // Get the router state to detect when routes are loading
-  const { isLoading } = useRouterState();
+  const { isLoading, location } = useRouterState();
+  const isAdminPage = location.pathname.startsWith("/admin");
 
   return (
     <ClerkProvider>
@@ -124,7 +125,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               </main>
 
               <Footer />
-              <WhatsAppButton />
+              {!isAdminPage && <WhatsAppButton />}
             </div>
           </div>
         </body>

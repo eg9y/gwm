@@ -2,7 +2,7 @@ import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@clerk/tanstack-start";
 import { Link, useNavigate, useMatches } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Users, FileText, Phone } from "lucide-react";
+import { Users, FileText, Phone, Car } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -67,6 +67,18 @@ function AdminLayout() {
                 >
                   <FileText className="h-5 w-5 mr-2" />
                   Articles
+                </Link>
+
+                <Link
+                  to="/admin/models"
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
+                    currentPath.includes("/admin/models")
+                      ? "text-white bg-primary"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <Car className="h-5 w-5 mr-2" />
+                  Car Models
                 </Link>
 
                 <Link
