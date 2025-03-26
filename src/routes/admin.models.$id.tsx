@@ -137,6 +137,11 @@ export const Route = createFileRoute("/admin/models/$id")({
   },
 });
 
+// Validate hex color format
+function isValidHexColor(color: string): boolean {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}
+
 function CarModelEditorPage() {
   const { model, isNew } = Route.useLoaderData();
   const { id } = Route.useParams();
@@ -237,6 +242,20 @@ function CarModelEditorPage() {
     setIsSubmitting(true);
 
     try {
+      // Validate hex colors
+      const invalidColors = data.colors.filter(
+        (color) =>
+          !isValidHexColor(color.hex) || !isValidHexColor(color.backgroundColor)
+      );
+
+      if (invalidColors.length > 0) {
+        toast.error(
+          "Some colors have invalid hex values. Please check your color inputs."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
       // First validate if all required fields are filled
       const isValid = await trigger();
       if (!isValid) {
@@ -336,9 +355,16 @@ function CarModelEditorPage() {
           featuredImage: watch("featuredImage"),
           mainProductImage: watch("mainProductImage"),
           subImage: watch("subImage"),
-          colors: watch("colors"),
+          colors: watch("colors").map((color) => ({
+            ...color,
+            hex: color.hex || "#000000", // Ensure hex values are present
+            backgroundColor: color.backgroundColor || "#f5f5f5", // Ensure background colors are present
+          })),
           gallery: watch("gallery"),
         };
+
+        // Add debug log to check what's being sent
+        console.log("Submitting model data with colors:", submitData.colors);
 
         // Clear the upload progress and file uploads
         setUploadProgress(null);
@@ -1046,7 +1072,13 @@ function CarModelEditorPage() {
                         <input
                           id={`color-picker-${index}`}
                           type="color"
-                          {...register(`colors.${index}.hex`)}
+                          value={watch(`colors.${index}.hex`) || "#000000"}
+                          onChange={(e) => {
+                            setValue(`colors.${index}.hex`, e.target.value, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            });
+                          }}
                           className="h-9 w-9 p-0 rounded border border-gray-300"
                         />
                         <input
@@ -1075,7 +1107,20 @@ function CarModelEditorPage() {
                         <input
                           id={`color-bg-picker-${index}`}
                           type="color"
-                          {...register(`colors.${index}.backgroundColor`)}
+                          value={
+                            watch(`colors.${index}.backgroundColor`) ||
+                            "#f5f5f5"
+                          }
+                          onChange={(e) => {
+                            setValue(
+                              `colors.${index}.backgroundColor`,
+                              e.target.value,
+                              {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                              }
+                            );
+                          }}
                           className="h-9 w-9 p-0 rounded border border-gray-300"
                         />
                         <input
@@ -1166,6 +1211,33 @@ function CarModelEditorPage() {
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
+                    </div>
+                  </div>
+
+                  <div
+                    className="mt-3 p-3 rounded-md"
+                    style={{
+                      backgroundColor:
+                        watch(`colors.${index}.backgroundColor`) || "#f5f5f5",
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-full border border-gray-200 shadow-sm"
+                        style={{
+                          backgroundColor:
+                            watch(`colors.${index}.hex`) || "#000000",
+                        }}
+                      ></div>
+                      <div className="text-sm">
+                        <p>
+                          <strong>Preview:</strong>{" "}
+                          {watch(`colors.${index}.name`)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Hex: {watch(`colors.${index}.hex`)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

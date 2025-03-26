@@ -123,7 +123,7 @@ function generateModelId(name: string): string {
   });
 }
 
-// Process colors to add IDs based on names
+// Process colors to add IDs based on names and ensure all properties are present
 function processColors(
   colors: {
     name: string;
@@ -134,9 +134,9 @@ function processColors(
 ): CarModelColor[] {
   return colors.map((color) => ({
     name: color.name,
-    hex: color.hex,
-    backgroundColor: color.backgroundColor,
-    imageUrl: color.imageUrl,
+    hex: color.hex || "#000000", // Ensure default value if missing
+    backgroundColor: color.backgroundColor || "#f5f5f5", // Ensure default value if missing
+    imageUrl: color.imageUrl || undefined,
   }));
 }
 
