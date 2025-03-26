@@ -6,34 +6,8 @@ import {
   UserButton,
   SignInButton,
 } from "@clerk/tanstack-start";
-
-// Define vehicle models for the dropdown
-const vehicleModels = [
-  {
-    id: "tank-300",
-    name: "Tank 300",
-    category: "SUV",
-    image: "https://gwm.kopimap.com/navbar/tank_300_nav_shot.png",
-  },
-  {
-    id: "tank-500",
-    name: "Tank 500",
-    category: "SUV",
-    image: "https://gwm.kopimap.com/navbar/tank_500_nav_shot.png",
-  },
-  {
-    id: "haval-jolion",
-    name: "Haval Jolion Ultra",
-    category: "SUV",
-    image: "https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png",
-  },
-  {
-    id: "haval-h6",
-    name: "Haval H6",
-    category: "SUV",
-    image: "https://gwm.kopimap.com/navbar/haval_h6_nav_shot.png",
-  },
-];
+import { getAllPublishedCarModels } from "../server/frontend-car-models";
+import type { DisplayCarModel } from "../server/frontend-car-models";
 
 // Define pages that should start with transparent navbar
 const transparentNavbarPages = ["/", "/kontak"];
@@ -50,6 +24,24 @@ const Navbar = () => {
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState(true);
   const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLLIElement | null>(null);
+  const [vehicleModels, setVehicleModels] = useState<DisplayCarModel[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch car models for the dropdown
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const data = await getAllPublishedCarModels();
+        setVehicleModels(data);
+      } catch (error) {
+        console.error("Failed to load car models for navigation:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchModels();
+  }, []);
 
   // Handle body scroll locking when mobile menu is open
   useEffect(() => {
@@ -200,6 +192,19 @@ const Navbar = () => {
     return "https://gwm.kopimap.com/gwm_logo.webp"; // Default colored logo
   };
 
+  // Group vehicle models by category
+  const vehicleModelsByCategory = vehicleModels.reduce(
+    (acc, model) => {
+      const category = model.category || "other";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(model);
+      return acc;
+    },
+    {} as Record<string, DisplayCarModel[]>
+  );
+
   return (
     <nav
       className={`flex justify-between items-center px-4 sm:px-6 md:px-10 h-[60px] sm:h-[70px] w-full transition-all duration-300 ${getNavbarStyle()}`}
@@ -262,29 +267,53 @@ const Navbar = () => {
             {/* Dropdown menu */}
             {dropdownOpen && (
               <div className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg py-2 min-w-[280px] z-50">
-                {vehicleModels.map((model) => (
-                  <Link
-                    key={model.id}
-                    to="/tipe-mobil/$model"
-                    params={{
-                      model: model.id,
-                    }}
-                    preload="intent"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <img
-                      src={model.image}
-                      alt={model.name}
-                      className="w-14 h-10 object-cover rounded mr-3"
-                    />
-                    <div>
-                      <span className="flex-1 font-medium">{model.name}</span>
-                      <span className="text-xs text-gray-500 block">
-                        {model.category}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                {isLoading ? (
+                  <div className="px-4 py-3 text-sm text-gray-500">
+                    Loading models...
+                  </div>
+                ) : vehicleModels.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-500">
+                    No car models available
+                  </div>
+                ) : (
+                  Object.entries(vehicleModelsByCategory).map(
+                    ([category, categoryModels]) => (
+                      <div key={category}>
+                        <div className="px-4 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2">
+                          {categoryModels[0]?.categoryDisplay || category}
+                        </div>
+                        {categoryModels.map((model) => (
+                          <Link
+                            key={model.id}
+                            to="/tipe-mobil/$model"
+                            params={{
+                              model: model.id,
+                            }}
+                            preload="intent"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <img
+                              src={
+                                model.mainProductImage ||
+                                "https://gwm.kopimap.com/placeholder-car.png"
+                              }
+                              alt={model.name}
+                              className="w-20 h-12 object-cover rounded mr-3"
+                            />
+                            <div>
+                              <span className="flex-1 font-medium">
+                                {model.name}
+                              </span>
+                              <span className="text-xs text-gray-500 block">
+                                {model.categoryDisplay || model.category}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )
+                  )
+                )}
               </div>
             )}
           </li>
@@ -451,32 +480,52 @@ const Navbar = () => {
             </div>
             {mobileSubmenuOpen && (
               <div className="pl-4 mt-2 space-y-3 border-l-2 border-gray-100">
-                {vehicleModels.map((model) => (
-                  <Link
-                    key={model.id}
-                    to="/tipe-mobil/$model"
-                    params={{
-                      model: model.id,
-                    }}
-                    preload="intent"
-                    className="flex items-center py-1.5 text-sm text-gray-700 hover:text-primary"
-                    onClick={(e) => {
-                      closeMenu();
-                    }}
-                  >
-                    <img
-                      src={model.image}
-                      alt={model.name}
-                      className="w-12 h-9 object-cover rounded mr-2"
-                    />
-                    <div>
-                      <span>{model.name}</span>
-                      <span className="text-xs text-gray-500 block">
-                        {model.category}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                {isLoading ? (
+                  <div className="py-2 text-sm text-gray-500">
+                    Loading models...
+                  </div>
+                ) : vehicleModels.length === 0 ? (
+                  <div className="py-2 text-sm text-gray-500">
+                    No car models available
+                  </div>
+                ) : (
+                  Object.entries(vehicleModelsByCategory).map(
+                    ([category, categoryModels]) => (
+                      <div key={category} className="py-2">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                          {categoryModels[0]?.categoryDisplay || category}
+                        </div>
+                        {categoryModels.map((model) => (
+                          <Link
+                            key={model.id}
+                            to="/tipe-mobil/$model"
+                            params={{
+                              model: model.id,
+                            }}
+                            preload="intent"
+                            className="flex items-center py-1.5 text-sm text-gray-700 hover:text-primary"
+                            onClick={closeMenu}
+                          >
+                            <img
+                              src={
+                                model.mainProductImage ||
+                                "https://gwm.kopimap.com/placeholder-car.png"
+                              }
+                              alt={model.name}
+                              className="w-16 h-12 object-cover rounded mr-2"
+                            />
+                            <div>
+                              <span>{model.name}</span>
+                              <span className="text-xs text-gray-500 block">
+                                {model.categoryDisplay || model.category}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )
+                  )
+                )}
               </div>
             )}
           </li>

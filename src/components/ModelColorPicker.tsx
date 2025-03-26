@@ -1,14 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import type { CarModelColor } from "../db/schema";
 
 // Types for the component props
 interface ModelColorPickerProps {
   modelId: string;
-  colors: {
-    id: string;
-    name: string;
-    hex: string;
-    backgroundColor?: string; // Optional background color for display
-  }[];
+  colors: CarModelColor[];
   baseUrl?: string;
 }
 
@@ -18,12 +14,12 @@ export function ModelColorPicker({
   baseUrl = "https://gwm.kopimap.com/model_colors",
 }: ModelColorPickerProps) {
   // State
-  const [selectedColor, setSelectedColor] = useState<string>(
-    colors[0]?.id || ""
-  );
+  const [selectedColorIndex, setSelectedColorIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [imageError, setImageError] = useState<boolean>(false);
-  const [hoveredColor, setHoveredColor] = useState<string | null>(null);
+  const [hoveredColorIndex, setHoveredColorIndex] = useState<number | null>(
+    null
+  );
   const [preloadedImages, setPreloadedImages] = useState<
     Record<string, boolean>
   >({});
@@ -39,8 +35,12 @@ export function ModelColorPicker({
   // Format model ID (replace hyphens with underscores)
   const formattedModelId = modelId.replace(/-/g, "_");
 
+  // Ensure colors is an array (handle potential JSON string)
+  const colorArray = Array.isArray(colors) ? colors : [];
+
   // Get the currently selected color data
-  const selectedColorData = colors.find((color) => color.id === selectedColor);
+  const selectedColorData = colorArray[selectedColorIndex];
+  const selectedColorId = `color_${selectedColorIndex}`;
 
   // Get the hex color and background color
   const selectedColorHex = selectedColorData?.hex || "#FFFFFF";
@@ -49,10 +49,11 @@ export function ModelColorPicker({
 
   // Check if the image is already cached by the browser on initial load
   useEffect(() => {
-    // Function to check if image is already cached
+    // Function to check if image is cached
     const checkInitialImageCache = () => {
-      if (selectedColor) {
-        const initialImageUrl = `${baseUrl}/${formattedModelId}/${selectedColor}.webp`;
+      if (selectedColorData?.imageUrl) {
+        // Use the imageUrl from the color data directly
+        const initialImageUrl = selectedColorData.imageUrl;
         const img = new Image();
 
         img.onload = () => {
@@ -60,7 +61,7 @@ export function ModelColorPicker({
           setIsLoading(false);
           setPreloadedImages((prev) => ({
             ...prev,
-            [selectedColor]: true,
+            [selectedColorId]: true,
           }));
         };
 
@@ -71,7 +72,7 @@ export function ModelColorPicker({
           setIsLoading(false);
           setPreloadedImages((prev) => ({
             ...prev,
-            [selectedColor]: true,
+            [selectedColorId]: true,
           }));
         }
       }
@@ -89,25 +90,25 @@ export function ModelColorPicker({
         clearTimeout(loadingTimeoutRef.current);
       }
     };
-  }, [baseUrl, formattedModelId, selectedColor]);
+  }, [selectedColorData, selectedColorId]);
 
   // Reset selectedColor when colors change
   useEffect(() => {
-    if (colors && colors.length > 0) {
-      setSelectedColor(colors[0].id);
+    if (colorArray && colorArray.length > 0) {
+      setSelectedColorIndex(0);
       setPreloadedImages({});
       setPreloadingImages({});
       setImageError(false);
     }
-  }, [colors]);
+  }, [colorArray]);
 
-  // Image URL for current selection
-  const imageUrl = `${baseUrl}/${formattedModelId}/${selectedColor}.webp`;
+  // Image URL for current selection - use imageUrl from the color data directly
+  const imageUrl = selectedColorData?.imageUrl || "";
 
   // Reset loading state when color changes
   useEffect(() => {
-    if (selectedColor) {
-      if (preloadedImages[selectedColor]) {
+    if (selectedColorId) {
+      if (preloadedImages[selectedColorId]) {
         // If preloaded, we can skip the loading state
         setIsLoading(false);
       } else {
@@ -125,19 +126,26 @@ export function ModelColorPicker({
             setIsLoading(false);
             setPreloadedImages((prev) => ({
               ...prev,
-              [selectedColor]: true,
+              [selectedColorId]: true,
             }));
           }
         }, 1000) as unknown as number;
       }
     }
-  }, [selectedColor, preloadedImages]);
+  }, [selectedColorId, preloadedImages]);
 
   // Preload image on hover
   useEffect(() => {
-    const preloadImage = (colorId: string) => {
-      // Skip if already preloaded or currently preloading
-      if (preloadedImages[colorId] || preloadingImages[colorId]) {
+    const preloadImage = (index: number) => {
+      const colorId = `color_${index}`;
+      const colorData = colorArray[index];
+
+      // Skip if no imageUrl, already preloaded, or currently preloading
+      if (
+        !colorData?.imageUrl ||
+        preloadedImages[colorId] ||
+        preloadingImages[colorId]
+      ) {
         return;
       }
 
@@ -177,35 +185,46 @@ export function ModelColorPicker({
         }));
       };
 
-      img.src = `${baseUrl}/${formattedModelId}/${colorId}.webp`;
+      img.src = colorData.imageUrl;
       preloadImageRef.current[colorId] = img;
     };
 
-    if (hoveredColor && hoveredColor !== selectedColor) {
-      preloadImage(hoveredColor);
+    if (
+      hoveredColorIndex !== null &&
+      hoveredColorIndex !== selectedColorIndex
+    ) {
+      preloadImage(hoveredColorIndex);
     }
 
     return () => {
       // Clean up is handled by the preloadingImages state
     };
   }, [
-    hoveredColor,
-    formattedModelId,
-    baseUrl,
+    hoveredColorIndex,
+    colorArray,
     preloadedImages,
     preloadingImages,
-    selectedColor,
+    selectedColorIndex,
   ]);
 
   // Handle mouse enter on color button
-  const handleColorHover = (colorId: string) => {
-    setHoveredColor(colorId);
+  const handleColorHover = (index: number) => {
+    setHoveredColorIndex(index);
   };
 
   // Handle mouse leave on color button
   const handleColorLeave = () => {
-    setHoveredColor(null);
+    setHoveredColorIndex(null);
   };
+
+  // If no colors, show a placeholder message
+  if (colorArray.length === 0) {
+    return (
+      <div className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-100 shadow-sm text-center text-gray-500">
+        Warna tidak tersedia untuk model ini
+      </div>
+    );
+  }
 
   return (
     <div className="mb-8 relative bg-gray-50 p-4 sm:p-6 rounded-lg border border-gray-100 shadow-sm">
@@ -224,64 +243,32 @@ export function ModelColorPicker({
       {/* Color selection */}
       <div className="mb-4 sm:mb-6">
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-y-4 gap-x-2 justify-items-center">
-          {colors.map((color) => (
+          {colorArray.map((color, index) => (
             <button
-              key={color.id}
+              key={`color-${index}-${color.name}`}
               type="button"
               className={`group flex flex-col items-center transition-all max-w-[90px] ${
-                selectedColor === color.id ? "scale-105" : "hover:scale-105"
+                selectedColorIndex === index ? "scale-105" : "hover:scale-105"
               }`}
-              onClick={() => setSelectedColor(color.id)}
-              onMouseEnter={() => handleColorHover(color.id)}
+              onClick={() => setSelectedColorIndex(index)}
+              onMouseEnter={() => handleColorHover(index)}
               onMouseLeave={handleColorLeave}
               aria-label={`Warna ${color.name}`}
               title={color.name}
             >
               <div
                 className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 mb-1 sm:mb-2 flex items-center justify-center ${
-                  selectedColor === color.id
+                  selectedColorIndex === index
                     ? "border-primary shadow-lg"
-                    : hoveredColor === color.id
-                      ? "border-primary/60 shadow-md"
-                      : "border-gray-300 group-hover:border-primary/60 group-hover:shadow-md"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
                 style={{ backgroundColor: color.hex }}
-              >
-                {selectedColor === color.id && (
-                  <span className="flex items-center justify-center text-white">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 sm:h-5 sm:w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <title>Warna terpilih</title>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </span>
-                )}
-
-                {/* Small preloading indicator */}
-                {preloadingImages[color.id] && color.id !== selectedColor && (
-                  <span className="absolute -bottom-1 -right-1 bg-white rounded-full w-4 h-4 flex items-center justify-center">
-                    <div className="w-3 h-3 border-2 border-primary/40 border-t-transparent rounded-full animate-spin" />
-                  </span>
-                )}
-              </div>
+              />
               <span
-                className={`text-xs text-center break-words hyphens-auto px-1 ${
-                  selectedColor === color.id
+                className={`text-xs sm:text-sm text-center ${
+                  selectedColorIndex === index
                     ? "font-medium text-primary"
-                    : hoveredColor === color.id
-                      ? "text-primary/80"
-                      : "text-gray-600 group-hover:text-primary/80"
+                    : "text-gray-700 group-hover:text-gray-900"
                 }`}
               >
                 {color.name}
@@ -291,84 +278,84 @@ export function ModelColorPicker({
         </div>
       </div>
 
-      {/* Image container */}
+      {/* Color preview */}
       <div
-        className="relative rounded-lg overflow-hidden shadow-inner border border-gray-200"
+        className="aspect-video rounded-lg overflow-hidden flex items-center justify-center relative"
         style={{ backgroundColor: selectedBackgroundColor }}
       >
-        {/* Loading indicator */}
+        {/* Loading state */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 bg-opacity-70 bg-white">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
+            <div className="w-10 h-10 border-4 border-t-transparent border-primary rounded-full animate-spin" />
           </div>
         )}
 
-        {/* Error message if image can't be loaded */}
+        {/* Error state */}
         {imageError && !isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-gray-500 text-center bg-white bg-opacity-75 px-4 py-3 sm:px-6 sm:py-4 rounded-lg shadow-sm text-sm sm:text-base">
-              Maaf, gambar untuk warna ini belum tersedia.
-              <br />
-              Silakan pilih warna lain.
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 bg-opacity-50 p-4 text-center">
+            <svg
+              className="w-12 h-12 text-gray-400 mb-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <title>Error loading image</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            <p className="text-gray-600">
+              Gambar tidak dapat dimuat. Silakan coba warna lain.
             </p>
           </div>
         )}
 
-        {/* The vehicle image */}
-        <img
-          ref={imgRef}
-          src={imageUrl}
-          alt={`${modelId.replace(/-/g, " ")} warna ${
-            selectedColorData?.name || selectedColor
-          }`}
-          className="w-full h-full object-contain transition-opacity duration-300"
-          style={{ opacity: isLoading || imageError ? 0 : 1 }}
-          onLoad={() => {
-            setIsLoading(false);
-            // Clear any pending timeout
-            if (loadingTimeoutRef.current !== null) {
-              clearTimeout(loadingTimeoutRef.current);
-              loadingTimeoutRef.current = null;
-            }
-            // Mark this color as preloaded
-            setPreloadedImages((prev) => ({
-              ...prev,
-              [selectedColor]: true,
-            }));
-            // No longer preloading
-            setPreloadingImages((prev) => ({
-              ...prev,
-              [selectedColor]: false,
-            }));
-          }}
-          onError={() => {
-            setIsLoading(false);
-            setImageError(true);
-            // Clear any pending timeout
-            if (loadingTimeoutRef.current !== null) {
-              clearTimeout(loadingTimeoutRef.current);
-              loadingTimeoutRef.current = null;
-            }
-            // Mark this color as failed
-            setPreloadedImages((prev) => ({
-              ...prev,
-              [selectedColor]: false,
-            }));
-            // No longer preloading
-            setPreloadingImages((prev) => ({
-              ...prev,
-              [selectedColor]: false,
-            }));
-          }}
-        />
+        {/* Image */}
+        {imageUrl && (
+          <img
+            ref={imgRef}
+            src={imageUrl}
+            alt={`${modelId.replace(/-/g, " ")} warna ${
+              selectedColorData.name
+            }`}
+            className={`max-w-full max-h-full object-contain transition-opacity duration-200 ${
+              isLoading || imageError ? "opacity-0" : "opacity-100"
+            }`}
+            onLoad={() => {
+              setIsLoading(false);
+              setPreloadedImages((prev) => ({
+                ...prev,
+                [selectedColorId]: true,
+              }));
+            }}
+            onError={() => {
+              setIsLoading(false);
+              setImageError(true);
+            }}
+          />
+        )}
       </div>
 
-      {/* Color name display */}
-      <div className="mt-3 sm:mt-4 text-center">
-        <span className="inline-block bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-gray-800 font-medium shadow-sm text-sm sm:text-base">
-          {selectedColorData?.name || selectedColor}
-        </span>
-      </div>
+      {/* Color name displayed prominently */}
+      {selectedColorData && (
+        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">{selectedColorData.name}</h3>
+            <p className="text-sm text-gray-500">Tersedia untuk semua varian</p>
+          </div>
+          <div className="flex space-x-2">
+            <div
+              className="w-8 h-8 rounded-full border border-gray-200"
+              style={{ backgroundColor: selectedColorHex }}
+              title={`Color: ${selectedColorData.name}`}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

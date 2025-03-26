@@ -28,8 +28,11 @@ import { Route as InfoPromoSlugImport } from './routes/info-promo.$slug'
 import { Route as AdminKontakImport } from './routes/admin.kontak'
 import { Route as AdminContactInfoImport } from './routes/admin.contact-info'
 import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
+import { Route as AdminModelsRouteImport } from './routes/admin.models.route'
 import { Route as AdminArticlesRouteImport } from './routes/admin.articles.route'
+import { Route as AdminModelsIndexImport } from './routes/admin.models.index'
 import { Route as AdminArticlesIndexImport } from './routes/admin.articles.index'
+import { Route as AdminModelsIdImport } from './routes/admin.models.$id'
 import { Route as AdminArticlesNewImport } from './routes/admin.articles.new'
 import { Route as AdminArticlesIdImport } from './routes/admin.articles.$id'
 import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathlessLayout/_nested-layout/route-b'
@@ -139,16 +142,34 @@ const PathlessLayoutNestedLayoutRoute = PathlessLayoutNestedLayoutImport.update(
   } as any,
 )
 
+const AdminModelsRouteRoute = AdminModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
 const AdminArticlesRouteRoute = AdminArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 
+const AdminModelsIndexRoute = AdminModelsIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminModelsRouteRoute,
+} as any)
+
 const AdminArticlesIndexRoute = AdminArticlesIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminArticlesRouteRoute,
+} as any)
+
+const AdminModelsIdRoute = AdminModelsIdImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminModelsRouteRoute,
 } as any)
 
 const AdminArticlesNewRoute = AdminArticlesNewImport.update({
@@ -251,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminArticlesRouteImport
       parentRoute: typeof AdminRouteImport
     }
+    '/admin/models': {
+      id: '/admin/models'
+      path: '/models'
+      fullPath: '/admin/models'
+      preLoaderRoute: typeof AdminModelsRouteImport
+      parentRoute: typeof AdminRouteImport
+    }
     '/_pathlessLayout/_nested-layout': {
       id: '/_pathlessLayout/_nested-layout'
       path: ''
@@ -335,12 +363,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminArticlesNewImport
       parentRoute: typeof AdminArticlesRouteImport
     }
+    '/admin/models/$id': {
+      id: '/admin/models/$id'
+      path: '/$id'
+      fullPath: '/admin/models/$id'
+      preLoaderRoute: typeof AdminModelsIdImport
+      parentRoute: typeof AdminModelsRouteImport
+    }
     '/admin/articles/': {
       id: '/admin/articles/'
       path: '/'
       fullPath: '/admin/articles/'
       preLoaderRoute: typeof AdminArticlesIndexImport
       parentRoute: typeof AdminArticlesRouteImport
+    }
+    '/admin/models/': {
+      id: '/admin/models/'
+      path: '/'
+      fullPath: '/admin/models/'
+      preLoaderRoute: typeof AdminModelsIndexImport
+      parentRoute: typeof AdminModelsRouteImport
     }
   }
 }
@@ -362,8 +404,22 @@ const AdminArticlesRouteRouteChildren: AdminArticlesRouteRouteChildren = {
 const AdminArticlesRouteRouteWithChildren =
   AdminArticlesRouteRoute._addFileChildren(AdminArticlesRouteRouteChildren)
 
+interface AdminModelsRouteRouteChildren {
+  AdminModelsIdRoute: typeof AdminModelsIdRoute
+  AdminModelsIndexRoute: typeof AdminModelsIndexRoute
+}
+
+const AdminModelsRouteRouteChildren: AdminModelsRouteRouteChildren = {
+  AdminModelsIdRoute: AdminModelsIdRoute,
+  AdminModelsIndexRoute: AdminModelsIndexRoute,
+}
+
+const AdminModelsRouteRouteWithChildren =
+  AdminModelsRouteRoute._addFileChildren(AdminModelsRouteRouteChildren)
+
 interface AdminRouteRouteChildren {
   AdminArticlesRouteRoute: typeof AdminArticlesRouteRouteWithChildren
+  AdminModelsRouteRoute: typeof AdminModelsRouteRouteWithChildren
   AdminContactInfoRoute: typeof AdminContactInfoRoute
   AdminKontakRoute: typeof AdminKontakRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -371,6 +427,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminArticlesRouteRoute: AdminArticlesRouteRouteWithChildren,
+  AdminModelsRouteRoute: AdminModelsRouteRouteWithChildren,
   AdminContactInfoRoute: AdminContactInfoRoute,
   AdminKontakRoute: AdminKontakRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -435,6 +492,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
+  '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/kontak': typeof AdminKontakRoute
   '/info-promo/$slug': typeof InfoPromoSlugRoute
@@ -446,7 +504,9 @@ export interface FileRoutesByFullPath {
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
   '/admin/articles/$id': typeof AdminArticlesIdRoute
   '/admin/articles/new': typeof AdminArticlesNewRoute
+  '/admin/models/$id': typeof AdminModelsIdRoute
   '/admin/articles/': typeof AdminArticlesIndexRoute
+  '/admin/models/': typeof AdminModelsIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -468,7 +528,9 @@ export interface FileRoutesByTo {
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
   '/admin/articles/$id': typeof AdminArticlesIdRoute
   '/admin/articles/new': typeof AdminArticlesNewRoute
+  '/admin/models/$id': typeof AdminModelsIdRoute
   '/admin/articles': typeof AdminArticlesIndexRoute
+  '/admin/models': typeof AdminModelsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -483,6 +545,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
+  '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/kontak': typeof AdminKontakRoute
@@ -495,7 +558,9 @@ export interface FileRoutesById {
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
   '/admin/articles/$id': typeof AdminArticlesIdRoute
   '/admin/articles/new': typeof AdminArticlesNewRoute
+  '/admin/models/$id': typeof AdminModelsIdRoute
   '/admin/articles/': typeof AdminArticlesIndexRoute
+  '/admin/models/': typeof AdminModelsIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -511,6 +576,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/admin/articles'
+    | '/admin/models'
     | '/admin/contact-info'
     | '/admin/kontak'
     | '/info-promo/$slug'
@@ -522,7 +588,9 @@ export interface FileRouteTypes {
     | '/route-b'
     | '/admin/articles/$id'
     | '/admin/articles/new'
+    | '/admin/models/$id'
     | '/admin/articles/'
+    | '/admin/models/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -543,7 +611,9 @@ export interface FileRouteTypes {
     | '/route-b'
     | '/admin/articles/$id'
     | '/admin/articles/new'
+    | '/admin/models/$id'
     | '/admin/articles'
+    | '/admin/models'
   id:
     | '__root__'
     | '/'
@@ -556,6 +626,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/admin/articles'
+    | '/admin/models'
     | '/_pathlessLayout/_nested-layout'
     | '/admin/contact-info'
     | '/admin/kontak'
@@ -568,7 +639,9 @@ export interface FileRouteTypes {
     | '/_pathlessLayout/_nested-layout/route-b'
     | '/admin/articles/$id'
     | '/admin/articles/new'
+    | '/admin/models/$id'
     | '/admin/articles/'
+    | '/admin/models/'
   fileRoutesById: FileRoutesById
 }
 
@@ -630,6 +703,7 @@ export const routeTree = rootRoute
       "filePath": "admin.route.tsx",
       "children": [
         "/admin/articles",
+        "/admin/models",
         "/admin/contact-info",
         "/admin/kontak",
         "/admin/"
@@ -670,6 +744,14 @@ export const routeTree = rootRoute
         "/admin/articles/$id",
         "/admin/articles/new",
         "/admin/articles/"
+      ]
+    },
+    "/admin/models": {
+      "filePath": "admin.models.route.tsx",
+      "parent": "/admin",
+      "children": [
+        "/admin/models/$id",
+        "/admin/models/"
       ]
     },
     "/_pathlessLayout/_nested-layout": {
@@ -722,9 +804,17 @@ export const routeTree = rootRoute
       "filePath": "admin.articles.new.tsx",
       "parent": "/admin/articles"
     },
+    "/admin/models/$id": {
+      "filePath": "admin.models.$id.tsx",
+      "parent": "/admin/models"
+    },
     "/admin/articles/": {
       "filePath": "admin.articles.index.tsx",
       "parent": "/admin/articles"
+    },
+    "/admin/models/": {
+      "filePath": "admin.models.index.tsx",
+      "parent": "/admin/models"
     }
   }
 }
