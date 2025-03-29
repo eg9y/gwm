@@ -130,7 +130,7 @@ export const Route = createFileRoute("/")({
       },
       {
         rel: "preload",
-        href: "https://gwm.kopimap.com/hero_image_mobile.png",
+        href: "https://gwm.kopimap.com/hero_image_mobile.webp",
         as: "image",
         media: "(max-width: 639px)", // Corresponds to screens smaller than sm
         fetchpriority: "high", // Hint browser to prioritize this fetch
@@ -172,7 +172,7 @@ function HomePage() {
           <Hero
             // backgroundImage={heroImage}
             desktopImage={"https://gwm.kopimap.com/hero_image.webp"}
-            mobileImage={"https://gwm.kopimap.com/hero_image_mobile.png"}
+            mobileImage={"https://gwm.kopimap.com/hero_image_mobile.webp"}
             title="GWM Indonesia"
             subtitle="Great Wall Motors - Mobil berkualitas tinggi dengan teknologi terkini"
             primaryButtonText="Jelajahi Mobil"

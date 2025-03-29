@@ -187,7 +187,7 @@ const Navbar = () => {
   const getLogoVariant = () => {
     if (shouldStartTransparent && !scrolled) {
       //   return "/gwm_logo_white.webp"; // White logo for transparent navbar
-      return "https://gwm.kopimap.com/gwm_logo.webp"; // Default colored logo
+      return "https://gwm.kopimap.com/gwm_initial_logo.webp"; // Default colored logo
     }
     return "https://gwm.kopimap.com/gwm_logo.webp"; // Default colored logo
   };
@@ -216,6 +216,8 @@ const Navbar = () => {
             src={getLogoVariant()}
             alt="GWM Indonesia Logo"
             className="h-7 sm:h-9 m-0"
+            width="130"
+            height="36"
           />
         </Link>
       </div>

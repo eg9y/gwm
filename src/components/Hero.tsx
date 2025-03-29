@@ -140,8 +140,11 @@ const Hero = ({
             <img
               src={mobileImage || backgroundImage}
               alt="Hero background"
-              className="w-full h-auto object-contain"
-              style={{ filter: `brightness(${100 - imageDarkenAmount}%)` }}
+              className="w-full h-auto object-cover"
+              style={{
+                filter: `brightness(${100 - imageDarkenAmount}%)`,
+                aspectRatio: "375 / 667", // Add aspect ratio based on width/height
+              }}
               fetchPriority="high"
               loading="eager"
               decoding="async"
@@ -232,7 +235,7 @@ const Hero = ({
 
             {/* Scroll indicator - position at bottom */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center animate-[pulse_3s_infinite]">
-              <span className="w-[24px] h-[40px] border-2 border-white/60 rounded-[25px] relative before:content-[''] before:absolute before:w-[5px] before:h-[5px] before:bg-white before:rounded-full before:left-1/2 before:-translate-x-1/2 before:top-[10px] before:animate-[scroll_2.5s_infinite]" />
+              <span className="w-[24px] h-[40px] border-2 border-white/60 rounded-[25px] relative before:content-[''] before:absolute before:w-[5px] before:h-[5px] before:bg-white before:rounded-full before:left-1/2 before:-translate-x-1/2 before:animate-[scroll_2.5s_infinite]" />
             </div>
           </div>
         </div>
@@ -258,9 +261,9 @@ const Hero = ({
           100% { transform: translateY(0px); }
         }
         @keyframes scroll {
-          0% { opacity: 1; top: 10px; }
-          50% { opacity: 0.7; top: 25px; }
-          100% { opacity: 1; top: 10px; }
+          0% { opacity: 1; transform: translateY(0px); }
+          50% { opacity: 0.7; transform: translateY(15px); }
+          100% { opacity: 1; transform: translateY(0px); }
         }
         .text-shadow-lg {
           text-shadow: 0 4px 8px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.5);

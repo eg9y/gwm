@@ -29,7 +29,10 @@ const ModelShowcase = ({
         isReversed ? "lg:flex-row-reverse" : ""
       } overflow-hidden bg-white`}
     >
-      <div className="w-full lg:w-1/2 h-[40vh] sm:h-[50vh] lg:h-screen overflow-hidden relative">
+      <div
+        className="w-full lg:w-1/2 h-[40vh] sm:h-[50vh] lg:h-screen overflow-hidden relative"
+        style={{ aspectRatio: "600 / 400" }}
+      >
         <img
           src={imageUrl}
           alt={title}
