@@ -2,7 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/tanstack-start";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray, Controller, Control } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  Controller,
+  type Control,
+} from "react-hook-form";
 import { z } from "zod";
 import {
   ChevronLeft,
@@ -220,8 +225,8 @@ function CarModelEditorPage() {
     fields: featureFields,
     append: appendFeature,
     remove: removeFeature,
-  } = useFieldArray<FieldValues>({
-    control: control as unknown as Control<FieldValues>,
+  } = useFieldArray({
+    control: control,
     name: "features",
   });
 
@@ -229,8 +234,8 @@ function CarModelEditorPage() {
     fields: colorFields,
     append: appendColor,
     remove: removeColor,
-  } = useFieldArray<FieldValues>({
-    control: control as unknown as Control<FieldValues>,
+  } = useFieldArray({
+    control: control,
     name: "colors",
   });
 
@@ -238,8 +243,8 @@ function CarModelEditorPage() {
     fields: galleryFields,
     append: appendGallery,
     remove: removeGallery,
-  } = useFieldArray<FieldValues>({
-    control: control as unknown as Control<FieldValues>,
+  } = useFieldArray({
+    control: control,
     name: "gallery",
   });
 
@@ -664,7 +669,7 @@ function CarModelEditorPage() {
       );
 
       // Track if we'll replace the original URL
-      let resultUrl = originalUrl;
+      let resultUrl: string = originalUrl;
 
       if (optimizeImages) {
         try {
@@ -1378,6 +1383,9 @@ function CarModelEditorPage() {
                   error={errors.featuredImage?.message}
                   altText="Featured hero image"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Recommended aspect ratio: 16:9 (landscape)
+                </p>
               </div>
 
               {/* Main Product Image */}
@@ -1396,6 +1404,9 @@ function CarModelEditorPage() {
                   error={errors.mainProductImage?.message}
                   altText="Main product image"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Recommended aspect ratio: 4:3
+                </p>
               </div>
 
               {/* Sub Image */}
@@ -1414,6 +1425,9 @@ function CarModelEditorPage() {
                   error={errors.subImage?.message}
                   altText="Sub image"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Recommended aspect ratio: 16:9 (landscape)
+                </p>
               </div>
             </div>
           </div>
@@ -1745,6 +1759,9 @@ function CarModelEditorPage() {
                         error={errors.colors?.[index]?.imageUrl?.message}
                         altText={`Color ${watch(`colors.${index}.name`) || index + 1}`}
                       />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Recommended aspect ratio: 16:9 (landscape)
+                      </p>
                     </div>
 
                     <div className="flex items-end justify-end">
@@ -1859,6 +1876,10 @@ function CarModelEditorPage() {
                           `Gallery image ${index + 1}`
                         }
                       />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Recommended: 16:9 or 4:3 (landscape). Other ratios will
+                        be displayed correctly.
+                      </p>
                     </div>
 
                     <div className="mb-3">
