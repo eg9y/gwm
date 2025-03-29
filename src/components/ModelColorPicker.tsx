@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { CarModelColor } from "../db/schema";
+import { ResponsiveLazyImage } from "./ResponsiveImage";
 
 // Types for the component props
 interface ModelColorPickerProps {
@@ -227,135 +228,46 @@ export function ModelColorPicker({
   }
 
   return (
-    <div className="mb-8 relative bg-gray-50 p-4 sm:p-6 rounded-lg border border-gray-100 shadow-sm">
-      {/* New feature badge */}
-      <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium shadow-md transform translate-x-1 -translate-y-1 z-10">
-        Fitur Baru
-      </div>
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold text-gray-900 mb-6">Warna</h2>
 
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-        Pilih Warna
-      </h2>
-      <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
-        Lihat {modelId.replace(/-/g, " ")} dalam berbagai pilihan warna
-      </p>
-
-      {/* Color selection */}
-      <div className="mb-4 sm:mb-6">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-y-4 gap-x-2 justify-items-center">
-          {colorArray.map((color, index) => (
-            <button
-              key={`color-${index}-${color.name}`}
-              type="button"
-              className={`group flex flex-col items-center transition-all max-w-[90px] ${
-                selectedColorIndex === index ? "scale-105" : "hover:scale-105"
-              }`}
-              onClick={() => setSelectedColorIndex(index)}
-              onMouseEnter={() => handleColorHover(index)}
-              onMouseLeave={handleColorLeave}
-              aria-label={`Warna ${color.name}`}
-              title={color.name}
-            >
-              <div
-                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 mb-1 sm:mb-2 flex items-center justify-center ${
-                  selectedColorIndex === index
-                    ? "border-primary shadow-lg"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                style={{ backgroundColor: color.hex }}
-              />
-              <span
-                className={`text-xs sm:text-sm text-center ${
-                  selectedColorIndex === index
-                    ? "font-medium text-primary"
-                    : "text-gray-700 group-hover:text-gray-900"
-                }`}
-              >
-                {color.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Color preview */}
+      {/* Color Preview Image */}
       <div
-        className="aspect-video rounded-lg overflow-hidden flex items-center justify-center relative"
+        className="w-full aspect-video rounded-lg shadow-lg overflow-hidden transition-colors duration-300"
         style={{ backgroundColor: selectedBackgroundColor }}
       >
-        {/* Loading state */}
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
-            <div className="w-10 h-10 border-4 border-t-transparent border-primary rounded-full animate-spin" />
-          </div>
-        )}
-
-        {/* Error state */}
-        {imageError && !isLoading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 bg-opacity-50 p-4 text-center">
-            <svg
-              className="w-12 h-12 text-gray-400 mb-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <title>Error loading image</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-            <p className="text-gray-600">
-              Gambar tidak dapat dimuat. Silakan coba warna lain.
-            </p>
-          </div>
-        )}
-
-        {/* Image */}
-        {imageUrl && (
-          <img
-            ref={imgRef}
-            src={imageUrl}
-            alt={`${modelId.replace(/-/g, " ")} warna ${
-              selectedColorData.name
-            }`}
-            className={`max-w-full max-h-full object-contain transition-opacity duration-200 ${
-              isLoading || imageError ? "opacity-0" : "opacity-100"
-            }`}
-            onLoad={() => {
-              setIsLoading(false);
-              setPreloadedImages((prev) => ({
-                ...prev,
-                [selectedColorId]: true,
-              }));
-            }}
-            onError={() => {
-              setIsLoading(false);
-              setImageError(true);
-            }}
-          />
-        )}
+        <ResponsiveLazyImage
+          src={imageUrl}
+          alt={`${modelId.replace(/-/g, " ")} warna ${
+            selectedColorData?.name || "Color"
+          }`}
+          className="w-full h-full object-contain p-4 md:p-8"
+        />
       </div>
 
-      {/* Color name displayed prominently */}
-      {selectedColorData && (
-        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-semibold">{selectedColorData.name}</h3>
-            <p className="text-sm text-gray-500">Tersedia untuk semua varian</p>
-          </div>
-          <div className="flex space-x-2">
-            <div
-              className="w-8 h-8 rounded-full border border-gray-200"
-              style={{ backgroundColor: selectedColorHex }}
-              title={`Color: ${selectedColorData.name}`}
-            />
-          </div>
-        </div>
-      )}
+      {/* Color Swatches */}
+      <div className="flex flex-wrap justify-center gap-3">
+        {colorArray.map((color, index) => (
+          <button
+            key={`${modelId}-${color.name}-${index}`}
+            type="button"
+            onClick={() => setSelectedColorIndex(index)}
+            className={`w-10 h-10 rounded-full border-2 transition-all transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              index === selectedColorIndex
+                ? "border-primary ring-2 ring-primary ring-offset-2"
+                : "border-gray-300 hover:border-gray-400 focus:ring-gray-400"
+            }`}
+            style={{ backgroundColor: color.hex || "#000000" }}
+            aria-label={`Select color ${color.name || index + 1}`}
+            title={color.name || `Color ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Selected Color Name */}
+      <p className="text-center text-gray-700">
+        Warna dipilih: <strong>{selectedColorData?.name || "Default"}</strong>
+      </p>
     </div>
   );
 }

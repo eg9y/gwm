@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { GalleryImage } from "../db/schema";
+import { ResponsiveLazyImage } from "./ResponsiveImage";
 
 interface ModelGalleryProps {
   modelId: string;
@@ -28,10 +29,13 @@ export function ModelGallery({
 
       {/* Main image display */}
       <div className="w-full bg-gray-100 rounded-lg overflow-hidden shadow-md">
-        <img
+        <ResponsiveLazyImage
           src={activeImage.imageUrl}
+          // srcSet and sizes are handled by ResponsiveLazyImage now
           alt={activeImage.alt || `${modelName} image`}
           className="w-full h-auto object-cover aspect-[16/9]"
+          // effect="blur" // Effect is default in ResponsiveLazyImage
+          width="100%" // Ensure width is specified for layout
         />
       </div>
 
@@ -54,10 +58,14 @@ export function ModelGallery({
                   : "border-transparent hover:border-gray-300"
               }`}
             >
-              <img
-                src={image.imageUrl}
+              <ResponsiveLazyImage
+                src={image.imageUrl} // Use original for thumbnail src
                 alt={image.alt || `${modelName} thumbnail ${index + 1}`}
                 className="w-full h-full object-cover"
+                // effect="blur" // Effect is default
+                sizes="80px" // Override default sizes for thumbnails
+                width={80}
+                height={80}
               />
             </button>
           ))}
