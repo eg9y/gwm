@@ -309,7 +309,7 @@ function VehicleDetailPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/kontak"
-                className="px-6 py-3 bg-slate-200 text-slate-700 rounded-md font-medium text-center hover:bg-primary/90 transition-colors"
+                className="px-6 py-3 bg-slate-200 text-slate-700 rounded-md font-medium text-center hover:bg-slate-300 transition-colors"
               >
                 Hubungi Kami
               </a>

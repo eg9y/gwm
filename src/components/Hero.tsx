@@ -142,6 +142,11 @@ const Hero = ({
               alt="Hero background"
               className="w-full h-auto object-contain"
               style={{ filter: `brightness(${100 - imageDarkenAmount}%)` }}
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              width="375"
+              height="667"
             />
           </div>
 

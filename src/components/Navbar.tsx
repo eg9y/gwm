@@ -299,6 +299,10 @@ const Navbar = () => {
                               }
                               alt={model.name}
                               className="w-20 h-12 object-cover rounded mr-3"
+                              loading="lazy"
+                              decoding="async"
+                              width="80"
+                              height="48"
                             />
                             <div>
                               <span className="flex-1 font-medium">
@@ -513,6 +517,10 @@ const Navbar = () => {
                               }
                               alt={model.name}
                               className="w-16 h-12 object-cover rounded mr-2"
+                              loading="lazy"
+                              decoding="async"
+                              width="64"
+                              height="48"
                             />
                             <div>
                               <span>{model.name}</span>

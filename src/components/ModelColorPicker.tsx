@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { CarModelColor } from "../db/schema";
+import { Loader2 } from "lucide-react"; // Import spinner icon
 import { ResponsiveLazyImage } from "./ResponsiveImage";
+// Swiper imports
+import { Swiper, SwiperSlide } from "swiper/react";
+import type SwiperCore from "swiper";
+import "swiper/css"; // Import Swiper styles
+// If you want fade effect later, uncomment these:
+// import 'swiper/css/effect-fade';
+// import { EffectFade } from 'swiper/modules';
 
 // Types for the component props
 interface ModelColorPickerProps {
@@ -16,8 +24,6 @@ export function ModelColorPicker({
 }: ModelColorPickerProps) {
   // State
   const [selectedColorIndex, setSelectedColorIndex] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [imageError, setImageError] = useState<boolean>(false);
   const [hoveredColorIndex, setHoveredColorIndex] = useState<number | null>(
     null
   );
@@ -27,11 +33,11 @@ export function ModelColorPicker({
   const [preloadingImages, setPreloadingImages] = useState<
     Record<string, boolean>
   >({});
+  const [swiperInstance, setSwiperInstance] = useState<SwiperCore | null>(null);
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false); // State for conditional loading overlay
 
   // Refs
   const preloadImageRef = useRef<Record<string, HTMLImageElement>>({});
-  const loadingTimeoutRef = useRef<number | null>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   // Format model ID (replace hyphens with underscores)
   const formattedModelId = modelId.replace(/-/g, "_");
@@ -48,92 +54,23 @@ export function ModelColorPicker({
   const selectedBackgroundColor =
     selectedColorData?.backgroundColor || "#F5F5F5";
 
-  // Check if the image is already cached by the browser on initial load
-  useEffect(() => {
-    // Function to check if image is cached
-    const checkInitialImageCache = () => {
-      if (selectedColorData?.imageUrl) {
-        // Use the imageUrl from the color data directly
-        const initialImageUrl = selectedColorData.imageUrl;
-        const img = new Image();
-
-        img.onload = () => {
-          // If image loads immediately (from cache), update states
-          setIsLoading(false);
-          setPreloadedImages((prev) => ({
-            ...prev,
-            [selectedColorId]: true,
-          }));
-        };
-
-        img.src = initialImageUrl;
-
-        // If the image is complete already, it was cached
-        if (img.complete) {
-          setIsLoading(false);
-          setPreloadedImages((prev) => ({
-            ...prev,
-            [selectedColorId]: true,
-          }));
-        }
-      }
-    };
-
-    checkInitialImageCache();
-
-    // Safety timeout to prevent infinite loading state
-    loadingTimeoutRef.current = window.setTimeout(() => {
-      setIsLoading(false);
-    }, 5000) as unknown as number;
-
-    return () => {
-      if (loadingTimeoutRef.current !== null) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-    };
-  }, [selectedColorData, selectedColorId]);
-
-  // Reset selectedColor when colors change
+  // Reset selectedColorIndex and Swiper when colors prop changes
   useEffect(() => {
     if (colorArray && colorArray.length > 0) {
-      setSelectedColorIndex(0);
+      if (selectedColorIndex >= colorArray.length) {
+        setSelectedColorIndex(0);
+        swiperInstance?.slideTo(0, 0);
+      }
       setPreloadedImages({});
       setPreloadingImages({});
-      setImageError(false);
+    } else {
+      setSelectedColorIndex(0);
+      swiperInstance?.slideTo(0, 0);
     }
-  }, [colorArray]);
-
-  // Image URL for current selection - use imageUrl from the color data directly
-  const imageUrl = selectedColorData?.imageUrl || "";
-
-  // Reset loading state when color changes
-  useEffect(() => {
-    if (selectedColorId) {
-      if (preloadedImages[selectedColorId]) {
-        // If preloaded, we can skip the loading state
-        setIsLoading(false);
-      } else {
-        setIsLoading(true);
-        setImageError(false);
-
-        // Safety timeout to prevent infinite loading state
-        if (loadingTimeoutRef.current !== null) {
-          clearTimeout(loadingTimeoutRef.current);
-        }
-
-        loadingTimeoutRef.current = window.setTimeout(() => {
-          // Check if image is already loaded but event wasn't captured
-          if (imgRef.current?.complete && imgRef.current.naturalWidth !== 0) {
-            setIsLoading(false);
-            setPreloadedImages((prev) => ({
-              ...prev,
-              [selectedColorId]: true,
-            }));
-          }
-        }, 1000) as unknown as number;
-      }
+    if (swiperInstance && selectedColorIndex !== 0) {
+      swiperInstance.slideTo(selectedColorIndex, 0);
     }
-  }, [selectedColorId, preloadedImages]);
+  }, [colorArray, swiperInstance, selectedColorIndex]);
 
   // Preload image on hover
   useEffect(() => {
@@ -208,6 +145,20 @@ export function ModelColorPicker({
     selectedColorIndex,
   ]);
 
+  // Handle color swatch click: Update state and slide Swiper
+  const handleColorClick = (index: number) => {
+    if (index !== selectedColorIndex) {
+      // Check if the target image is preloaded BEFORE starting the slide
+      const targetColorId = `color_${index}`;
+      if (!preloadedImages[targetColorId]) {
+        // Only show overlay if the target image isn't preloaded yet
+        setShowLoadingOverlay(true);
+      }
+      setSelectedColorIndex(index);
+      swiperInstance?.slideTo(index);
+    }
+  };
+
   // Handle mouse enter on color button
   const handleColorHover = (index: number) => {
     setHoveredColorIndex(index);
@@ -229,20 +180,47 @@ export function ModelColorPicker({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900 mb-6">Warna</h2>
+      <h2 className="text-3xl font-bold text-gray-900 mb-4">Pilih Warna</h2>
 
-      {/* Color Preview Image */}
+      {/* Color Preview Area with Swiper */}
       <div
-        className="w-full aspect-video rounded-lg shadow-lg overflow-hidden transition-colors duration-300"
-        style={{ backgroundColor: selectedBackgroundColor }}
+        className="w-full rounded-lg shadow-lg overflow-hidden transition-colors duration-300 relative"
+        style={{
+          backgroundColor: selectedBackgroundColor,
+          transition: "background-color 300ms ease-in-out",
+        }}
       >
-        <ResponsiveLazyImage
-          src={imageUrl}
-          alt={`${modelId.replace(/-/g, " ")} warna ${
-            selectedColorData?.name || "Color"
-          }`}
-          className="w-full h-full object-contain p-4 md:p-8"
-        />
+        <Swiper
+          spaceBetween={0}
+          slidesPerView={1}
+          onSlideChange={(swiper) => {
+            if (swiper.activeIndex !== selectedColorIndex) {
+              setSelectedColorIndex(swiper.activeIndex);
+            }
+          }}
+          onSlideChangeTransitionEnd={() => setShowLoadingOverlay(false)}
+          onSwiper={setSwiperInstance}
+          allowTouchMove={false}
+          className="w-full h-auto"
+          key={modelId}
+        >
+          {colorArray.map((color, index) => (
+            <SwiperSlide key={`${modelId}-${color.name || index}-slide`}>
+              <ResponsiveLazyImage
+                src={color.imageUrl || ""}
+                alt={`${modelId.replace(/-/g, " ")} warna ${
+                  color.name || "Color"
+                }`}
+                className="w-full object-contain"
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        {showLoadingOverlay && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 z-10 backdrop-blur-sm transition-opacity duration-100">
+            <Loader2 className="h-10 w-10 animate-spin text-white text-opacity-75" />
+          </div>
+        )}
       </div>
 
       {/* Color Swatches */}
@@ -251,7 +229,9 @@ export function ModelColorPicker({
           <button
             key={`${modelId}-${color.name}-${index}`}
             type="button"
-            onClick={() => setSelectedColorIndex(index)}
+            onClick={() => handleColorClick(index)}
+            onMouseEnter={() => handleColorHover(index)}
+            onMouseLeave={handleColorLeave}
             className={`w-10 h-10 rounded-full border-2 transition-all transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
               index === selectedColorIndex
                 ? "border-primary ring-2 ring-primary ring-offset-2"
@@ -266,7 +246,13 @@ export function ModelColorPicker({
 
       {/* Selected Color Name */}
       <p className="text-center text-gray-700">
-        Warna dipilih: <strong>{selectedColorData?.name || "Default"}</strong>
+        <span className="text-sm text-gray-600">Warna dipilih:</span>{" "}
+        <span
+          key={selectedColorIndex}
+          className="inline-block animate-fade-in-fast font-semibold"
+        >
+          {selectedColorData?.name || "Default"}
+        </span>
       </p>
     </div>
   );
