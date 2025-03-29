@@ -8,6 +8,8 @@ import {
   getAllPublishedCarModels,
 } from "../server/frontend-car-models";
 import type { CarModelColor, GalleryImage } from "../db/schema";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 // Define the expected types for loader data
 type LoaderData = {
@@ -141,10 +143,12 @@ function VehicleDetailPage() {
         {/* Vehicle details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Image */}
-          <div className="rounded-lg overflow-hidden shadow-lg">
-            <img
+          <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
+            <LazyLoadImage
               src={vehicle.featuredImage}
               alt={vehicle.name}
+              effect="blur"
+              wrapperClassName="w-full h-full"
               className="w-full h-full object-cover"
             />
           </div>
@@ -228,14 +232,9 @@ function VehicleDetailPage() {
 
           {/* Color picker - only show for models that have color options */}
           <div>
-            {vehicle.colors &&
-              Array.isArray(vehicle.colors) &&
-              vehicle.colors.length > 0 && (
-                <ModelColorPicker
-                  modelId={vehicle.id}
-                  colors={vehicle.colors}
-                />
-              )}
+            {vehicle.colors?.length > 0 && (
+              <ModelColorPicker modelId={vehicle.id} colors={vehicle.colors} />
+            )}
           </div>
         </div>
 
@@ -268,9 +267,12 @@ function VehicleDetailPage() {
                   className="block h-full"
                 >
                   <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-                    <img
+                    <LazyLoadImage
                       src={relatedVehicle.featuredImage}
                       alt={relatedVehicle.name}
+                      effect="blur"
+                      width="100%"
+                      height="100%"
                       className="w-full h-full object-cover"
                     />
                   </div>
