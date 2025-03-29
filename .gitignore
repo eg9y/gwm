@@ -29,3 +29,6 @@ yarn.lock
 storage/gwm-database.db
 *.sqlite
 *.sqlite3
+
+gwm-indonesia.db
+gwm-database.db-*

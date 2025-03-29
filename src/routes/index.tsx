@@ -120,6 +120,21 @@ export const Route = createFileRoute("/")({
         rel: "canonical",
         href: "https://gwm.co.id/",
       },
+      // Preload LCP images for different screen sizes
+      {
+        rel: "preload",
+        href: "https://gwm.kopimap.com/hero_image.webp",
+        as: "image",
+        media: "(min-width: 640px)", // Corresponds to sm breakpoint where desktop image is shown
+        fetchpriority: "high", // Hint browser to prioritize this fetch
+      },
+      {
+        rel: "preload",
+        href: "https://gwm.kopimap.com/hero_image_mobile.png",
+        as: "image",
+        media: "(max-width: 639px)", // Corresponds to screens smaller than sm
+        fetchpriority: "high", // Hint browser to prioritize this fetch
+      },
     ],
   }),
 });

@@ -34,6 +34,10 @@ const ModelShowcase = ({
           src={imageUrl}
           alt={title}
           className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out hover:scale-[1.03]"
+          loading="lazy"
+          decoding="async"
+          width="600"
+          height="400"
         />
       </div>
 
