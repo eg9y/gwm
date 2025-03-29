@@ -9,7 +9,6 @@ import {
 } from "../server/frontend-car-models";
 import type { CarModelColor, GalleryImage } from "../db/schema";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-import "react-lazy-load-image-component/src/effects/blur.css";
 
 // Define the expected types for loader data
 type LoaderData = {
