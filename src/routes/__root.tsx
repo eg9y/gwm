@@ -37,6 +37,8 @@ export const Route = createRootRoute({
       }),
     ],
     links: [
+      // Reverted async loading due to type/compatibility issues.
+      // Using standard blocking stylesheet link.
       { rel: "stylesheet", href: appCss },
       {
         rel: "apple-touch-icon",
