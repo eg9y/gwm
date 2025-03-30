@@ -201,17 +201,20 @@ export function ModelColorPicker({
           onSlideChangeTransitionEnd={() => setShowLoadingOverlay(false)}
           onSwiper={setSwiperInstance}
           allowTouchMove={false}
-          className="w-full h-auto"
+          className="w-full"
           key={modelId}
         >
           {colorArray.map((color, index) => (
-            <SwiperSlide key={`${modelId}-${color.name || index}-slide`}>
+            <SwiperSlide
+              key={`${modelId}-${color.name || index}-slide`}
+              className="flex items-center justify-center"
+            >
               <ResponsiveLazyImage
                 src={color.imageUrl || ""}
                 alt={`${modelId.replace(/-/g, " ")} warna ${
                   color.name || "Color"
                 }`}
-                className="w-full object-contain"
+                className="w-full h-auto object-cover mx-auto"
               />
             </SwiperSlide>
           ))}
