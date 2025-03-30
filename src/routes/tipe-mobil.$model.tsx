@@ -142,37 +142,65 @@ function VehicleDetailPage() {
         {/* Vehicle details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Image */}
-          <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
-            <LazyLoadImage
-              src={vehicle.featuredImage}
-              alt={vehicle.name}
-              effect="blur"
-              wrapperClassName="w-full h-full"
-              className="w-full h-full object-cover"
-            />
+          <div className="flex flex-col gap-12">
+            <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
+              <LazyLoadImage
+                src={vehicle.featuredImage}
+                alt={vehicle.name}
+                effect="blur"
+                wrapperClassName="w-full h-full"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {vehicle.subImage && (
+              <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
+                <LazyLoadImage
+                  src={vehicle.subImage}
+                  alt={vehicle.name}
+                  effect="blur"
+                  wrapperClassName="w-full h-full"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
 
           {/* Features */}
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Fitur Unggulan
             </h2>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <ul className="space-y-4">
+            <div className="bg-gray-50 rounded-xl p-4 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {vehicle.features &&
                   Array.isArray(vehicle.features) &&
                   vehicle.features.map((feature, idx) => (
-                    <li
+                    <div
                       key={`${vehicle.id}-feature-${idx}`}
-                      className="flex items-start gap-3"
+                      className="flex items-center gap-3 bg-white p-3 rounded-lg hover:shadow-md transition-shadow duration-200 border border-gray-100"
                     >
-                      <span className="flex-shrink-0 mt-1 text-primary font-bold">
-                        ✓
+                      <div className="flex-shrink-0 bg-primary/10 rounded-full p-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 text-primary"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-gray-700 font-medium text-sm">
+                        {feature}
                       </span>
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
+                    </div>
                   ))}
-              </ul>
+              </div>
             </div>
 
             {/* Action buttons */}
@@ -199,10 +227,10 @@ function VehicleDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
           {/* Vehicle description */}
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Tentang {vehicle.name}
             </h2>
-            <div className="prose prose-lg max-w-none">
+            <div className="prose prose-md max-w-none">
               <p>
                 {vehicle.name} dirancang untuk memenuhi kebutuhan pengguna yang
                 menginginkan kendaraan dengan performa tinggi dan fitur modern.
@@ -250,7 +278,7 @@ function VehicleDetailPage() {
 
         {/* Related vehicles */}
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-12">
             Tipe Mobil GWM Lainnya
           </h2>
 
@@ -298,7 +326,7 @@ function VehicleDetailPage() {
         {/* Call to action */}
         <div className="mt-24 bg-gray-100 rounded-xl p-8 md:p-12">
           <div className="text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl md:text-2xl font-bold text-gray-900 mb-4">
               Tertarik dengan {vehicle.name}?
             </h2>
             <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
