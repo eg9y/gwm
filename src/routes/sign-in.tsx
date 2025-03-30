@@ -1,15 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { SignIn, useAuth } from "@clerk/tanstack-start";
+import { SignIn, useAuth, ClerkProvider } from "@clerk/tanstack-start";
 import { useEffect } from "react";
 import { z } from "zod";
 
+// 4. Define the route, using the new wrapper component
 export const Route = createFileRoute("/sign-in")({
-  component: SignInPage,
+  component: SignInRouteWrapper, // Use the wrapper component here
   validateSearch: z.object({
     redirect: z.string().optional(),
   }),
 });
 
+// This is the actual page component that uses Clerk hooks
 function SignInPage() {
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
@@ -55,5 +57,14 @@ function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 3. Define the wrapper component that provides the Clerk context
+function SignInRouteWrapper() {
+  return (
+    <ClerkProvider>
+      <SignInPage />
+    </ClerkProvider>
   );
 }

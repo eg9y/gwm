@@ -177,6 +177,25 @@ function CarModelEditorPage() {
   // Add state to track removed images for later deletion
   const [removedImageUrls, setRemovedImageUrls] = useState<string[]>([]);
 
+  // Add effect to warn user before leaving page during submission
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isSubmitting || uploadProgress) {
+        // Standard way to trigger the browser's confirmation dialog
+        event.preventDefault();
+        // Included for older browser compatibility
+        event.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isSubmitting, uploadProgress]); // Re-run effect if submission status changes
+
   // Prepare form data from model - specify more precise type
   const prepareModelData = (
     model: Record<string, unknown>
@@ -214,13 +233,7 @@ function CarModelEditorPage() {
     defaultValues: model ? prepareModelData(model) : defaultValues,
   });
 
-  // Field arrays for features and colors
-  type FieldValues = {
-    features: string[];
-    colors: CarModelColor[];
-    gallery: GalleryImage[];
-  };
-
+  // Field arrays for features, colors, and gallery
   const {
     fields: featureFields,
     append: appendFeature,
@@ -329,6 +342,7 @@ function CarModelEditorPage() {
   // Handle form submission
   const onSubmit = async (data: CarModelFormData) => {
     setIsSubmitting(true);
+    let toastId: string | undefined = undefined; // Declare toastId here
 
     try {
       // Validate hex colors
@@ -363,7 +377,7 @@ function CarModelEditorPage() {
       }
 
       // Start with a submission toast that can be updated
-      const toastId = toast.loading("Preparing to submit form...");
+      toastId = toast.loading("Preparing to submit form..."); // Assign ID here
 
       console.log("removing images", removedImageUrls);
       // Save a copy of the removed images to delete after submission
@@ -383,83 +397,112 @@ function CarModelEditorPage() {
       let submitData = { ...data };
 
       if (fileUploads.length > 0) {
-        // Calculate total uploads
         const totalUploads = fileUploads.length;
         let completedUploads = 0;
 
+        toastId = toast.loading(
+          `Starting parallel upload of ${totalUploads} image(s)...`,
+          { id: toastId }
+        );
+
         setUploadProgress({
-          current: completedUploads,
+          current: 0,
           total: totalUploads,
-          message: `Preparing to upload ${totalUploads} image${totalUploads !== 1 ? "s" : ""}...`,
+          message: `Starting uploads...`,
         });
 
-        toast.loading(`Uploading ${totalUploads} images...`, { id: toastId });
-
-        // Upload each image
-        for (const upload of fileUploads) {
-          setUploadProgress({
-            current: completedUploads,
-            total: totalUploads,
-            message: `Uploading image ${completedUploads + 1} of ${totalUploads}: ${upload.originalFileName}`,
-          });
-
+        // Create an array of upload promises
+        const uploadPromises = fileUploads.map(async (upload) => {
           try {
-            // Pass original file name for naming convention
+            // Update progress bar message (less specific for parallel)
+            setUploadProgress((prev) => ({
+              current: prev?.current ?? 0,
+              total: totalUploads,
+              message: `Uploading: ${upload.originalFileName}...`, // Revert back to template literal
+            }));
+
             const uploadResult = await uploadImageToR2(
               upload.file,
               upload.originalFileName
             );
 
-            // Update field value with the public URL
-            if (upload.fieldName.includes("colors.")) {
-              // Handle colors array field
-              const fieldPath = upload.fieldName as `colors.${number}.imageUrl`;
-              setValue(fieldPath, uploadResult, { shouldValidate: true });
-            } else if (upload.fieldName.includes("gallery.")) {
-              // Handle gallery array field
-              const fieldPath =
-                upload.fieldName as `gallery.${number}.imageUrl`;
-              setValue(fieldPath, uploadResult, { shouldValidate: true });
-            } else {
-              // Handle regular fields
-              setValue(
-                upload.fieldName as keyof CarModelFormData,
-                uploadResult,
-                { shouldValidate: true }
-              );
-            }
-
-            // Free memory by revoking URL
-            URL.revokeObjectURL(upload.previewUrl);
-
-            completedUploads++;
-            setUploadProgress({
-              current: completedUploads,
-              total: totalUploads,
-              message: `Uploaded ${completedUploads} of ${totalUploads} images`,
-            });
-
-            toast.loading(
-              `Uploaded ${completedUploads} of ${totalUploads} images`,
-              { id: toastId }
-            );
+            // Update field value based on the result (important: needs context)
+            // We need to return the result along with fieldName to update later
+            URL.revokeObjectURL(upload.previewUrl); // Revoke preview URL
+            return {
+              success: true,
+              fieldName: upload.fieldName,
+              url: uploadResult,
+              originalFileName: upload.originalFileName,
+            };
           } catch (error) {
             console.error(
-              `Error uploading image for ${upload.fieldName}:`,
+              `Error uploading image for ${upload.fieldName} (${upload.originalFileName}):`,
               error
             );
-            toast.error("Failed to upload an image. Please try again.", {
-              id: toastId,
+            // Return failure status to handle errors after Promise.all
+            return {
+              success: false,
+              fieldName: upload.fieldName,
+              error,
+              originalFileName: upload.originalFileName,
+            };
+          }
+        });
+
+        // Execute uploads in parallel
+        const results = await Promise.all(uploadPromises);
+
+        // Process results after all uploads are attempted
+        const successfulUploads = results.filter((r) => r.success);
+        const failedUploads = results.filter((r) => !r.success);
+        completedUploads = successfulUploads.length;
+
+        setUploadProgress({
+          current: completedUploads,
+          total: totalUploads,
+          message: `Upload complete. ${completedUploads}/${totalUploads} successful.`,
+        });
+
+        // Update form values for successful uploads
+        for (const result of successfulUploads) {
+          if (result.fieldName.includes("colors.")) {
+            setValue(
+              result.fieldName as `colors.${number}.imageUrl`,
+              result.url,
+              { shouldValidate: true }
+            );
+          } else if (result.fieldName.includes("gallery.")) {
+            setValue(
+              result.fieldName as `gallery.${number}.imageUrl`,
+              result.url,
+              { shouldValidate: true }
+            );
+          } else {
+            setValue(result.fieldName as keyof CarModelFormData, result.url, {
+              shouldValidate: true,
             });
-            setIsSubmitting(false);
-            setUploadProgress(null);
-            // Re-add the images marked for deletion if upload fails
-            setRemovedImageUrls((prev) => [...prev, ...imagesToDelete]);
-            return;
           }
         }
 
-        // Get the latest form values after all uploads
+        // Handle failures
+        if (failedUploads.length > 0) {
+          const failedNames = failedUploads
+            .map((f) => f.originalFileName)
+            .join(", ");
+          const errorMessage = `Failed to upload ${failedUploads.length} image(s): ${failedNames}. Please check console and try again.`;
+          toast.error(errorMessage, { id: toastId, duration: 6000 });
+          setIsSubmitting(false);
+          setUploadProgress(null);
+          setRemovedImageUrls((prev) => [...prev, ...imagesToDelete]); // Re-add images marked for deletion
+          return; // Stop submission process
+        }
+
+        // Update toast only if all succeed (implicitly runs if no failures)
+        const successMessage = `${totalUploads} image(s) uploaded successfully!`;
+        toast.success(successMessage, { id: toastId });
+
+        // Get the latest form values after all successful uploads
         submitData = {
           ...data,
           featuredImage: watch("featuredImage"),
@@ -491,7 +534,8 @@ function CarModelEditorPage() {
         published: submitData.published ? 1 : 0,
       };
 
-      toast.loading("Saving model data...", { id: toastId });
+      // Update toast for saving data
+      toastId = toast.loading("Saving model data...", { id: toastId });
 
       // Submit form
       const result = isNew
@@ -501,9 +545,11 @@ function CarModelEditorPage() {
       if (result.success) {
         // Delete removed images AFTER successful form submission
         if (imagesToDelete.length > 0) {
-          toast.loading(`Deleting ${imagesToDelete.length} removed images...`, {
-            id: toastId,
-          });
+          // Update toast for deletion start
+          toastId = toast.loading(
+            `Deleting ${imagesToDelete.length} removed image(s)...`,
+            { id: toastId }
+          );
 
           console.log(
             `Proceeding to delete ${imagesToDelete.length} images:`,
@@ -541,15 +587,25 @@ function CarModelEditorPage() {
             `Image deletion finished. Success: ${deletedCount}, Failed: ${failedCount}`
           );
           if (failedCount === 0 && deletedCount > 0) {
+            // Update toast for successful deletion
             toast.success(`Deleted ${deletedCount} old image(s).`, {
               id: toastId,
             });
+          } else if (failedCount > 0) {
+            // Update toast if some deletions failed
+            toast.error(
+              `Failed to delete ${failedCount} image(s). Check console.`,
+              { id: toastId }
+            );
           }
+          // Slight delay before final success message if images were deleted
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
+        // Final success toast
         toast.success(
           isNew ? "Model created successfully!" : "Model updated successfully!",
-          { id: toastId }
+          { id: toastId } // Use the latest toastId
         );
 
         // If this is a new model, navigate to the edit page for the new model
@@ -562,12 +618,19 @@ function CarModelEditorPage() {
           }, 800);
         }
       } else {
+        // Update toast if operation failed
+        toast.error("Operation failed. Please check server logs.", {
+          id: toastId,
+        });
         throw new Error("Operation failed");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
+      // Ensure toastId exists before trying to update it, otherwise show a new error toast
+      const finalToastId = toastId ? toastId : toast.error("");
       toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        { id: finalToastId }
       );
     } finally {
       setIsSubmitting(false);
@@ -672,6 +735,7 @@ function CarModelEditorPage() {
       let resultUrl: string = originalUrl;
 
       if (optimizeImages) {
+        console.log(`Starting optimization process for ${originalUrl}`);
         try {
           if (uploadProgress) {
             setUploadProgress({
@@ -720,58 +784,36 @@ function CarModelEditorPage() {
 
               clearTimeout(timeoutId);
 
-              // Check if the fetch was successful
+              // Check if the fetch was successful AND the content type is an image
               if (!response.ok) {
                 console.error(
-                  `Failed to download ${purpose} version: ${response.status} ${response.statusText}`
+                  `[Download Error] Failed to download ${purpose} version from ${transformUrl}: ${response.status} ${response.statusText}`
                 );
-                console.log(`Attempted URL: ${transformUrl}`);
-                console.log("Response headers:", response.headers);
-
-                // Try with a simpler transformation as fallback
-                if (purpose === "mobile") {
-                  console.log(
-                    "Trying simpler mobile transformation as fallback"
-                  );
-                  const fallbackUrl = await getTransformUrl(originalUrl, {
-                    width: 640,
-                    format: "auto" as
-                      | "auto"
-                      | "webp"
-                      | "avif"
-                      | "jpeg"
-                      | "png"
-                      | "gif",
-                  });
-
-                  console.log(`Fallback URL: ${fallbackUrl}`);
-
-                  const fallbackResponse = await fetch(fallbackUrl, {
-                    signal: controller.signal,
-                    headers: {
-                      Accept: "image/*",
-                    },
-                    cache: "no-cache",
-                  });
-
-                  if (fallbackResponse.ok) {
-                    const blob = await fallbackResponse.blob();
-                    console.log(
-                      `Fallback successful! Size: ${blob.size / 1024}KB`
-                    );
-                    return await uploadTransformedImage(
-                      blob,
-                      targetFileName,
-                      purpose
-                    );
-                  }
-                  console.error("Fallback transformation also failed");
-                  return null;
-                }
-
-                return null;
+                // Log response body if possible (might be empty or non-text)
+                try {
+                  const bodyText = await response.text();
+                  console.error(
+                    `[Download Error] Response body (text): ${bodyText.substring(0, 500)}`
+                  ); // Log first 500 chars
+                } catch {}
+                console.log(
+                  "Response headers:",
+                  Object.fromEntries(response.headers.entries())
+                );
+                return null; // Stop processing this variant if download fails
               }
 
+              const contentType = response.headers.get("content-type");
+              if (!contentType || !contentType.startsWith("image/")) {
+                console.error(
+                  `[Download Error] Invalid content type for ${purpose} version from ${transformUrl}. Expected image/*, got ${contentType}`
+                );
+                return null; // Stop processing if it's not an image
+              }
+
+              console.log(
+                `Successfully received ${purpose} response with content type: ${contentType}`
+              );
               const blob = await response.blob();
               console.log(
                 `Successfully downloaded ${purpose} version, size: ${blob.size / 1024}KB`
@@ -819,6 +861,16 @@ function CarModelEditorPage() {
                 });
               }
 
+              if (
+                !transformUploadResult ||
+                !transformUploadResult.presignedUrl
+              ) {
+                console.error(
+                  `[Upload Error] Failed to get presigned URL for ${purpose} version: ${fileName}`
+                );
+                return null;
+              }
+
               // Upload transformed version to R2
               const uploadResponse = await fetch(
                 transformUploadResult.presignedUrl,
@@ -833,8 +885,15 @@ function CarModelEditorPage() {
 
               if (!uploadResponse.ok) {
                 console.error(
-                  `Failed to upload ${purpose} version: ${uploadResponse.status}`
+                  `[Upload Error] Failed to upload ${purpose} version (${fileName}) to R2: ${uploadResponse.status} ${uploadResponse.statusText}`
                 );
+                // Log response body if possible
+                try {
+                  const bodyText = await uploadResponse.text();
+                  console.error(
+                    `[Upload Error] Response body (text): ${bodyText.substring(0, 500)}`
+                  );
+                } catch {}
                 return null;
               }
 
@@ -843,82 +902,80 @@ function CarModelEditorPage() {
               );
               return transformUploadResult.publicUrl;
             } catch (error) {
-              console.error(`Error uploading ${purpose} image:`, error);
+              console.error(
+                `[Upload Error] Exception during upload of ${purpose} image (${fileName}):`,
+                error
+              );
               return null;
             }
           };
 
-          // Always create mobile version
+          // Process mobile version
           if (shouldOptimizeMobile) {
-            // Process mobile version using the predetermined filename
+            console.log(
+              `Attempting to generate and upload mobile version: ${mobileFileName}`
+            );
             const mobileResult = await downloadAndUploadTransformation(
               transformUrls.mobile,
               mobileFileName,
               "mobile"
             );
-
-            // If mobile version fails, try again with different options
-            if (!mobileResult) {
+            if (mobileResult) {
               console.log(
-                "Mobile transformation failed, attempting retry with different parameters"
+                `Successfully processed mobile version: ${mobileResult}`
               );
-              const fallbackMobileUrl = await getTransformUrl(originalUrl, {
-                width: 640,
-                height: 640,
-                fit: "scale-down",
-                format: "auto" as
-                  | "auto"
-                  | "webp"
-                  | "avif"
-                  | "jpeg"
-                  | "png"
-                  | "gif",
-              });
-
-              await downloadAndUploadTransformation(
-                fallbackMobileUrl,
-                mobileFileName,
-                "mobile (retry)"
+            } else {
+              console.warn(
+                `Failed to process mobile version for ${originalFileName}.`
               );
+              // Consider if a fallback is needed or just log the warning
             }
-
-            // Verify the mobile URL follows the expected pattern based on original URL
-            // (This is a safety check to ensure the naming convention is maintained)
-            const expectedMobileUrlPattern = originalUrl.replace(
-              /(\.[^.]+)$/,
-              "_mobile$1"
-            );
-            const lastPathSegment = mobileFileName.split("/").pop() || "";
-            console.log(`Mobile filename verification: 
-              Expected pattern: ${expectedMobileUrlPattern}
-              Actual filename: ${mobileFileName}
-              Last segment: ${lastPathSegment}`);
           }
 
-          // Optimize desktop version if needed
+          // Process desktop version (only if needed and different from original)
           if (shouldOptimizeDesktop) {
-            // Process desktop version which will replace the original
-            const desktopUrl = await downloadAndUploadTransformation(
+            console.log(
+              `Attempting to generate and upload optimized desktop version: ${desktopFileName}`
+            );
+            const desktopResult = await downloadAndUploadTransformation(
               transformUrls.desktop,
-              desktopFileName,
-              "desktop"
+              desktopFileName, // Upload with the original desktop filename
+              "desktop (optimized)"
             );
 
-            // Update the result URL if desktop optimization succeeded
-            if (desktopUrl) {
-              resultUrl = desktopUrl;
+            if (desktopResult) {
+              console.log(
+                `Successfully processed optimized desktop version: ${desktopResult}`
+              );
+              resultUrl = desktopResult; // Update the URL to return if optimization succeeded
+            } else {
+              console.warn(
+                `Failed to process optimized desktop version for ${originalFileName}. Using original URL.`
+              );
+              // Keep the original URL as resultUrl
             }
           }
         } catch (error) {
-          console.error("Error in image transformation process:", error);
-          // Continue with the original URL if there are errors
+          console.error(
+            `[Optimization Error] Error during image optimization process for ${originalUrl}:`,
+            error
+          );
+          // Continue with the original URL if the optimization process has an unhandled exception
         }
+      } else {
+        console.log(
+          `Skipping optimization for ${originalFileName} based on settings or size.`
+        );
       }
 
       // Return either the original URL or the optimized desktop URL
+      console.log(`Final URL returned for ${originalFileName}: ${resultUrl}`);
       return resultUrl;
     } catch (error) {
-      console.error("Error in uploadImageToR2:", error);
+      console.error(
+        `[Upload Error] Top-level error in uploadImageToR2 for ${originalFileName}:`,
+        error
+      );
       throw new Error(error instanceof Error ? error.message : "Upload failed");
     }
   };

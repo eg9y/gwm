@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import type { Swiper as SwiperCore } from "swiper/types"; // Import Swiper type
 import type { GalleryImage } from "../db/schema";
 import { ResponsiveLazyImage } from "./ResponsiveImage";
@@ -8,14 +8,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react"; // Import icons
 import "swiper/css";
 // Required Swiper modules styles
 import "swiper/css/navigation";
-import "swiper/css/pagination";
 import "swiper/css/thumbs";
 import "swiper/css/free-mode";
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper core and required modules
-import { Navigation, Pagination, Thumbs, FreeMode } from "swiper/modules";
+import { Navigation, Thumbs, FreeMode } from "swiper/modules";
 
 interface ModelGalleryProps {
   modelId: string;
@@ -29,11 +28,43 @@ export function ModelGallery({
   gallery = [],
 }: ModelGalleryProps) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperCore | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const mainSwiperRef = useRef<SwiperCore | null>(null);
+  const initialized = useRef(false);
 
   // If no gallery images provided or empty array, return null
   if (!gallery || gallery.length === 0) {
     return null;
   }
+
+  // Force the swiper to update after mounting
+  useEffect(() => {
+    // Skip if already initialized
+    if (initialized.current) return;
+
+    // Small delay to ensure DOM is fully rendered
+    const timer = setTimeout(() => {
+      if (mainSwiperRef.current) {
+        mainSwiperRef.current.update();
+        mainSwiperRef.current.slideTo(0, 0);
+        initialized.current = true;
+      }
+
+      if (thumbsSwiper) {
+        thumbsSwiper.update();
+        thumbsSwiper.slideTo(0, 0);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [thumbsSwiper]);
+
+  // Reset initialization flag on unmount
+  useEffect(() => {
+    return () => {
+      initialized.current = false;
+    };
+  }, []);
 
   return (
     <div className="w-full space-y-6">
@@ -44,8 +75,8 @@ export function ModelGallery({
       {/* Main Swiper */}
       <div className="relative group">
         <Swiper
-          modules={[Navigation, Pagination, Thumbs, FreeMode]}
-          spaceBetween={10}
+          modules={[Navigation, Thumbs, FreeMode]}
+          spaceBetween={20}
           navigation={{
             nextEl: ".swiper-button-next-custom",
             prevEl: ".swiper-button-prev-custom",
@@ -55,8 +86,16 @@ export function ModelGallery({
             swiper:
               thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
           }}
-          loop={true}
-          className="w-full h-auto rounded-lg overflow-hidden shadow-lg aspect-[16/9] bg-gray-100 grab-cursor"
+          slidesPerView={"auto"}
+          autoHeight={true}
+          initialSlide={0}
+          onSwiper={(swiper) => {
+            mainSwiperRef.current = swiper;
+            // Force initial slide
+            swiper.slideTo(0, 0);
+          }}
+          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+          className="w-full max-h-[40vh] rounded-lg overflow-hidden bg-gray-100/50 grab-cursor"
           style={
             {
               "--swiper-navigation-color": "#ffffff",
@@ -71,21 +110,25 @@ export function ModelGallery({
           {gallery.map((image, index) => (
             <SwiperSlide
               key={`${modelId}-main-gallery-${image.imageUrl}-${index}`}
+              className="!w-auto flex justify-center items-center" // Added mx-auto
             >
-              <ResponsiveLazyImage
-                src={image.imageUrl}
-                alt={image.alt || `${modelName} image ${index + 1}`}
-                className="w-full h-full object-contain block"
-                width="100%"
-              />
-              {/* Optional: Add caption inside the slide */}
-              {image.alt && (
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                  <p className="text-sm text-white text-center">{image.alt}</p>
-                </div>
-              )}
+              <div className="shadow-lg rounded-lg overflow-hidden">
+                <ResponsiveLazyImage
+                  src={image.imageUrl}
+                  alt={image.alt || `${modelName} image ${index + 1}`}
+                  className="block object-contain max-w-full max-h-[40vh]"
+                />
+                {image.alt && (
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                    <p className="text-base font-semibold text-white text-center">
+                      {image.alt}
+                    </p>
+                  </div>
+                )}
+              </div>
             </SwiperSlide>
           ))}
+
           {/* Custom Navigation Arrows */}
           <button
             type="button"
@@ -108,7 +151,10 @@ export function ModelGallery({
       {gallery.length > 1 && (
         <div className="w-full">
           <Swiper
-            onSwiper={setThumbsSwiper}
+            onSwiper={(swiper) => {
+              setThumbsSwiper(swiper);
+              swiper.slideTo(0, 0);
+            }}
             loop={false}
             spaceBetween={10}
             slidesPerView={4}
@@ -116,6 +162,7 @@ export function ModelGallery({
             watchSlidesProgress={true}
             modules={[Thumbs, FreeMode]}
             className="mySwiperThumbs grab-cursor"
+            initialSlide={0}
             breakpoints={{
               640: {
                 slidesPerView: 5,
