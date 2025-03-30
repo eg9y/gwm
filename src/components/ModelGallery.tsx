@@ -85,11 +85,23 @@ export function ModelGallery({
           thumbs={{
             swiper:
               thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
+            multipleActiveThumbs: false,
           }}
           slidesPerView={"auto"}
           autoHeight={true}
-          freeMode={true}
           initialSlide={0}
+          freeMode={{
+            enabled: true,
+            sticky: false,
+            momentum: true,
+            momentumRatio: 0.8,
+            momentumBounce: false,
+          }}
+          speed={300}
+          simulateTouch={true}
+          threshold={5}
+          preventInteractionOnTransition={false}
+          cssMode={false}
           onSwiper={(swiper) => {
             mainSwiperRef.current = swiper;
             // Force initial slide
@@ -159,7 +171,7 @@ export function ModelGallery({
             loop={false}
             spaceBetween={10}
             slidesPerView={4}
-            freeMode={true}
+            freeMode={false}
             watchSlidesProgress={true}
             modules={[Thumbs, FreeMode]}
             className="mySwiperThumbs grab-cursor"
