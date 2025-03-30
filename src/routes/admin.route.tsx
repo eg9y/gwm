@@ -3,9 +3,19 @@ import { useAuth } from "@clerk/tanstack-start";
 import { Link, useNavigate, useMatches } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Users, FileText, Phone, Car } from "lucide-react";
+import { ClerkProvider } from "@clerk/tanstack-start";
+
+// Define the wrapper component
+function AdminRouteWrapper() {
+  return (
+    <ClerkProvider>
+      <AdminLayout />
+    </ClerkProvider>
+  );
+}
 
 export const Route = createFileRoute("/admin")({
-  component: AdminLayout,
+  component: AdminRouteWrapper,
 });
 
 function AdminLayout() {

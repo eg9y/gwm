@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type * as React from "react";
-import { ClerkProvider } from "@clerk/tanstack-start";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
@@ -104,38 +103,36 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const isAdminPage = location.pathname.startsWith("/admin");
 
   return (
-    <ClerkProvider>
-      <html lang="id">
-        <head>
-          <HeadContent />
-        </head>
-        <body>
-          <div
-            className="relative min-h-screen overflow-y-auto"
-            data-react-root="true"
-          >
-            {/* Show loading spinner when routes are transitioning */}
-            {isLoading && <LoadingSpinner />}
-            {/* Keep navbar fixed at the top and outside of any transition effects */}
-            <div className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-              <Navbar />
-            </div>
-            {/* Add padding to account for fixed navbar */}
-            <div className="">
-              <main>
-                <div className="transition-opacity duration-300 opacity-100">
-                  {children}
-                  <TanStackRouterDevtools position="bottom-right" />
-                  <Scripts />
-                </div>
-              </main>
-
-              <Footer />
-              {!isAdminPage && <WhatsAppButton />}
-            </div>
+    <html lang="id">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <div
+          className="relative min-h-screen overflow-y-auto"
+          data-react-root="true"
+        >
+          {/* Show loading spinner when routes are transitioning */}
+          {isLoading && <LoadingSpinner />}
+          {/* Keep navbar fixed at the top and outside of any transition effects */}
+          <div className="fixed top-0 left-0 right-0 z-50 bg-transparent">
+            <Navbar />
           </div>
-        </body>
-      </html>
-    </ClerkProvider>
+          {/* Add padding to account for fixed navbar */}
+          <div className="">
+            <main>
+              <div className="transition-opacity duration-300 opacity-100">
+                {children}
+                <TanStackRouterDevtools position="bottom-right" />
+                <Scripts />
+              </div>
+            </main>
+
+            <Footer />
+            {!isAdminPage && <WhatsAppButton />}
+          </div>
+        </div>
+      </body>
+    </html>
   );
 }
