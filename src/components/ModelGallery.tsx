@@ -88,6 +88,7 @@ export function ModelGallery({
           }}
           slidesPerView={"auto"}
           autoHeight={true}
+          freeMode={true}
           initialSlide={0}
           onSwiper={(swiper) => {
             mainSwiperRef.current = swiper;
