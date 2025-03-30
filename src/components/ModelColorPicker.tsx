@@ -107,6 +107,11 @@ export function ModelColorPicker({
           ...prev,
           [colorId]: false,
         }));
+
+        // If this is the selected image that was loading, hide the overlay
+        if (index === selectedColorIndex && showLoadingOverlay) {
+          setShowLoadingOverlay(false);
+        }
       };
 
       img.onerror = () => {
@@ -121,6 +126,11 @@ export function ModelColorPicker({
           ...prev,
           [colorId]: false,
         }));
+
+        // If this is the selected image that was loading, hide the overlay
+        if (index === selectedColorIndex && showLoadingOverlay) {
+          setShowLoadingOverlay(false);
+        }
       };
 
       img.src = colorData.imageUrl;
@@ -143,6 +153,7 @@ export function ModelColorPicker({
     preloadedImages,
     preloadingImages,
     selectedColorIndex,
+    showLoadingOverlay,
   ]);
 
   // Handle color swatch click: Update state and slide Swiper
@@ -150,10 +161,42 @@ export function ModelColorPicker({
     if (index !== selectedColorIndex) {
       // Check if the target image is preloaded BEFORE starting the slide
       const targetColorId = `color_${index}`;
-      if (!preloadedImages[targetColorId]) {
-        // Only show overlay if the target image isn't preloaded yet
-        setShowLoadingOverlay(true);
+      const isPreloaded = preloadedImages[targetColorId];
+      const isCurrentlyPreloading = preloadingImages[targetColorId];
+
+      // Only show loading overlay if the image is not already preloaded
+      // AND it's not in the browser's cache (which we can't detect directly)
+      if (!isPreloaded) {
+        // Start preloading if not already preloading
+        if (!isCurrentlyPreloading) {
+          const colorData = colorArray[index];
+          if (colorData?.imageUrl) {
+            // Attempt to check if image is in browser cache
+            const img = new Image();
+            img.onload = () => {
+              // Image loaded immediately (likely from cache)
+              setPreloadedImages((prev) => ({
+                ...prev,
+                [targetColorId]: true,
+              }));
+
+              // If this is now the selected color, hide loading overlay
+              if (index === selectedColorIndex) {
+                setShowLoadingOverlay(false);
+              }
+            };
+            img.src = colorData.imageUrl;
+
+            // Set loading state while we check
+            setShowLoadingOverlay(true);
+          }
+        } else {
+          // Already preloading, show the overlay
+          setShowLoadingOverlay(true);
+        }
       }
+
+      // Update selected color and slide
       setSelectedColorIndex(index);
       swiperInstance?.slideTo(index);
     }
@@ -168,6 +211,15 @@ export function ModelColorPicker({
   const handleColorLeave = () => {
     setHoveredColorIndex(null);
   };
+
+  // Effect to hide loading overlay when slide transition completes or image is fully loaded
+  useEffect(() => {
+    const targetColorId = `color_${selectedColorIndex}`;
+    if (preloadedImages[targetColorId]) {
+      // If image is preloaded, immediately hide loading overlay
+      setShowLoadingOverlay(false);
+    }
+  }, [selectedColorIndex, preloadedImages]);
 
   // If no colors, show a placeholder message
   if (colorArray.length === 0) {
@@ -198,7 +250,6 @@ export function ModelColorPicker({
               setSelectedColorIndex(swiper.activeIndex);
             }
           }}
-          onSlideChangeTransitionEnd={() => setShowLoadingOverlay(false)}
           onSwiper={setSwiperInstance}
           allowTouchMove={false}
           className="w-full"
@@ -209,12 +260,21 @@ export function ModelColorPicker({
               key={`${modelId}-${color.name || index}-slide`}
               className="flex items-center justify-center"
             >
-              <ResponsiveLazyImage
-                src={color.imageUrl || ""}
-                alt={`${modelId.replace(/-/g, " ")} warna ${
-                  color.name || "Color"
-                }`}
-                className="w-full h-auto object-cover mx-auto"
+              <img
+                src={color.imageUrl}
+                alt={color.name}
+                onLoad={() => {
+                  // Mark image as loaded when it renders in the Swiper
+                  const colorId = `color_${index}`;
+                  setPreloadedImages((prev) => ({
+                    ...prev,
+                    [colorId]: true,
+                  }));
+                  // Hide loading overlay if this is the selected color
+                  if (index === selectedColorIndex) {
+                    setShowLoadingOverlay(false);
+                  }
+                }}
               />
             </SwiperSlide>
           ))}
