@@ -1,11 +1,5 @@
 import { useState, useEffect, type KeyboardEvent, useRef } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
-import {
-  SignedIn,
-  SignedOut,
-  UserButton,
-  SignInButton,
-} from "@clerk/tanstack-start";
 import { getAllPublishedCarModels } from "../server/frontend-car-models";
 import type { DisplayCarModel } from "../server/frontend-car-models";
 
@@ -341,29 +335,11 @@ const Navbar = () => {
               Kontak
             </Link>
           </li>
-
-          {/* Admin link - only visible when signed in */}
-          <SignedIn>
-            <li>
-              <Link
-                to="/admin/kontak"
-                className={baseNavClass}
-                activeProps={{ className: `${baseNavClass} ${activeClass}` }}
-              >
-                Admin
-              </Link>
-            </li>
-          </SignedIn>
         </ul>
       </div>
 
       {/* Right - WhatsApp & Order Buttons */}
       <div className="flex items-center gap-2 md:gap-3">
-        {/* SignIn/UserButton based on auth state - only show UserButton when signed in */}
-        <SignedIn>
-          <UserButton afterSignOutUrl="/" />
-        </SignedIn>
-
         {/* WhatsApp Button - Now visible on all screen sizes */}
         <a
           href={whatsappUrl}
@@ -563,29 +539,6 @@ const Navbar = () => {
               Kontak
             </Link>
           </li>
-
-          {/* Only show admin link if signed in */}
-          <SignedIn>
-            <li className="mb-5">
-              <Link
-                to="/admin/kontak"
-                className={baseMobileNavClass}
-                activeProps={{
-                  className: `${baseMobileNavClass} ${activeClass}`,
-                }}
-                onClick={closeMenu}
-              >
-                Admin
-              </Link>
-            </li>
-          </SignedIn>
-
-          {/* Sign in/out only in mobile menu - only show when signed in */}
-          <SignedIn>
-            <li className="mb-5 pt-3 border-t border-gray-100">
-              <UserButton afterSignOutUrl="/" />
-            </li>
-          </SignedIn>
         </ul>
       </div>
 
