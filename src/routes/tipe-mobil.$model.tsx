@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { seo } from "../utils/seo";
 import { ModelColorPicker } from "../components/ModelColorPicker";
 import { ModelGallery } from "../components/ModelGallery";
@@ -103,6 +103,9 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
 function VehicleDetailPage() {
   const { vehicle, relatedVehicles } = Route.useLoaderData();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const [showStickyInfo, setShowStickyInfo] = useState(false);
+  const heroSectionRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Add a small delay for smooth transition effect
   useEffect(() => {
@@ -113,12 +116,77 @@ function VehicleDetailPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Use Intersection Observer to detect when hero section is scrolled out of view
+  useEffect(() => {
+    if (!heroSectionRef.current) return;
+
+    // Create observer with options
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        // When hero section is only 20% or less visible (80% scrolled out), show the sticky bar
+        setShowStickyInfo(
+          !entry.isIntersecting || entry.intersectionRatio <= 0.4
+        );
+      },
+      {
+        // Root is the viewport
+        root: null,
+        // Margin to start observing before the element enters/exits viewport
+        // Negative value on top means it will trigger earlier (when hero is still partially visible)
+        rootMargin: "-70px 0px 0px 0px",
+        // Array of thresholds at which to trigger the callback
+        // 0.2 means when 20% of the element is visible
+        threshold: [0, 0.4],
+      }
+    );
+
+    // Start observing the hero section
+    observerRef.current.observe(heroSectionRef.current);
+
+    // Cleanup
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   return (
     <div
       className={`pt-16 transition-opacity duration-500 ${isPageLoaded ? "opacity-100" : "opacity-0"}`}
     >
+      {/* Sticky Vehicle Info - shows when scrolled past hero */}
+      <div
+        className={`fixed top-[60px] sm:top-[70px] left-0 right-0 z-30 bg-white/95 backdrop-blur-sm shadow-md border-b border-gray-200 py-2 sm:py-2.5 transition-all duration-300 ${
+          showStickyInfo
+            ? "translate-y-0 opacity-100 visible"
+            : "translate-y-[-100%] opacity-0 invisible pointer-events-none"
+        }`}
+      >
+        <div className="container mx-auto px-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+          <div className="flex items-center gap-3">
+            <img
+              src={vehicle.mainProductImage || vehicle.featuredImage}
+              alt={vehicle.name}
+              className="h-8 w-12 sm:h-10 sm:w-16 object-cover rounded"
+              loading="lazy"
+              decoding="async"
+            />
+            <h3 className="font-semibold text-primary text-sm sm:text-base truncate max-w-[120px] sm:max-w-[200px]">
+              {vehicle.name}
+            </h3>
+          </div>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="font-medium text-gray-900 text-sm sm:text-base">
+              {vehicle.price}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Hero section */}
-      <div className="relative bg-gray-900 text-white">
+      <div className="relative bg-gray-900 text-white" ref={heroSectionRef}>
         <div
           className="absolute inset-0 bg-cover bg-center opacity-30"
           style={{
@@ -237,7 +305,7 @@ function VehicleDetailPage() {
                 Setiap detail dalam desain dan teknologi dipilih untuk
                 memberikan pengalaman berkendara yang optimal.
               </p>
-              {vehicle.features && vehicle.features[0] && (
+              {vehicle.features?.[0] && (
                 <p className="mt-4">
                   Dengan {vehicle.features[0].toLowerCase()}, {vehicle.name}{" "}
                   memberikan tenaga dan torsi yang cukup untuk menghadapi
@@ -266,7 +334,7 @@ function VehicleDetailPage() {
         </div>
 
         {/* Gallery Section - only show if gallery images exist */}
-        {vehicle.gallery?.length > 0 && (
+        {vehicle.gallery && vehicle.gallery.length > 0 && (
           <div className="mb-16">
             <ModelGallery
               modelId={vehicle.id}

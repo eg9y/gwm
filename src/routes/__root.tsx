@@ -101,13 +101,16 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   // Get the router state to detect when routes are loading
   const { isLoading, location } = useRouterState();
   const isAdminPage = location.pathname.startsWith("/admin");
+  const isVehicleDetailPage =
+    location.pathname.startsWith("/tipe-mobil/") &&
+    location.pathname.split("/").length > 2;
 
   return (
     <html lang="id">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className={isVehicleDetailPage ? "vehicle-detail-page" : ""}>
         <div
           className="relative min-h-screen overflow-y-auto"
           data-react-root="true"
