@@ -20,7 +20,7 @@ const sections = [
 // Replace the existing vehicle models section with this updated content
 const vehicleModels = [
   {
-    id: 1,
+    id: "tank-300",
     name: "Tank 300",
     price: "Rp. 837.000.000",
     description:
@@ -35,12 +35,13 @@ const vehicleModels = [
       "Multi-Terrain Select",
       "ADAS Lvl 2",
     ],
-    learnMoreLink: "/tank-300",
-    // imageUrl: tank300Image,
-    imageUrl: "https://gwm.kopimap.com/tank_300.webp",
+    imageUrls: [
+      "https://gwm.kopimap.com/tank_300.webp",
+      "https://gwm.kopimap.com/images/1743309988606-zir1d7-tank_300_product_im.webp",
+    ],
   },
   {
-    id: 2,
+    id: "tank-500",
     name: "Tank 500",
     price: "Rp. 1.208.000.000",
     description:
@@ -55,12 +56,13 @@ const vehicleModels = [
       "Massage Seat",
       "ADAS Lvl 2",
     ],
-    learnMoreLink: "/tank-500",
-    // imageUrl: tank500Image,
-    imageUrl: "https://gwm.kopimap.com/tank_500.webp",
+    imageUrls: [
+      "https://gwm.kopimap.com/tank_500.webp",
+      "https://gwm.kopimap.com/images/1743434479972-joh58p-DSC00816___.jpg",
+    ],
   },
   {
-    id: 3,
+    id: "haval-jolion",
     name: "Haval Jolion Ultra",
     price: "Rp. 418.000.000",
     description:
@@ -75,12 +77,13 @@ const vehicleModels = [
       "ADAS Lvl 2",
       "EV Mode",
     ],
-    learnMoreLink: "/haval-jolion",
-    // imageUrl: havalJolionImage,
-    imageUrl: "https://gwm.kopimap.com/haval_jolion.webp",
+    imageUrls: [
+      "https://gwm.kopimap.com/haval_jolion.webp",
+      "https://gwm.kopimap.com/images/1743435091188-qxqf9y-H-5-1-jpg.webp",
+    ],
   },
   {
-    id: 4,
+    id: "haval-h6",
     name: "Haval H6",
     price: "Rp. 602.000.000",
     description:
@@ -95,9 +98,10 @@ const vehicleModels = [
       "Advanced Safety Features",
       "Smart Connectivity",
     ],
-    learnMoreLink: "/haval-h6",
-    // imageUrl: havalH6Image,
-    imageUrl: "https://gwm.kopimap.com/haval_h6.jpg",
+    imageUrls: [
+      "https://gwm.kopimap.com/haval_h6.jpg",
+      "https://gwm.kopimap.com/images/1743434880188-pfm5he-GWM05896.jpg",
+    ],
   },
 ];
 
@@ -201,14 +205,14 @@ function HomePage() {
               className="section-container"
             >
               <ModelShowcase
-                imageUrl={model.imageUrl}
+                imageUrls={model.imageUrls}
                 title={model.name}
                 price={model.price}
                 description={model.description}
                 features={model.features}
                 primaryButtonText="Lihat Detail"
                 secondaryButtonText={secondaryButtonText}
-                primaryButtonLink={model.learnMoreLink}
+                modelId={model.id}
                 secondaryButtonLink={secondaryButtonLink}
                 isReversed={index % 2 !== 0} // Alternate isReversed (odd indexes are reversed)
               />

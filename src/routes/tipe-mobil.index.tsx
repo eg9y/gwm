@@ -81,7 +81,7 @@ function TipeMobilPage() {
             {models.map((model) => (
               <div
                 key={model.id}
-                className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                className="bg-white shadow-md  overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
                   <img

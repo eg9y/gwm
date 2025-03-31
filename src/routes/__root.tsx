@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type * as React from "react";
+import { useEffect, useRef } from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
@@ -15,6 +16,22 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppButton from "~/components/WhatsAppButton";
 import { LoadingSpinner } from "~/components/LoadingSpinner";
+
+// Create scroll restoration component
+function ScrollToTop() {
+  const { location } = useRouterState();
+  const prevPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    // Only scroll to top if the path has changed
+    if (prevPathRef.current !== location.pathname) {
+      window.scrollTo(0, 0);
+      prevPathRef.current = location.pathname;
+    }
+  });
+
+  return null;
+}
 
 export const Route = createRootRoute({
   head: () => ({
@@ -92,6 +109,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
+      <ScrollToTop />
       <Outlet />
     </RootDocument>
   );
