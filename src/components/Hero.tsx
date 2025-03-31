@@ -1,3 +1,5 @@
+import { RainbowButton } from "./RainbowButton";
+
 interface HeroProps {
   backgroundImage?: string; // Kept for backward compatibility
   desktopImage: string;
@@ -104,14 +106,9 @@ const Hero = ({
 
         <div className="flex flex-row gap-4 md:gap-6 justify-center items-center w-full px-8 mb-20 z-10">
           {primaryButtonText && (
-            <a
-              href={primaryButtonLink}
-              className="group min-w-[180px] md:min-w-[240px] px-6 py-3.5 rounded-lg text-white text-sm font-bold text-center uppercase transition-all duration-300 hover:-translate-y-1 active:translate-y-0 animate-fadeInUp animation-delay-600 w-auto max-w-xs hover:shadow-lg relative overflow-hidden"
-              style={{ backgroundColor: highlightColor }}
-            >
-              <span className="relative z-10">{primaryButtonText}</span>
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-            </a>
+            <RainbowButton href={primaryButtonLink} bgColor={highlightColor}>
+              {primaryButtonText}
+            </RainbowButton>
           )}
 
           {secondaryButtonText && (
@@ -218,14 +215,13 @@ const Hero = ({
             {/* Button area - positioned in the middle-lower section */}
             <div className="flex flex-col gap-3 justify-center items-center w-full px-4 absolute bottom-16 left-0 right-0">
               {primaryButtonText && (
-                <a
+                <RainbowButton
                   href={primaryButtonLink}
-                  className="group w-full px-5 py-3.5 rounded-lg text-white text-xs font-bold text-center uppercase transition-all duration-300 hover:scale-[1.02] active:scale-100 animate-fadeInUp animation-delay-600 max-w-xs shadow-lg relative overflow-hidden"
-                  style={{ backgroundColor: highlightColor }}
+                  isMobile={true}
+                  bgColor={highlightColor}
                 >
-                  <span className="relative z-10">{primaryButtonText}</span>
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                </a>
+                  {primaryButtonText}
+                </RainbowButton>
               )}
 
               {secondaryButtonText && (

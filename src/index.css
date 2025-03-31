@@ -1,3 +1,13 @@
+/* Rainbow button color variables */
+:root {
+	--color-1: 340, 82%, 52%; /* Red */
+	--color-2: 45, 93%, 47%; /* Gold */
+	--color-3: 190, 90%, 50%; /* Cyan */
+	--color-4: 280, 75%, 60%; /* Purple */
+	--color-5: 150, 84%, 40%; /* Green */
+	--speed: 4s; /* Animation speed */
+}
+
 /* Add these styles for the Tiptap editor and content */
 
 /* Tiptap content styles */

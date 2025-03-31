@@ -170,7 +170,7 @@ function VehicleDetailPage() {
             <img
               src={vehicle.mainProductImage || vehicle.featuredImage}
               alt={`${vehicle.name} - ${vehicle.categoryDisplay || vehicle.category} main`}
-              className="h-8 w-12 sm:h-10 sm:w-16 object-cover rounded"
+              className="h-8 w-12 sm:h-10 sm:w-16 object-cover "
               loading="lazy"
               decoding="async"
             />
@@ -212,7 +212,7 @@ function VehicleDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Image */}
           <div className="flex flex-col gap-12">
-            <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
+            <div className="overflow-hidden shadow-lg aspect-video">
               <LazyLoadImage
                 src={vehicle.featuredImage}
                 alt={`${vehicle.name} - ${vehicle.categoryDisplay || vehicle.category} main image`}
@@ -223,7 +223,7 @@ function VehicleDetailPage() {
             </div>
 
             {vehicle.subImage && (
-              <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
+              <div className="overflow-hidden shadow-lg aspect-video">
                 <LazyLoadImage
                   src={vehicle.subImage}
                   alt={`${vehicle.name} - ${vehicle.categoryDisplay || vehicle.category} sub image`}
@@ -358,7 +358,7 @@ function VehicleDetailPage() {
             {relatedVehicles.map((relatedVehicle) => (
               <div
                 key={relatedVehicle.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-lg"
+                className="bg-white shadow-md overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-lg"
               >
                 <Link
                   to="/tipe-mobil/$model"

@@ -224,7 +224,7 @@ export function ModelColorPicker({
   // If no colors, show a placeholder message
   if (colorArray.length === 0) {
     return (
-      <div className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-100 shadow-sm text-center text-gray-500">
+      <div className="mb-8 bg-gray-50 p-6 border border-gray-100 shadow-sm text-center text-gray-500">
         Warna tidak tersedia untuk model ini
       </div>
     );
@@ -236,7 +236,7 @@ export function ModelColorPicker({
 
       {/* Color Preview Area with Swiper */}
       <div
-        className="w-full rounded-lg shadow-lg overflow-hidden transition-colors duration-300 relative"
+        className="w-full shadow-lg overflow-hidden transition-colors duration-300 relative"
         style={{
           backgroundColor: selectedBackgroundColor,
           transition: "background-color 300ms ease-in-out",

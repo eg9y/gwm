@@ -126,7 +126,7 @@ function InfoPromoPage() {
             <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 content-fade-in stagger-item">
               <button
                 type="button"
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                className={`px-4 py-2 rounded-sm text-sm font-medium transition ${
                   activeCategory === "All"
                     ? "bg-primary text-white"
                     : "bg-slate-100 text-gray-700 hover:bg-gray-100"
@@ -140,7 +140,7 @@ function InfoPromoPage() {
               </button>
               <button
                 type="button"
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                className={`px-4 py-2 rounded-sm text-sm font-medium transition ${
                   activeCategory === "News"
                     ? "bg-primary text-white"
                     : "bg-slate-100 text-gray-700 hover:bg-gray-100"
@@ -154,7 +154,7 @@ function InfoPromoPage() {
               </button>
               <button
                 type="button"
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                className={`px-4 py-2 rounded-sm text-sm font-medium transition ${
                   activeCategory === "Promo"
                     ? "bg-primary text-white"
                     : "bg-slate-100 text-gray-700 hover:bg-gray-100"
@@ -179,7 +179,7 @@ function InfoPromoPage() {
                 <input
                   type="text"
                   placeholder="Cari info atau promo..."
-                  className="w-full md:w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full md:w-64 px-4 py-2 rounded-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -249,7 +249,7 @@ function InfoPromoPage() {
                 {filteredArticles.map((article) => (
                   <div
                     key={article.id}
-                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition duration-300 flex flex-col transform hover:-translate-y-1 content-fade-in"
+                    className="bg-white overflow-hidden shadow-md hover:shadow-lg transition duration-300 flex flex-col transform hover:-translate-y-1 content-fade-in"
                   >
                     <Link
                       to="/info-promo/$slug"
