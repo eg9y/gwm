@@ -38,7 +38,9 @@ export function RainbowButton({
   );
 
   const buttonStyle = {
-    backgroundColor: bgColor,
+    backgroundColor: bgColor, // Fallback background color
+    // Add a subtle vertical gradient from the base color to a slightly darker shade
+    backgroundImage: `linear-gradient(to bottom, ${bgColor}, color-mix(in srgb, ${bgColor} 85%, black))`,
   };
 
   // If href is provided, render as an anchor tag

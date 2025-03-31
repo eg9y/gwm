@@ -14,6 +14,7 @@ interface ModelShowcaseProps {
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
+import { useEffect, useRef, useState } from "react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -33,16 +34,61 @@ const ModelShowcase = ({
   // secondaryButtonLink = "/",
   isReversed = false,
 }: ModelShowcaseProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Intersection observer to add fade-in effect
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       className={`min-h-screen snap-start flex flex-col lg:flex-row ${
         isReversed ? "lg:flex-row-reverse" : ""
-      } overflow-hidden bg-white`}
+      } overflow-hidden relative perspective bg-gradient-to-br from-white via-white to-gray-50`}
     >
+      {/* Background design elements */}
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary/3 rounded-full blur-3xl" />
+
+      {/* Subtle pattern overlay */}
       <div
-        className="w-full lg:w-1/2 h-[40vh] sm:h-[50vh] lg:h-screen overflow-hidden relative"
-        style={{ aspectRatio: "600 / 400" }}
+        className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Image showcase side */}
+      <div
+        className={`w-full lg:w-1/2 h-[45vh] sm:h-[50vh] lg:h-screen overflow-hidden relative shadow-2xl ${
+          isVisible ? "animate-slide-in" : "opacity-0"
+        }`}
+        style={{
+          transition: "opacity 0.8s ease, transform 1.2s ease",
+          transitionDelay: "0.2s",
+        }}
       >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 pointer-events-none" />
+
         <Swiper
           modules={[Autoplay, EffectFade]}
           effect="fade"
@@ -62,7 +108,7 @@ const ModelShowcase = ({
               <img
                 src={imageUrl}
                 alt={`${title} view ${index + 1}`}
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center scale-[1.02] hover:scale-[1.05] transition-transform duration-7000"
                 loading="lazy"
                 decoding="async"
                 width="600"
@@ -73,62 +119,165 @@ const ModelShowcase = ({
         </Swiper>
       </div>
 
-      <div className="w-full lg:w-1/2 px-6 py-8 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-center text-primary">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 tracking-tight">
-          {title}
-        </h2>
-
-        {price && (
-          <p className="text-xl sm:text-2xl font-semibold text-accent mb-4">
-            {price}
-          </p>
-        )}
-
-        <p className="text-sm sm:text-base md:text-lg leading-tight tracking-tight mb-6 text-secondary max-w-xl">
-          {description}
-        </p>
-
-        {features.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-10">
-            {features.map((feature) => (
-              <div
-                key={`${title}-${feature.replace(/\s+/g, "-").toLowerCase()}`}
-                className="flex items-start gap-x-3"
-              >
-                <span className="flex h-[1lh] items-center">
-                  <span className="text-accent text-xl font-bold">✓</span>
-                </span>
-                <span className="text-xs sm:text-base text-secondary">
-                  {feature}
-                </span>
-              </div>
-            ))}
+      {/* Content side */}
+      <div
+        className={`w-full lg:w-1/2 px-6 py-8 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-center relative z-10 ${
+          isVisible ? "animate-fade-in" : "opacity-0"
+        }`}
+        style={{
+          transition: "opacity 1s ease",
+          transitionDelay: "0.4s",
+        }}
+      >
+        <div className="max-w-xl">
+          {/* Model title with accent line */}
+          <div className="relative mb-2">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-primary">
+              {title}
+            </h2>
+            <div className="h-1 w-12 bg-accent mt-3 rounded-full" />
           </div>
-        )}
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
-          {primaryButtonText && (
-            <Link
-              to={"/tipe-mobil/$model"}
-              params={{
-                model: modelId,
-              }}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-primary text-white text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {primaryButtonText}
-            </Link>
+          {/* Price with improved styling */}
+          {price && (
+            <p className="text-xl sm:text-2xl font-semibold text-accent mt-4 mb-4 flex items-center gap-x-2">
+              <span className="text-xs uppercase tracking-widest text-gray-400">
+                Starting at
+              </span>
+              {price}
+            </p>
           )}
 
-          {/* {secondaryButtonText && (
-              <a
-                href={secondaryButtonLink}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 rounded bg-gray-100 text-secondary text-xs sm:text-sm font-medium text-center uppercase transition-all duration-300 border border-gray-200 hover:bg-gray-200 hover:-translate-y-0.5 active:translate-y-0"
+          {/* Description with improved typography */}
+          <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-8 text-secondary max-w-xl opacity-80">
+            {description}
+          </p>
+
+          {/* Improved feature section */}
+          {features.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-10 sm:mb-12">
+              {features.map((feature, index) => (
+                <div
+                  key={`${title}-${feature.replace(/\s+/g, "-").toLowerCase()}`}
+                  className={`flex items-start gap-x-3 p-3 rounded-lg transition-all duration-300 ${
+                    isVisible
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-4"
+                  }`}
+                  style={{
+                    transitionDelay: `${0.1 * (index + 1)}s`,
+                    backgroundColor:
+                      index % 2 === 0 ? "rgba(0,0,0,0.01)" : "rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <span className="flex h-6 w-6 rounded-full bg-accent/10 items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="text-accent"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5 14L9 17L19 7"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="text-sm text-secondary font-medium">
+                    {feature}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Enhanced button */}
+          <div
+            className={`flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }`}
+            style={{
+              transition: "opacity 0.6s ease, transform 0.6s ease",
+              transitionDelay: "0.8s",
+            }}
+          >
+            {primaryButtonText && (
+              <Link
+                to={"/tipe-mobil/$model"}
+                params={{
+                  model: modelId,
+                }}
+                className="group px-6 py-3.5 rounded-lg bg-primary text-white text-sm font-semibold text-center uppercase tracking-wide transition-all duration-300 hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg active:translate-y-0 relative overflow-hidden"
               >
-                {secondaryButtonText}
-              </a>
-            )} */}
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {primaryButtonText}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M5 12H19M19 12L13 6M19 12L13 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+              </Link>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Add custom animations */}
+      <style>{`
+        .perspective {
+          perspective: 1000px;
+        }
+        
+        .animate-fade-in {
+          animation: fadeIn 1.2s ease forwards;
+        }
+        
+        .animate-slide-in {
+          animation: slideIn 1.2s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+          0% { 
+            opacity: 0; 
+            transform: ${isReversed ? "translateX(-20px)" : "translateX(20px)"}; 
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateX(0); 
+          }
+        }
+        
+        .duration-7000 {
+          transition-duration: 7000ms;
+        }
+      `}</style>
     </section>
   );
 };

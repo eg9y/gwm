@@ -62,7 +62,7 @@ const vehicleModels = [
     ],
   },
   {
-    id: "haval-jolion",
+    id: "haval-jolion-ultra",
     name: "Haval Jolion Ultra",
     price: "Rp. 418.000.000",
     description:
