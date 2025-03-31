@@ -967,16 +967,20 @@ function ContactPage() {
 
                 <div className="mt-1">
                   {/* reCAPTCHA */}
-                  <div className="mb-2 flex justify-center">
+                  <div className="mb-2 flex justify-center" aria-live="polite">
                     <div
                       className="g-recaptcha"
                       data-sitekey="6LcVRf0qAAAAADuDcfd1Stg2VyLc88m_WkqqMXup"
                       data-callback="onRecaptchaSuccess"
                       data-size="compact"
+                      aria-label="reCAPTCHA verification"
                     />
                   </div>
                   {errors.recaptchaToken && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center justify-center mb-2">
+                    <p
+                      className="text-red-500 text-xs mt-1 flex items-center justify-center mb-2"
+                      role="alert"
+                    >
                       <svg
                         className="h-3 w-3 mr-1"
                         fill="currentColor"
@@ -995,7 +999,7 @@ function ContactPage() {
                   )}
 
                   {/* Privacy note */}
-                  <p className="text-xs text-gray-500 mb-3">
+                  <p className="text-xs text-gray-700 mb-3">
                     Dengan mengirimkan formulir ini, Anda menyetujui bahwa data
                     Anda akan diproses sesuai dengan kebijakan privasi kami.
                   </p>
@@ -1052,9 +1056,16 @@ function ContactPage() {
                   </button>
 
                   {/* Notification area with ref for scrolling */}
-                  <div ref={notificationRef} className="mt-3 scroll-mt-6">
+                  <div
+                    ref={notificationRef}
+                    className="mt-3 scroll-mt-6"
+                    aria-live="assertive"
+                  >
                     {formStatus.success ? (
-                      <div className="bg-green-50 border border-green-400 text-green-700 px-3 py-2 text-sm rounded-lg animate-notification shadow-md">
+                      <div
+                        className="bg-green-50 border border-green-400 text-green-700 px-3 py-2 text-sm rounded-lg animate-notification shadow-md"
+                        role="status"
+                      >
                         <div className="flex items-center">
                           <svg
                             className="h-4 w-4 text-green-500 mr-2"
@@ -1077,7 +1088,10 @@ function ContactPage() {
                         </div>
                       </div>
                     ) : formStatus.message ? (
-                      <div className="bg-red-50 border border-red-400 text-red-700 px-3 py-2 text-sm rounded-lg animate-notification shadow-md">
+                      <div
+                        className="bg-red-50 border border-red-400 text-red-700 px-3 py-2 text-sm rounded-lg animate-notification shadow-md"
+                        role="alert"
+                      >
                         <div className="flex items-center">
                           <svg
                             className="h-4 w-4 text-red-500 mr-2"

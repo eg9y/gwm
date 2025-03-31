@@ -28,7 +28,7 @@ const Hero = ({
   primaryButtonLink = "/",
   secondaryButtonLink = "/",
   overlayOpacity = 0.3, // Default overlay opacity
-  highlightColor = "#FF3E00", // Default highlight color (GWM red)
+  highlightColor = "#D03000", // Darker red for better contrast
   imageDarkenAmount = 0, // Default darkness level
 }: HeroProps) => {
   return (
@@ -55,8 +55,11 @@ const Hero = ({
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
               style={{ filter: `brightness(${100 - imageDarkenAmount}%)` }}
+              aria-hidden="true"
+              tabIndex={-1}
             >
               <source src={videoBackground} type="video/mp4" />
+              <p>Your browser doesn't support HTML5 video playback.</p>
             </video>
           </div>
         )}
@@ -103,7 +106,7 @@ const Hero = ({
           {primaryButtonText && (
             <a
               href={primaryButtonLink}
-              className="group min-w-[180px] md:min-w-[240px] px-6 py-3.5 rounded-lg text-white text-sm font-medium text-center uppercase transition-all duration-300 hover:-translate-y-1 active:translate-y-0 animate-fadeInUp animation-delay-600 w-auto max-w-xs hover:shadow-lg relative overflow-hidden"
+              className="group min-w-[180px] md:min-w-[240px] px-6 py-3.5 rounded-lg text-white text-sm font-bold text-center uppercase transition-all duration-300 hover:-translate-y-1 active:translate-y-0 animate-fadeInUp animation-delay-600 w-auto max-w-xs hover:shadow-lg relative overflow-hidden"
               style={{ backgroundColor: highlightColor }}
             >
               <span className="relative z-10">{primaryButtonText}</span>
@@ -114,7 +117,7 @@ const Hero = ({
           {secondaryButtonText && (
             <a
               href={secondaryButtonLink}
-              className="group min-w-[180px] md:min-w-[240px] px-6 py-3.5 rounded-lg bg-white/15 text-white backdrop-blur-sm text-sm font-medium text-center uppercase transition-all duration-300 hover:-translate-y-1 active:translate-y-0 animate-fadeInUp animation-delay-700 w-auto max-w-xs hover:shadow-lg border border-white/30 relative overflow-hidden"
+              className="group min-w-[180px] md:min-w-[240px] px-6 py-3.5 rounded-lg bg-white/20 text-white backdrop-blur-sm text-sm font-bold text-center uppercase transition-all duration-300 hover:-translate-y-1 active:translate-y-0 animate-fadeInUp animation-delay-700 w-auto max-w-xs hover:shadow-lg border border-white/50 relative overflow-hidden"
             >
               <span className="relative z-10">{secondaryButtonText}</span>
               <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
@@ -163,8 +166,11 @@ const Hero = ({
                 playsInline
                 className="absolute inset-0 w-full h-full object-contain"
                 style={{ filter: `brightness(${100 - imageDarkenAmount}%)` }}
+                aria-hidden="true"
+                tabIndex={-1}
               >
                 <source src={videoBackground} type="video/mp4" />
+                <p>Your browser doesn't support HTML5 video playback.</p>
               </video>
             </div>
           )}
@@ -214,7 +220,7 @@ const Hero = ({
               {primaryButtonText && (
                 <a
                   href={primaryButtonLink}
-                  className="group w-full px-5 py-3.5 rounded-lg text-white text-xs font-medium text-center uppercase transition-all duration-300 hover:scale-[1.02] active:scale-100 animate-fadeInUp animation-delay-600 max-w-xs shadow-lg relative overflow-hidden"
+                  className="group w-full px-5 py-3.5 rounded-lg text-white text-xs font-bold text-center uppercase transition-all duration-300 hover:scale-[1.02] active:scale-100 animate-fadeInUp animation-delay-600 max-w-xs shadow-lg relative overflow-hidden"
                   style={{ backgroundColor: highlightColor }}
                 >
                   <span className="relative z-10">{primaryButtonText}</span>
@@ -225,7 +231,7 @@ const Hero = ({
               {secondaryButtonText && (
                 <a
                   href={secondaryButtonLink}
-                  className="group w-full px-5 py-3.5 rounded-lg bg-white/15 text-white backdrop-blur-md text-xs font-medium text-center uppercase transition-all duration-300 hover:scale-[1.02] active:scale-100 animate-fadeInUp animation-delay-700 max-w-xs shadow-lg border border-white/30 relative overflow-hidden"
+                  className="group w-full px-5 py-3.5 rounded-lg bg-white/20 text-white backdrop-blur-md text-xs font-bold text-center uppercase transition-all duration-300 hover:scale-[1.02] active:scale-100 animate-fadeInUp animation-delay-700 max-w-xs shadow-lg border border-white/50 relative overflow-hidden"
                 >
                   <span className="relative z-10">{secondaryButtonText}</span>
                   <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />

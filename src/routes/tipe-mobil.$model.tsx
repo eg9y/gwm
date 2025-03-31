@@ -163,12 +163,13 @@ function VehicleDetailPage() {
             ? "translate-y-0 opacity-100 visible"
             : "translate-y-[-100%] opacity-0 invisible pointer-events-none"
         }`}
+        aria-hidden={!showStickyInfo}
       >
         <div className="container mx-auto px-4 flex flex-wrap md:flex-nowrap justify-between items-center">
           <div className="flex items-center gap-3">
             <img
               src={vehicle.mainProductImage || vehicle.featuredImage}
-              alt={vehicle.name}
+              alt={`${vehicle.name} - ${vehicle.categoryDisplay || vehicle.category} main`}
               className="h-8 w-12 sm:h-10 sm:w-16 object-cover rounded"
               loading="lazy"
               decoding="async"
@@ -214,7 +215,7 @@ function VehicleDetailPage() {
             <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
               <LazyLoadImage
                 src={vehicle.featuredImage}
-                alt={vehicle.name}
+                alt={`${vehicle.name} - ${vehicle.categoryDisplay || vehicle.category} main image`}
                 effect="blur"
                 wrapperClassName="w-full h-full"
                 className="w-full h-full object-cover"
@@ -225,7 +226,7 @@ function VehicleDetailPage() {
               <div className="rounded-lg overflow-hidden shadow-lg aspect-video">
                 <LazyLoadImage
                   src={vehicle.subImage}
-                  alt={vehicle.name}
+                  alt={`${vehicle.name} - ${vehicle.categoryDisplay || vehicle.category} sub image`}
                   effect="blur"
                   wrapperClassName="w-full h-full"
                   className="w-full h-full object-cover"
@@ -255,6 +256,7 @@ function VehicleDetailPage() {
                           viewBox="0 0 20 20"
                           fill="currentColor"
                           aria-hidden="true"
+                          focusable="false"
                         >
                           <path
                             fillRule="evenodd"
@@ -277,13 +279,15 @@ function VehicleDetailPage() {
                 href={`https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20tentang%20${vehicle.name}.%20Saya:%20...%20Domisili:%20..`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full block py-3 bg-primary text-white text-center rounded-md font-medium hover:bg-primary/90 transition-colors"
+                className="w-full block py-3 bg-primary text-white text-center rounded-md font-medium hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label={`Hubungi untuk test drive ${vehicle.name}`}
               >
                 Hubungi Untuk Test Drive
               </a>
               <a
                 href="/kontak"
-                className="w-full block py-3 border border-gray-300 text-gray-700 text-center rounded-md font-medium hover:bg-gray-50 transition-colors"
+                className="w-full block py-3 border border-gray-300 text-gray-700 text-center rounded-md font-medium hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label={`Pelajari lebih lanjut tentang ${vehicle.name}`}
               >
                 Pelajari Lebih Lanjut
               </a>
@@ -364,7 +368,7 @@ function VehicleDetailPage() {
                   <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
                     <LazyLoadImage
                       src={relatedVehicle.featuredImage}
-                      alt={relatedVehicle.name}
+                      alt={`${relatedVehicle.name} - ${relatedVehicle.categoryDisplay || relatedVehicle.category} main image`}
                       effect="blur"
                       width="100%"
                       height="100%"
@@ -413,7 +417,8 @@ function VehicleDetailPage() {
                 href={`https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20tentang%20${vehicle.name}.%20Saya:%20...%20Domisili:%20..`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 bg-green-500 text-white rounded-md font-medium text-center hover:bg-green-600 transition-colors"
+                className="px-6 py-3 bg-green-600 text-white rounded-md font-medium text-center hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+                aria-label={`Chat WhatsApp about ${vehicle.name}`}
               >
                 Chat WhatsApp
               </a>
