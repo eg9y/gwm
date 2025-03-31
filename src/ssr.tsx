@@ -8,8 +8,6 @@ import {
   defaultStreamHandler,
 } from "@tanstack/react-start/server";
 import { getRouterManifest } from "@tanstack/react-start/router-manifest";
-import { createClerkHandler } from "@clerk/tanstack-start/server";
-
 import { createRouter } from "./router";
 
 // Log for debugging (remove in production)
@@ -18,9 +16,11 @@ console.log(
   !!process.env.RECAPTCHA_SECRET_KEY
 );
 
-export default createClerkHandler(
-  createStartHandler({
-    createRouter,
-    getRouterManifest,
-  })
-)(defaultStreamHandler);
+// Create the standard handler (no Clerk)
+const handler = createStartHandler({
+  createRouter,
+  getRouterManifest,
+})(defaultStreamHandler);
+
+// Export the handler
+export default handler;
