@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, createFileRoute } from "@tanstack/react-router";
 
 import Hero from "../components/Hero";

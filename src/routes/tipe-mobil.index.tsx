@@ -62,11 +62,17 @@ function TipeMobilPage() {
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <div
+              className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
+              aria-label="Loading"
+              role="status"
+            >
+              <span className="sr-only">Loading vehicle models...</span>
+            </div>
           </div>
         ) : models.length === 0 && !error ? (
           <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">
+            <p className="text-gray-700">
               No models available at the moment. Please check back later.
             </p>
           </div>
@@ -80,7 +86,7 @@ function TipeMobilPage() {
                 <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
                   <img
                     src={model.featuredImage}
-                    alt={`${model.name} GWM`}
+                    alt={`${model.name} - GWM ${model.category || ""} vehicle`}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
@@ -92,7 +98,8 @@ function TipeMobilPage() {
                   <Link
                     to="/tipe-mobil/$model"
                     params={{ model: model.id }}
-                    className="mt-3 inline-block text-primary font-medium"
+                    className="mt-3 inline-block text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                    aria-label={`View details for ${model.name}`}
                   >
                     Lihat Detail
                   </Link>

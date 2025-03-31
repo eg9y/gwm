@@ -189,12 +189,12 @@ const Footer = () => {
 
       <div className="mt-10 pt-5 border-t border-gray-100 px-10">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-xs text-gray-400 order-2 md:order-1">
+          <p className="text-xs text-gray-600 order-2 md:order-1">
             © {currentYear} GWM Indonesia. All rights reserved.
           </p>
 
           <div className="flex space-x-3 items-center order-1 md:order-2">
-            <span className="text-xs text-gray-400 mr-2">Follow Us</span>
+            <span className="text-xs text-gray-600 mr-2">Follow Us</span>
             <button
               type="button"
               className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -287,7 +287,7 @@ const Footer = () => {
             <li>
               <a
                 href="/privacy-policy"
-                className="text-xs text-gray-400 hover:text-primary transition"
+                className="text-xs text-gray-600 hover:text-primary transition"
               >
                 Privacy Policy
               </a>
@@ -295,7 +295,7 @@ const Footer = () => {
             <li>
               <a
                 href="/terms"
-                className="text-xs text-gray-400 hover:text-primary transition"
+                className="text-xs text-gray-600 hover:text-primary transition"
               >
                 Terms of Service
               </a>
@@ -303,7 +303,7 @@ const Footer = () => {
             <li>
               <a
                 href="/cookie-policy"
-                className="text-xs text-gray-400 hover:text-primary transition"
+                className="text-xs text-gray-600 hover:text-primary transition"
               >
                 Cookie Policy
               </a>
