@@ -135,12 +135,12 @@ const ModelShowcase = ({
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-primary">
               {title}
             </h2>
-            <div className="h-1 w-12 bg-accent mt-3 rounded-full" />
+            <div className="h-1 w-12 bg-red-500 mt-3 rounded-full" />
           </div>
 
           {/* Price with improved styling */}
           {price && (
-            <p className="text-xl sm:text-2xl font-semibold text-accent mt-4 mb-4 flex items-center gap-x-2">
+            <p className="text-xl sm:text-2xl font-semibold text-accent m-1 sm:mt-4 sm:mb-4 flex items-center gap-x-2">
               <span className="text-xs uppercase tracking-widest text-gray-400">
                 Starting at
               </span>
@@ -149,17 +149,17 @@ const ModelShowcase = ({
           )}
 
           {/* Description with improved typography */}
-          <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-8 text-secondary max-w-xl opacity-80">
+          <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-8 text-secondary max-w-xl opacity-80">
             {description}
           </p>
 
           {/* Improved feature section */}
           {features.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-10 sm:mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-5 mb-10 sm:mb-12">
               {features.map((feature, index) => (
                 <div
                   key={`${title}-${feature.replace(/\s+/g, "-").toLowerCase()}`}
-                  className={`flex items-start gap-x-3 p-3 rounded-lg transition-all duration-300 ${
+                  className={`flex items-start gap-x-3 p-1 sm:p-3 rounded-lg transition-all duration-300 ${
                     isVisible
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-4"
@@ -215,7 +215,7 @@ const ModelShowcase = ({
                 params={{
                   model: modelId,
                 }}
-                className="group px-6 py-3.5 rounded-lg bg-primary text-white text-sm font-semibold text-center uppercase tracking-wide transition-all duration-300 hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg active:translate-y-0 relative overflow-hidden"
+                className="group px-6 py-3.5 bg-primary text-white text-sm font-semibold text-center uppercase tracking-wide transition-all duration-300 hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg active:translate-y-0 relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {primaryButtonText}
