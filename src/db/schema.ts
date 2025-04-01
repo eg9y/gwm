@@ -65,6 +65,18 @@ export type GalleryImage = {
   alt: string;
 };
 
+// Define type for individual specification item
+export type CarModelSpecificationItem = {
+  key: string;
+  value: string;
+};
+
+// Define type for specification category
+export type CarModelSpecificationCategory = {
+  categoryTitle: string;
+  specs: CarModelSpecificationItem[];
+};
+
 // Define car models table
 export const carModels = sqliteTable("car_models", {
   id: text("id").primaryKey(), // slugified name as ID
@@ -80,6 +92,9 @@ export const carModels = sqliteTable("car_models", {
   mainProductImage: text("main_product_image").notNull(), // Image for navbar and listing
   colors: text("colors", { mode: "json" }).notNull().$type<CarModelColor[]>(), // JSON array of color objects
   gallery: text("gallery", { mode: "json" }).$type<GalleryImage[]>(), // JSON array of gallery images
+  specifications: text("specifications", { mode: "json" }).$type<
+    CarModelSpecificationCategory[]
+  >(), // JSON array of specification categories
   category: text("category").notNull(), // e.g. SUV, Sedan, etc.
   categoryDisplay: text("category_display").notNull(), // Display name for category
   published: integer("published").notNull().default(0), // Published status

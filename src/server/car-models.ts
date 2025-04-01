@@ -5,10 +5,25 @@ import {
   type CarModelFeature,
   type CarModelColor,
   type GalleryImage,
+  type CarModelSpecificationCategory,
 } from "../db/schema";
 import { eq, asc, desc, like, or, and } from "drizzle-orm";
 import slugify from "slugify";
 import { z } from "zod";
+
+// Schema for individual specification item
+const specSchema = z.object({
+  key: z.string().min(1, "Specification key is required"),
+  value: z.string().min(1, "Specification value is required"),
+});
+
+// Schema for a specification category
+const specCategorySchema = z.object({
+  categoryTitle: z.string().min(1, "Category title is required"),
+  specs: z
+    .array(specSchema)
+    .min(1, "At least one specification is required per category"),
+});
 
 // Schema for car model input validation
 const carModelSchema = z.object({
@@ -42,6 +57,7 @@ const carModelSchema = z.object({
     )
     .optional()
     .default([]),
+  specifications: z.array(specCategorySchema).optional().default([]),
   category: z.string().min(1, "Category is required"),
   categoryDisplay: z.string().min(1, "Category display name is required"),
   published: z.coerce.number().default(0),
@@ -60,6 +76,7 @@ export interface CarModel {
   mainProductImage: string;
   colors: CarModelColor[];
   gallery?: GalleryImage[];
+  specifications?: CarModelSpecificationCategory[];
   category: string;
   categoryDisplay: string;
   published: number;
@@ -183,6 +200,7 @@ export const createCarModel = createServerFn()
         mainProductImage: data.mainProductImage,
         colors: processedColors,
         gallery: data.gallery,
+        specifications: data.specifications,
         category: data.category,
         categoryDisplay: data.categoryDisplay,
         published: data.published,
@@ -251,6 +269,7 @@ export const updateCarModel = createServerFn()
           mainProductImage: data.mainProductImage,
           colors: processedColors,
           gallery: data.gallery,
+          specifications: data.specifications,
           category: data.category,
           categoryDisplay: data.categoryDisplay,
           published: data.published,

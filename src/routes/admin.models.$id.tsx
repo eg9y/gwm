@@ -7,6 +7,7 @@ import {
   useFieldArray,
   Controller,
   type Control,
+  type FieldErrors, // Import FieldErrors
 } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -18,6 +19,7 @@ import {
   Upload,
   Loader2,
   Image as ImageIcon,
+  ListChecks,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -40,8 +42,23 @@ import type {
   CarModelFeature,
   CarModelColor,
   GalleryImage,
+  CarModelSpecificationCategory,
 } from "../db/schema";
 import slugify from "slugify";
+
+// Define schema for individual specification item
+const specSchema = z.object({
+  key: z.string().min(1, "Specification key is required"),
+  value: z.string().min(1, "Specification value is required"),
+});
+
+// Define schema for a specification category
+const specCategorySchema = z.object({
+  categoryTitle: z.string().min(1, "Category title is required"),
+  specs: z
+    .array(specSchema)
+    .min(1, "At least one specification is required per category"),
+});
 
 // Define form validation schema
 const carModelFormSchema = z.object({
@@ -78,6 +95,7 @@ const carModelFormSchema = z.object({
     )
     .optional()
     .default([]),
+  specifications: z.array(specCategorySchema).optional().default([]),
 });
 
 // Form data type
@@ -85,7 +103,10 @@ type CarModelFormData = z.infer<typeof carModelFormSchema>;
 
 // Type for safer field names
 type FieldPath =
-  | keyof CarModelFormData
+  | keyof Omit<
+      CarModelFormData,
+      "features" | "colors" | "gallery" | "specifications"
+    >
   | `colors.${number}.imageUrl`
   | `gallery.${number}.imageUrl`;
 
@@ -121,6 +142,7 @@ const defaultValues: CarModelFormData = {
     },
   ],
   gallery: [],
+  specifications: [],
   category: "suv",
   categoryDisplay: "SUV",
   published: false,
@@ -215,6 +237,8 @@ function CarModelEditorPage() {
       features: model.features as string[],
       colors: model.colors as CarModelColor[],
       gallery: (model.gallery as GalleryImage[]) || [],
+      specifications:
+        (model.specifications as CarModelSpecificationCategory[]) || [],
     };
   };
 
@@ -259,6 +283,16 @@ function CarModelEditorPage() {
   } = useFieldArray({
     control: control,
     name: "gallery",
+  });
+
+  // Field array for Specifications (Categories and Specs within)
+  const {
+    fields: specificationFields,
+    append: appendSpecificationCategory,
+    remove: removeSpecificationCategory,
+  } = useFieldArray({
+    control,
+    name: "specifications",
   });
 
   // Custom handlers for trash button clicks that track image URLs for deletion
@@ -408,7 +442,7 @@ function CarModelEditorPage() {
         setUploadProgress({
           current: 0,
           total: totalUploads,
-          message: `Starting uploads...`,
+          message: "Starting uploads...",
         });
 
         // Create an array of upload promises
@@ -428,7 +462,10 @@ function CarModelEditorPage() {
 
             // Update field value based on the result (important: needs context)
             // We need to return the result along with fieldName to update later
-            URL.revokeObjectURL(upload.previewUrl); // Revoke preview URL
+            if (typeof upload.previewUrl === "string") {
+              // Add stricter string check before revoking
+              URL.revokeObjectURL(upload.previewUrl); // Revoke preview URL
+            }
             return {
               success: true,
               fieldName: upload.fieldName,
@@ -475,7 +512,7 @@ function CarModelEditorPage() {
           } else if (result.fieldName.includes("gallery.")) {
             setValue(
               result.fieldName as `gallery.${number}.imageUrl`,
-              result.url,
+              result.url || "",
               { shouldValidate: true }
             );
           } else {
@@ -1527,7 +1564,7 @@ function CarModelEditorPage() {
               <button
                 type="button"
                 onClick={() => {
-                  // @ts-ignore - Function expects different type but works correctly
+                  // @ts-ignore - Restore: Function expects different type but works correctly
                   appendFeature("New Feature");
                 }}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
@@ -1570,7 +1607,7 @@ function CarModelEditorPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      // @ts-ignore - Function expects different type but works correctly
+                      // @ts-ignore - Restore: Function expects different type but works correctly
                       appendFeature("New Feature");
                     }}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -1627,7 +1664,7 @@ function CarModelEditorPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    // @ts-ignore - Function expects different type but works correctly
+                    // @ts-ignore - Restore: Function expects different type but works correctly
                     appendFeature("New Feature");
                   }}
                   className="inline-flex items-center px-3 py-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
@@ -1663,6 +1700,78 @@ function CarModelEditorPage() {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Specifications Section */}
+          <div className="bg-gray-50 p-4 rounded-md">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Specifications
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Add detailed specifications grouped by category (e.g.,
+                  Dimensions, Engine).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  appendSpecificationCategory({
+                    categoryTitle: "New Category",
+                    specs: [{ key: "", value: "" }],
+                  })
+                }
+                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Category
+              </button>
+            </div>
+
+            {errors.specifications && (
+              <p className="mb-3 text-sm text-red-600">
+                {errors.specifications.message}
+              </p>
+            )}
+
+            <div className="space-y-4">
+              {specificationFields.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+                  <div>
+                    <ListChecks className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500 mb-4">
+                      No specifications added yet. Add categories and key-value
+                      pairs.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        appendSpecificationCategory({
+                          categoryTitle: "Dimensions & Weights",
+                          specs: [{ key: "Dimensions (mm)", value: "" }],
+                        })
+                      }
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add First Category
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                specificationFields.map((categoryField, categoryIndex) => (
+                  <SpecificationCategoryField
+                    key={categoryField.id}
+                    categoryIndex={categoryIndex}
+                    control={control}
+                    register={register}
+                    removeCategory={removeSpecificationCategory}
+                    errors={errors}
+                  />
+                ))
+              )}
+            </div>
           </div>
 
           {/* Colors Section */}
@@ -2019,4 +2128,159 @@ interface ImageUploadFieldProps {
   handleUploadClick: (fieldName: FieldPath) => void;
   error?: string;
   altText?: string;
+}
+
+// ** NEW ** Specification Category Field Component
+interface SpecificationCategoryFieldProps {
+  categoryIndex: number;
+  control: Control<CarModelFormData>;
+  register: ReturnType<typeof useForm<CarModelFormData>>["register"];
+  removeCategory: (index: number) => void;
+  errors: FieldErrors<CarModelFormData>; // Use specific type
+}
+
+function SpecificationCategoryField({
+  categoryIndex,
+  control,
+  register,
+  removeCategory,
+  errors,
+}: SpecificationCategoryFieldProps) {
+  const {
+    fields: specFields,
+    append: appendSpec,
+    remove: removeSpec,
+  } = useFieldArray({
+    control,
+    name: `specifications.${categoryIndex}.specs`,
+  });
+
+  // Safely access nested errors
+  const categoryErrors = errors.specifications?.[categoryIndex];
+
+  return (
+    <div className="p-4 bg-white rounded-md shadow-sm border border-gray-200">
+      {/* Category Title and Remove Button */}
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+        <div className="flex-1 mr-4">
+          <label
+            htmlFor={`spec-cat-title-${categoryIndex}`}
+            className="sr-only"
+          >
+            Category Title
+          </label>
+          <input
+            id={`spec-cat-title-${categoryIndex}`}
+            type="text"
+            placeholder="Specification Category Title (e.g., Engine)"
+            {...register(`specifications.${categoryIndex}.categoryTitle`)}
+            className="w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary font-medium text-gray-800"
+          />
+          {categoryErrors?.categoryTitle && (
+            <p className="mt-1 text-sm text-red-600">
+              {categoryErrors.categoryTitle.message}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => removeCategory(categoryIndex)}
+          className="p-1 text-gray-400 hover:text-red-500"
+          title="Remove category"
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Specification Items */}
+      <div className="space-y-2 mb-3">
+        {specFields.map((specField, specIndex) => {
+          const specErrors = categoryErrors?.specs?.[specIndex];
+          return (
+            <div
+              key={specField.id}
+              className="grid grid-cols-1 sm:grid-cols-11 gap-2 items-center"
+            >
+              <div className="sm:col-span-5">
+                <label
+                  htmlFor={`spec-key-${categoryIndex}-${specIndex}`}
+                  className="sr-only"
+                >
+                  Specification Key
+                </label>
+                <input
+                  id={`spec-key-${categoryIndex}-${specIndex}`}
+                  type="text"
+                  placeholder="Key (e.g., Max Output)"
+                  {...register(
+                    `specifications.${categoryIndex}.specs.${specIndex}.key`
+                  )}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                />
+                {specErrors?.key && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {specErrors.key.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:col-span-5">
+                <label
+                  htmlFor={`spec-value-${categoryIndex}-${specIndex}`}
+                  className="sr-only"
+                >
+                  Specification Value
+                </label>
+                <input
+                  id={`spec-value-${categoryIndex}-${specIndex}`}
+                  type="text"
+                  placeholder="Value (e.g., 342 HP)"
+                  {...register(
+                    `specifications.${categoryIndex}.specs.${specIndex}.value`
+                  )}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                />
+                {specErrors?.value && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {specErrors.value.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:col-span-1 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => removeSpec(specIndex)}
+                  disabled={specFields.length <= 1}
+                  className="p-1 text-gray-400 hover:text-red-500 disabled:text-gray-300 disabled:cursor-not-allowed"
+                  title="Remove specification item"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {categoryErrors?.specs &&
+          typeof categoryErrors.specs === "object" &&
+          categoryErrors.specs.message && (
+            <p className="mt-1 text-sm text-red-600">
+              {categoryErrors.specs.message} {/* Display array-level errors */}
+            </p>
+          )}
+      </div>
+
+      {/* Add Specification Item Button */}
+      <div className="flex justify-start">
+        <button
+          type="button"
+          onClick={() => appendSpec({ key: "", value: "" })}
+          className="inline-flex items-center px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Add Item
+        </button>
+      </div>
+    </div>
+  );
 }

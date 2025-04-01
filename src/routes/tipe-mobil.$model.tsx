@@ -1,3 +1,5 @@
+"use client";
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { seo } from "../utils/seo";
@@ -9,6 +11,7 @@ import {
 } from "../server/frontend-car-models";
 import type { CarModelColor, GalleryImage } from "../db/schema";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { ChevronDown, Info } from "lucide-react";
 
 // Define the expected types for loader data
 type LoaderData = {
@@ -25,6 +28,10 @@ type LoaderData = {
     category: string;
     categoryDisplay: string;
     published: number;
+    specifications?: Array<{
+      categoryTitle: string;
+      specs: Array<{ key: string; value: string }>;
+    }>;
   };
   relatedVehicles: Array<{
     id: string;
@@ -104,8 +111,12 @@ function VehicleDetailPage() {
   const { vehicle, relatedVehicles } = Route.useLoaderData();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [showStickyInfo, setShowStickyInfo] = useState(false);
+  const [activeSpecCategory, setActiveSpecCategory] = useState<string | null>(
+    vehicle.specifications?.[0]?.categoryTitle || null
+  );
   const heroSectionRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const specsSectionRef = useRef<HTMLDivElement>(null);
 
   // Add a small delay for smooth transition effect
   useEffect(() => {
@@ -152,6 +163,20 @@ function VehicleDetailPage() {
     };
   }, []);
 
+  // Scroll to specifications section
+  const scrollToSpecs = () => {
+    if (specsSectionRef.current) {
+      specsSectionRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Toggle specification category
+  const toggleSpecCategory = (categoryTitle: string) => {
+    setActiveSpecCategory(
+      activeSpecCategory === categoryTitle ? null : categoryTitle
+    );
+  };
+
   return (
     <div
       className={`pt-16 transition-opacity duration-500 ${isPageLoaded ? "opacity-100" : "opacity-0"}`}
@@ -182,6 +207,13 @@ function VehicleDetailPage() {
             <span className="font-medium text-gray-900 text-sm sm:text-base">
               {vehicle.price}
             </span>
+            <button
+              onClick={scrollToSpecs}
+              type="button"
+              className="text-xs sm:text-sm bg-primary/10 text-primary px-3 py-1 rounded-full hover:bg-primary/20 transition-colors"
+            >
+              Lihat Spesifikasi
+            </button>
           </div>
         </div>
       </div>
@@ -337,6 +369,109 @@ function VehicleDetailPage() {
           </div>
         </div>
 
+        {/* Specifications Section - IMPROVED VERSION */}
+        {vehicle.specifications && vehicle.specifications.length > 0 && (
+          <div className="mb-16" ref={specsSectionRef} id="specifications">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Spesifikasi Lengkap {vehicle.name}
+              </h2>
+
+              <div className="mt-4 md:mt-0 flex items-center text-sm text-gray-500">
+                <Info size={16} className="mr-2" />
+                <span>Klik kategori untuk melihat detail</span>
+              </div>
+            </div>
+
+            {/* Specification Categories Navigation */}
+            <div className="flex overflow-x-auto pb-2 mb-6 gap-2 scrollbar-hide">
+              {vehicle.specifications.map(
+                (
+                  category: {
+                    categoryTitle: string;
+                    specs: Array<{ key: string; value: string }>;
+                  },
+                  index: number
+                ) => (
+                  <button
+                    key={`spec-nav-${category.categoryTitle}`}
+                    onClick={() =>
+                      setActiveSpecCategory(category.categoryTitle)
+                    }
+                    type="button"
+                    className={`px-4 py-2 rounded-sm whitespace-nowrap text-sm font-medium transition-colors ${
+                      activeSpecCategory === category.categoryTitle
+                        ? "bg-red-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {category.categoryTitle}
+                  </button>
+                )
+              )}
+            </div>
+
+            {/* Specifications Content */}
+            <div className="space-y-4">
+              {vehicle.specifications.map((category, catIndex) => (
+                <div
+                  key={`spec-cat-${category.categoryTitle}`}
+                  className={`bg-white rounded-sm border border-gray-200 overflow-hidden transition-all duration-300 ${
+                    activeSpecCategory === category.categoryTitle
+                      ? "shadow-md"
+                      : ""
+                  }`}
+                >
+                  {/* Category Header - Always visible and clickable */}
+                  <button
+                    onClick={() => toggleSpecCategory(category.categoryTitle)}
+                    type="button"
+                    className={`w-full flex items-center justify-between p-5 text-left ${
+                      activeSpecCategory === category.categoryTitle
+                        ? "bg-gray-50 border-b border-gray-200"
+                        : ""
+                    }`}
+                  >
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {category.categoryTitle}
+                    </h3>
+                    <div
+                      className={`text-gray-500 transition-transform duration-300 ${
+                        activeSpecCategory === category.categoryTitle
+                          ? "rotate-180"
+                          : ""
+                      }`}
+                    >
+                      <ChevronDown size={20} />
+                    </div>
+                  </button>
+
+                  {/* Category Content - Only visible when active */}
+                  {activeSpecCategory === category.categoryTitle && (
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {category.specs.map((spec, specIndex) => (
+                          <div
+                            key={`spec-item-${category.categoryTitle}-${spec.key}`}
+                            className="bg-gray-50 p-3 rounded-md"
+                          >
+                            <div className="text-xs font-medium text-gray-500 mb-1">
+                              {spec.key}
+                            </div>
+                            <div className="text-sm font-semibold text-gray-800">
+                              {spec.value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Gallery Section - only show if gallery images exist */}
         {vehicle.gallery && vehicle.gallery.length > 0 && (
           <div className="mb-16">
@@ -368,7 +503,10 @@ function VehicleDetailPage() {
                   <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
                     <LazyLoadImage
                       src={relatedVehicle.featuredImage}
-                      alt={`${relatedVehicle.name} - ${relatedVehicle.categoryDisplay || relatedVehicle.category} main image`}
+                      alt={`${relatedVehicle.name} - ${
+                        relatedVehicle.categoryDisplay ||
+                        relatedVehicle.category
+                      } main image`}
                       effect="blur"
                       width="100%"
                       height="100%"

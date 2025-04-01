@@ -30,6 +30,10 @@ export type DisplayCarModel = {
   published: number;
   createdAt: string;
   updatedAt: string;
+  specifications?: Array<{
+    categoryTitle: string;
+    specs: Array<{ key: string; value: string }>;
+  }>;
 };
 
 /**
