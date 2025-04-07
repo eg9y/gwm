@@ -221,7 +221,7 @@ function HomePage() {
         })}
 
         {/* Promos section */}
-        <div id={sections[5].id} className="section-container">
+        <div id={sections[5].id} className="section-container grainy-bg">
           <Promos />
         </div>
 
