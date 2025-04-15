@@ -43,7 +43,7 @@ function TipeMobilPage() {
   }, []);
 
   return (
-    <div className="pt-32 pb-10 grainy-bg">
+    <div className="pt-32 pb-10">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
@@ -79,18 +79,15 @@ function TipeMobilPage() {
         ) : (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {models.map((model) => (
-              <Link
+              <div
                 key={model.id}
-                to="/tipe-mobil/$model"
-                params={{ model: model.id }}
-                className="block bg-white shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group"
-                aria-label={`View details for ${model.name}`}
+                className="bg-white shadow-md  overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
                   <img
                     src={model.featuredImage}
                     alt={`${model.name} - GWM ${model.category || ""} vehicle`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
                 <div className="p-4">
@@ -98,11 +95,16 @@ function TipeMobilPage() {
                   <p className="mt-2 text-gray-600 line-clamp-3">
                     {model.description}
                   </p>
-                  <span className="mt-3 inline-block text-primary font-medium group-hover:underline">
+                  <Link
+                    to="/tipe-mobil/$model"
+                    params={{ model: model.id }}
+                    className="mt-3 inline-block text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                    aria-label={`View details for ${model.name}`}
+                  >
                     Lihat Detail
-                  </span>
+                  </Link>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

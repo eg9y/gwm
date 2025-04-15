@@ -34,163 +34,155 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gwm-gray-800 text-primary py-12 grainy-bg">
-      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Logo and About */}
-        <div className="md:col-span-1">
-          <img
-            src="https://gwm.kopimap.com/gwm_logo.webp"
-            alt="GWM Logo White"
-            className="h-10 mb-4"
-          />
-          <p className="text-sm text-gwm-gray-300">
-            Leading the future of mobility with innovative and sustainable
-            vehicle solutions.
-          </p>
-        </div>
+    <footer
+      className="bg-white py-8 sm:py-10 text-primary border-t border-gray-100"
+      id="contact"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10">
+          <div className="col-span-1">
+            <h3 className="text-sm font-medium mb-2 sm:mb-3">GWM Indonesia</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              <li>
+                <a
+                  href="/tentang-kami"
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  Tentang Kami
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/berita"
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  Berita
+                </a>
+              </li>
+            </ul>
+          </div>
 
-        <div className="col-span-1">
-          <h3 className="text-sm font-medium mb-2 sm:mb-3">GWM Indonesia</h3>
-          <ul className="space-y-1 sm:space-y-2">
-            <li>
-              <a
-                href="/tentang-kami"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                Tentang Kami
-              </a>
-            </li>
-            <li>
-              <a
-                href="/berita"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                Berita
-              </a>
-            </li>
-          </ul>
-        </div>
+          <div className="col-span-1">
+            <h3 className="text-sm font-medium mb-2 sm:mb-3">Tipe Mobil</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              <li>
+                <a
+                  href="/tipe-mobil/suv"
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  SUV
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/tipe-mobil/pickup"
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  Pickup
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/tipe-mobil/electric"
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  Electric
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/tipe-mobil/hybrid"
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  Hybrid
+                </a>
+              </li>
+            </ul>
+          </div>
 
-        <div className="col-span-1">
-          <h3 className="text-sm font-medium mb-2 sm:mb-3">Tipe Mobil</h3>
-          <ul className="space-y-1 sm:space-y-2">
-            <li>
-              <a
-                href="/tipe-mobil/suv"
-                className="text-gray-500 hover:text-primary text-xs transition"
+          <div className="col-span-1">
+            <h3 className="text-sm font-medium mb-2 sm:mb-3">Kontak</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              <li>
+                <a
+                  href={`tel:${contactInfo?.phone || "+6287774377422"}`}
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  {contactInfo?.phone || "+62 877 7437 7422"}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${contactInfo?.email || "info@gwmindonesia.co.id"}`}
+                  className="text-gray-500 hover:text-primary text-xs transition"
+                >
+                  {contactInfo?.email || "info@gwmindonesia.co.id"}
+                </a>
+              </li>
+              <li className="text-gray-500 text-xs">
+                {contactInfo?.address ||
+                  "Jl. Gatot Subroto Kav. 36-38, Jakarta Selatan"}
+              </li>
+            </ul>
+            <div className="flex gap-4 mt-5">
+              <button
+                type="button"
+                onClick={() =>
+                  window.open(
+                    contactInfo?.facebook || "https://facebook.com",
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+                onKeyDown={(e) =>
+                  handleKeyPress(
+                    e,
+                    contactInfo?.facebook || "https://facebook.com"
+                  )
+                }
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
+                aria-label="Kunjungi Facebook GWM Indonesia"
               >
-                SUV
-              </a>
-            </li>
-            <li>
-              <a
-                href="/tipe-mobil/pickup"
-                className="text-gray-500 hover:text-primary text-xs transition"
+                <i className="fab fa-facebook-f text-sm" />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  window.open(
+                    contactInfo?.instagram || "https://instagram.com/indo.tank",
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+                onKeyDown={(e) =>
+                  handleKeyPress(
+                    e,
+                    contactInfo?.instagram || "https://instagram.com/indo.tank"
+                  )
+                }
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
+                aria-label="Kunjungi Instagram GWM Indonesia"
               >
-                Pickup
-              </a>
-            </li>
-            <li>
-              <a
-                href="/tipe-mobil/electric"
-                className="text-gray-500 hover:text-primary text-xs transition"
+                <i className="fab fa-instagram text-sm" />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  window.open(
+                    contactInfo?.x || "https://twitter.com",
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+                onKeyDown={(e) =>
+                  handleKeyPress(e, contactInfo?.x || "https://twitter.com")
+                }
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
+                aria-label="Kunjungi Twitter GWM Indonesia"
               >
-                Electric
-              </a>
-            </li>
-            <li>
-              <a
-                href="/tipe-mobil/hybrid"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                Hybrid
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div className="col-span-1">
-          <h3 className="text-sm font-medium mb-2 sm:mb-3">Kontak</h3>
-          <ul className="space-y-1 sm:space-y-2">
-            <li>
-              <a
-                href={`tel:${contactInfo?.phone || "+6287774377422"}`}
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                {contactInfo?.phone || "+62 877 7437 7422"}
-              </a>
-            </li>
-            <li>
-              <a
-                href={`mailto:${contactInfo?.email || "info@gwmindonesia.co.id"}`}
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                {contactInfo?.email || "info@gwmindonesia.co.id"}
-              </a>
-            </li>
-            <li className="text-gray-500 text-xs">
-              {contactInfo?.address ||
-                "Jl. Gatot Subroto Kav. 36-38, Jakarta Selatan"}
-            </li>
-          </ul>
-          <div className="flex gap-4 mt-5">
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  contactInfo?.facebook || "https://facebook.com",
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-              onKeyDown={(e) =>
-                handleKeyPress(
-                  e,
-                  contactInfo?.facebook || "https://facebook.com"
-                )
-              }
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
-              aria-label="Kunjungi Facebook GWM Indonesia"
-            >
-              <i className="fab fa-facebook-f text-sm" />
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  contactInfo?.instagram || "https://instagram.com/indo.tank",
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-              onKeyDown={(e) =>
-                handleKeyPress(
-                  e,
-                  contactInfo?.instagram || "https://instagram.com/indo.tank"
-                )
-              }
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
-              aria-label="Kunjungi Instagram GWM Indonesia"
-            >
-              <i className="fab fa-instagram text-sm" />
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  contactInfo?.x || "https://twitter.com",
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-              onKeyDown={(e) =>
-                handleKeyPress(e, contactInfo?.x || "https://twitter.com")
-              }
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-primary transition-colors"
-              aria-label="Kunjungi Twitter GWM Indonesia"
-            >
-              <i className="fab fa-twitter text-sm" />
-            </button>
+                <i className="fab fa-twitter text-sm" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

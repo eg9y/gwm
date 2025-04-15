@@ -198,7 +198,7 @@ function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white grainy-bg">
+    <div className="min-h-screen bg-white">
       {/* Hero Section with darker background */}
       <Hero
         desktopImage="https://gwm.kopimap.com/kontak.webp"
