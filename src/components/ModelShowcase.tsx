@@ -121,7 +121,7 @@ const ModelShowcase = ({
 
       {/* Content side */}
       <div
-        className={`w-full lg:w-1/2 px-6 py-8 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-center relative z-10 ${
+        className={`w-full lg:w-1/2 px-6 py-8 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-center relative z-10 grainy-bg ${
           isVisible ? "animate-fade-in" : "opacity-0"
         }`}
         style={{
