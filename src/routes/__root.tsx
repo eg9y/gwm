@@ -85,10 +85,12 @@ export const Route = createRootRoute({
             },
             {
               children: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-RYBLP114YY');
+          if (!window.location.pathname.startsWith('/admin')) {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-RYBLP114YY');
+          }
         `,
             },
           ]
