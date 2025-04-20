@@ -182,7 +182,7 @@ function HomePage() {
             primaryButtonText="Jelajahi Mobil"
             secondaryButtonText="Pesan Sekarang"
             primaryButtonLink="/tipe-mobil"
-            secondaryButtonLink="https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20promo%20terbaru%20mobil%20GWM.%20Saya:%20...%20Domisili:%20.."
+            secondaryButtonLink="https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:"
           />
         </div>
 
