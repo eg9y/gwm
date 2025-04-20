@@ -278,10 +278,10 @@ function ContactPage() {
                       Telepon
                     </h3>
                     <a
-                      href={`tel:${contactInfo?.phone || "+6287774377422"}`}
+                      href={`tel:${contactInfo?.phone || "+6287884818135"}`}
                       className="text-xs text-secondary hover:text-red-500 transition-colors"
                     >
-                      {contactInfo?.phone || "0877 7437 7422"} (Call/WA)
+                      {contactInfo?.phone || "+62 878-8481-8135"} (Call/WA)
                     </a>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ function ContactPage() {
               {/* Quick Action Buttons */}
               <div className="mt-6 space-y-2">
                 <a
-                  href="tel:+6287774377422"
+                  href="tel:+6287884818135"
                   className="flex items-center justify-center w-full py-2 px-3 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-all"
                 >
                   <svg
@@ -365,7 +365,7 @@ function ContactPage() {
                 </a>
 
                 <a
-                  href={`https://wa.me/${contactInfo?.phone?.replace(/\D/g, "") || "6287774377422"}`}
+                  href={`https://wa.me/${contactInfo?.phone?.replace(/\D/g, "") || "6287884818135"}?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-full py-2 px-3 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-all"
@@ -1428,7 +1428,7 @@ function ContactPage() {
           {/* CTA Button */}
           <div className="text-center mt-6">
             <a
-              href="https://wa.me/6287774377422?text=Halo,%20saya%20tertarik%20dengan%20mobil%20GWM.%20Bisa%20bantu%20informasi%20lebih%20lanjut?"
+              href="https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-5 py-2 bg-red-600 text-white text-sm font-medium rounded-lg shadow-md hover:bg-red-700 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/30"

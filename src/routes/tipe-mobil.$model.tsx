@@ -489,7 +489,7 @@ function VehicleDetailPage() {
             {/* Action buttons with improved styling */}
             <div className="mt-8 space-y-4">
               <a
-                href={`https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20tentang%20${vehicle.name}.%20Saya:%20...%20Domisili:%20..`}
+                href="https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full block py-3 bg-primary text-white text-center rounded-md font-medium hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-sm"
@@ -780,7 +780,7 @@ function VehicleDetailPage() {
                 Hubungi Kami
               </a>
               <a
-                href={`https://wa.me/6287774377422?text=Hello,%20Kak%20ARKAN.%20Saya%20ingin%20tanya%20tentang%20${vehicle.name}.%20Saya:%20...%20Domisili:%20..`}
+                href="https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-green-600 text-white rounded-md font-medium text-center hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 shadow-sm"
@@ -794,8 +794,4 @@ function VehicleDetailPage() {
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a2929348136fd28c0ba03cc9d808f1289b7b4076
