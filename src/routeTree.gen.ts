@@ -11,10 +11,12 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as TestTransformImport } from './routes/test-transform'
 import { Route as SignUpImport } from './routes/sign-up'
 import { Route as SignInImport } from './routes/sign-in'
 import { Route as KontakImport } from './routes/kontak'
 import { Route as DeferredImport } from './routes/deferred'
+import { Route as AboutUsImport } from './routes/about-us'
 import { Route as PathlessLayoutImport } from './routes/_pathlessLayout'
 import { Route as TipeMobileRouteImport } from './routes/tipe-mobile.route'
 import { Route as InfoPromoRouteImport } from './routes/info-promo.route'
@@ -28,6 +30,7 @@ import { Route as InfoPromoSlugImport } from './routes/info-promo.$slug'
 import { Route as AdminKontakImport } from './routes/admin.kontak'
 import { Route as AdminHomepageImport } from './routes/admin.homepage'
 import { Route as AdminContactInfoImport } from './routes/admin.contact-info'
+import { Route as AdminAboutUsImport } from './routes/admin.about-us'
 import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
 import { Route as AdminModelsRouteImport } from './routes/admin.models.route'
 import { Route as AdminArticlesRouteImport } from './routes/admin.articles.route'
@@ -40,6 +43,12 @@ import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathl
 import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathlessLayout/_nested-layout/route-a'
 
 // Create/Update Routes
+
+const TestTransformRoute = TestTransformImport.update({
+  id: '/test-transform',
+  path: '/test-transform',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const SignUpRoute = SignUpImport.update({
   id: '/sign-up',
@@ -62,6 +71,12 @@ const KontakRoute = KontakImport.update({
 const DeferredRoute = DeferredImport.update({
   id: '/deferred',
   path: '/deferred',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AboutUsRoute = AboutUsImport.update({
+  id: '/about-us',
+  path: '/about-us',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -139,6 +154,12 @@ const AdminHomepageRoute = AdminHomepageImport.update({
 const AdminContactInfoRoute = AdminContactInfoImport.update({
   id: '/contact-info',
   path: '/contact-info',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+const AdminAboutUsRoute = AdminAboutUsImport.update({
+  id: '/about-us',
+  path: '/about-us',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 
@@ -244,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathlessLayoutImport
       parentRoute: typeof rootRoute
     }
+    '/about-us': {
+      id: '/about-us'
+      path: '/about-us'
+      fullPath: '/about-us'
+      preLoaderRoute: typeof AboutUsImport
+      parentRoute: typeof rootRoute
+    }
     '/deferred': {
       id: '/deferred'
       path: '/deferred'
@@ -272,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpImport
       parentRoute: typeof rootRoute
     }
+    '/test-transform': {
+      id: '/test-transform'
+      path: '/test-transform'
+      fullPath: '/test-transform'
+      preLoaderRoute: typeof TestTransformImport
+      parentRoute: typeof rootRoute
+    }
     '/admin/articles': {
       id: '/admin/articles'
       path: '/articles'
@@ -292,6 +327,13 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof PathlessLayoutNestedLayoutImport
       parentRoute: typeof PathlessLayoutImport
+    }
+    '/admin/about-us': {
+      id: '/admin/about-us'
+      path: '/about-us'
+      fullPath: '/admin/about-us'
+      preLoaderRoute: typeof AdminAboutUsImport
+      parentRoute: typeof AdminRouteImport
     }
     '/admin/contact-info': {
       id: '/admin/contact-info'
@@ -434,6 +476,7 @@ const AdminModelsRouteRouteWithChildren =
 interface AdminRouteRouteChildren {
   AdminArticlesRouteRoute: typeof AdminArticlesRouteRouteWithChildren
   AdminModelsRouteRoute: typeof AdminModelsRouteRouteWithChildren
+  AdminAboutUsRoute: typeof AdminAboutUsRoute
   AdminContactInfoRoute: typeof AdminContactInfoRoute
   AdminHomepageRoute: typeof AdminHomepageRoute
   AdminKontakRoute: typeof AdminKontakRoute
@@ -443,6 +486,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminArticlesRouteRoute: AdminArticlesRouteRouteWithChildren,
   AdminModelsRouteRoute: AdminModelsRouteRouteWithChildren,
+  AdminAboutUsRoute: AdminAboutUsRoute,
   AdminContactInfoRoute: AdminContactInfoRoute,
   AdminHomepageRoute: AdminHomepageRoute,
   AdminKontakRoute: AdminKontakRoute,
@@ -503,12 +547,15 @@ export interface FileRoutesByFullPath {
   '/info-promo': typeof InfoPromoRouteRouteWithChildren
   '/tipe-mobile': typeof TipeMobileRouteRoute
   '': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/about-us': typeof AboutUsRoute
   '/deferred': typeof DeferredRoute
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/test-transform': typeof TestTransformRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
   '/admin/models': typeof AdminModelsRouteRouteWithChildren
+  '/admin/about-us': typeof AdminAboutUsRoute
   '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/kontak': typeof AdminKontakRoute
@@ -530,10 +577,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/tipe-mobile': typeof TipeMobileRouteRoute
   '': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/about-us': typeof AboutUsRoute
   '/deferred': typeof DeferredRoute
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/test-transform': typeof TestTransformRoute
+  '/admin/about-us': typeof AdminAboutUsRoute
   '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/kontak': typeof AdminKontakRoute
@@ -558,13 +608,16 @@ export interface FileRoutesById {
   '/info-promo': typeof InfoPromoRouteRouteWithChildren
   '/tipe-mobile': typeof TipeMobileRouteRoute
   '/_pathlessLayout': typeof PathlessLayoutRouteWithChildren
+  '/about-us': typeof AboutUsRoute
   '/deferred': typeof DeferredRoute
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/test-transform': typeof TestTransformRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
   '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/admin/about-us': typeof AdminAboutUsRoute
   '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/kontak': typeof AdminKontakRoute
@@ -590,12 +643,15 @@ export interface FileRouteTypes {
     | '/info-promo'
     | '/tipe-mobile'
     | ''
+    | '/about-us'
     | '/deferred'
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
+    | '/test-transform'
     | '/admin/articles'
     | '/admin/models'
+    | '/admin/about-us'
     | '/admin/contact-info'
     | '/admin/homepage'
     | '/admin/kontak'
@@ -616,10 +672,13 @@ export interface FileRouteTypes {
     | '/'
     | '/tipe-mobile'
     | ''
+    | '/about-us'
     | '/deferred'
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
+    | '/test-transform'
+    | '/admin/about-us'
     | '/admin/contact-info'
     | '/admin/homepage'
     | '/admin/kontak'
@@ -642,13 +701,16 @@ export interface FileRouteTypes {
     | '/info-promo'
     | '/tipe-mobile'
     | '/_pathlessLayout'
+    | '/about-us'
     | '/deferred'
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
+    | '/test-transform'
     | '/admin/articles'
     | '/admin/models'
     | '/_pathlessLayout/_nested-layout'
+    | '/admin/about-us'
     | '/admin/contact-info'
     | '/admin/homepage'
     | '/admin/kontak'
@@ -673,10 +735,12 @@ export interface RootRouteChildren {
   InfoPromoRouteRoute: typeof InfoPromoRouteRouteWithChildren
   TipeMobileRouteRoute: typeof TipeMobileRouteRoute
   PathlessLayoutRoute: typeof PathlessLayoutRouteWithChildren
+  AboutUsRoute: typeof AboutUsRoute
   DeferredRoute: typeof DeferredRoute
   KontakRoute: typeof KontakRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  TestTransformRoute: typeof TestTransformRoute
   TipeMobilModelRoute: typeof TipeMobilModelRoute
   TipeMobilIndexRoute: typeof TipeMobilIndexRoute
 }
@@ -687,10 +751,12 @@ const rootRouteChildren: RootRouteChildren = {
   InfoPromoRouteRoute: InfoPromoRouteRouteWithChildren,
   TipeMobileRouteRoute: TipeMobileRouteRoute,
   PathlessLayoutRoute: PathlessLayoutRouteWithChildren,
+  AboutUsRoute: AboutUsRoute,
   DeferredRoute: DeferredRoute,
   KontakRoute: KontakRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  TestTransformRoute: TestTransformRoute,
   TipeMobilModelRoute: TipeMobilModelRoute,
   TipeMobilIndexRoute: TipeMobilIndexRoute,
 }
@@ -710,10 +776,12 @@ export const routeTree = rootRoute
         "/info-promo",
         "/tipe-mobile",
         "/_pathlessLayout",
+        "/about-us",
         "/deferred",
         "/kontak",
         "/sign-in",
         "/sign-up",
+        "/test-transform",
         "/tipe-mobil/$model",
         "/tipe-mobil/"
       ]
@@ -726,6 +794,7 @@ export const routeTree = rootRoute
       "children": [
         "/admin/articles",
         "/admin/models",
+        "/admin/about-us",
         "/admin/contact-info",
         "/admin/homepage",
         "/admin/kontak",
@@ -748,6 +817,9 @@ export const routeTree = rootRoute
         "/_pathlessLayout/_nested-layout"
       ]
     },
+    "/about-us": {
+      "filePath": "about-us.tsx"
+    },
     "/deferred": {
       "filePath": "deferred.tsx"
     },
@@ -759,6 +831,9 @@ export const routeTree = rootRoute
     },
     "/sign-up": {
       "filePath": "sign-up.tsx"
+    },
+    "/test-transform": {
+      "filePath": "test-transform.tsx"
     },
     "/admin/articles": {
       "filePath": "admin.articles.route.tsx",
@@ -784,6 +859,10 @@ export const routeTree = rootRoute
         "/_pathlessLayout/_nested-layout/route-a",
         "/_pathlessLayout/_nested-layout/route-b"
       ]
+    },
+    "/admin/about-us": {
+      "filePath": "admin.about-us.tsx",
+      "parent": "/admin"
     },
     "/admin/contact-info": {
       "filePath": "admin.contact-info.tsx",

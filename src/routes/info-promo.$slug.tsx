@@ -128,7 +128,9 @@ export const Route = createFileRoute("/info-promo/$slug")({
         {
           name: "description",
           content:
-            article.excerpt || `${article.title} - Great Wall Motors Indonesia`,
+            article.metaDescription ||
+            article.excerpt ||
+            `${article.title} - Great Wall Motors Indonesia`,
         },
         {
           name: "keywords",
@@ -141,7 +143,9 @@ export const Route = createFileRoute("/info-promo/$slug")({
         {
           property: "og:description",
           content:
-            article.excerpt || `${article.title} - Great Wall Motors Indonesia`,
+            article.metaDescription ||
+            article.excerpt ||
+            `${article.title} - Great Wall Motors Indonesia`,
         },
         {
           property: "og:image",

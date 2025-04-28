@@ -92,6 +92,27 @@
       "when": 1745333475743,
       "tag": "0013_windy_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1745852454006,
+      "tag": "0014_even_warlock",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1745852880543,
+      "tag": "0015_high_eternals",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1745855186750,
+      "tag": "0016_common_mantis",
+      "breakpoints": true
     }
   ]
 }

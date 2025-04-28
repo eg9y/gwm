@@ -328,6 +328,15 @@ const Navbar = () => {
           </li>
           <li>
             <Link
+              to="/about-us"
+              className={baseNavClass}
+              activeProps={{ className: `${baseNavClass} ${activeClass}` }}
+            >
+              About Us
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/kontak"
               className={baseNavClass}
               activeProps={{ className: `${baseNavClass} ${activeClass}` }}
@@ -526,6 +535,18 @@ const Navbar = () => {
               onClick={closeMenu}
             >
               Info & Promo
+            </Link>
+          </li>
+          <li className="mb-5">
+            <Link
+              to="/about-us"
+              className={baseMobileNavClass}
+              activeProps={{
+                className: `${baseMobileNavClass} ${activeClass}`,
+              }}
+              onClick={closeMenu}
+            >
+              About Us
             </Link>
           </li>
           <li className="mb-5">

@@ -8,6 +8,7 @@
     "build": "vinxi build",
     "start": "dotenv -e .env vinxi start",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:init": "tsx scripts/init-db.ts",
     "db:seed-models": "tsx scripts/seed-car-models.ts",

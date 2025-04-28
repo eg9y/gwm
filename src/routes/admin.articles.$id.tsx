@@ -1,18 +1,6 @@
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
-import { useState, useEffect, FormEvent, useRef } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@clerk/tanstack-start";
-import { Loader2, ChevronLeft, Save, Upload, Eye } from "lucide-react";
-import {
-  getArticleById,
-  createArticle,
-  updateArticle,
-} from "../server/articles";
-import { getPresignedUploadUrl } from "../services/r2Service";
+import { getArticleById } from "../server/articles";
 import ArticleEditor from "../components/ArticleEditor";
 
 export const Route = createFileRoute("/admin/articles/$id")({

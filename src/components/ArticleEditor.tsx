@@ -3,7 +3,14 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { FormEvent } from "react";
 import { useAuth } from "@clerk/tanstack-start";
-import { Loader2, ChevronLeft, Save, Upload, Eye } from "lucide-react";
+import {
+  Loader2,
+  ChevronLeft,
+  Save,
+  Upload,
+  Eye,
+  RefreshCw,
+} from "lucide-react";
 import { createArticle, updateArticle } from "../server/articles";
 import {
   getPresignedUploadUrl,
@@ -55,13 +62,16 @@ export default function ArticleEditor({
 
   // Form state
   const [title, setTitle] = useState(article?.title || "");
+  const [slug, setSlug] = useState(article?.slug || "");
   const [content, setContent] = useState(
     article?.content ? normalizeImageUrls(article.content) : ""
   );
   const [excerpt, setExcerpt] = useState(article?.excerpt || "");
   const [category, setCategory] = useState(article?.category || "News");
   const [published, setPublished] = useState(article?.published === 1);
-  const [youtubeUrl, setYoutubeUrl] = useState(article?.youtubeUrl || "");
+  const [metaDescription, setMetaDescription] = useState(
+    article?.metaDescription || ""
+  );
 
   // Image upload state
   const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
@@ -100,6 +110,7 @@ export default function ArticleEditor({
   useEffect(() => {
     if (article) {
       setTitle(article.title || "");
+      setSlug(article.slug || "");
       const normalizedContent = article.content
         ? normalizeImageUrls(article.content)
         : "";
@@ -107,15 +118,27 @@ export default function ArticleEditor({
       setExcerpt(article.excerpt || "");
       setCategory(article.category || "News");
       setPublished(article.published === 1);
-      setYoutubeUrl(article.youtubeUrl || "");
       const normalizedFeaturedImageUrl = article.featuredImageUrl
         ? ensureCorrectImageDomain(article.featuredImageUrl)
         : "";
       setFeaturedImageUrl(normalizedFeaturedImageUrl);
       setFeaturedImagePreview(normalizedFeaturedImageUrl);
       setFeaturedImageAlt(article.featuredImageAlt || "");
+      setMetaDescription(article.metaDescription || "");
     }
   }, [article, normalizeImageUrls]);
+
+  // Helper function to generate a slug from title
+  const generateSlugFromTitle = useCallback(() => {
+    if (!title) return "";
+    // Simple slug generation - convert to lowercase, replace spaces with hyphens, remove special chars
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "") // Remove special characters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+      .trim();
+  }, [title]);
 
   // Handle featured image selection
   const handleFeatureImageSelect = (
@@ -359,6 +382,7 @@ export default function ArticleEditor({
       // Prepare form data
       const formData = new FormData();
       formData.append("title", title.trim());
+      formData.append("slug", slug.trim() || generateSlugFromTitle());
       formData.append("content", finalContent);
       formData.append("excerpt", excerpt.trim());
       formData.append("category", category);
@@ -375,8 +399,9 @@ export default function ArticleEditor({
         finalFeaturedImageUrl ? featuredImageAlt : ""
       );
 
-      if (youtubeUrl) {
-        formData.append("youtubeUrl", youtubeUrl);
+      // Add meta description to form data (optional)
+      if (metaDescription.trim()) {
+        formData.append("metaDescription", metaDescription.trim());
       }
 
       let result: ArticleResponse;
@@ -520,6 +545,44 @@ export default function ArticleEditor({
                 placeholder="Enter article title"
                 required
               />
+            </div>
+
+            {/* Slug */}
+            <div>
+              <div className="flex justify-between mb-1">
+                <label
+                  htmlFor="slug"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Permalink
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setSlug(generateSlugFromTitle())}
+                  className="text-xs text-primary flex items-center hover:text-primary/80"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Generate from title
+                </button>
+              </div>
+              <div className="flex items-center">
+                <span className="text-gray-500 bg-gray-100 px-3 py-2 border border-r-0 border-gray-300 rounded-l-md">
+                  /info-promo/
+                </span>
+                <input
+                  type="text"
+                  id="slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  placeholder={generateSlugFromTitle() || "article-slug"}
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                The permalink is the URL-friendly version of the title that
+                appears in the address bar. Leave empty to generate
+                automatically.
+              </p>
             </div>
 
             {/* Content (Using Tiptap editor) */}
@@ -690,22 +753,27 @@ export default function ArticleEditor({
               />
             </div>
 
-            {/* YouTube Video URL */}
+            {/* Meta Description (Optional) */}
             <div>
               <label
-                htmlFor="youtubeUrl"
+                htmlFor="metaDescription"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                YouTube Video URL
+                Meta Description (Optional)
               </label>
-              <input
-                type="text"
-                id="youtubeUrl"
-                value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
+              <textarea
+                id="metaDescription"
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="e.g. https://www.youtube.com/watch?v=..."
+                rows={3}
+                maxLength={160} // Common max length for meta descriptions
+                placeholder="Enter a brief summary for search engines (optional, max 160 characters)"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                A good meta description can improve click-through rates from
+                search results.
+              </p>
             </div>
           </div>
         </div>

@@ -45,19 +45,39 @@ const generateSrcSet = (src: string | undefined): string | undefined => {
 
 // Extend LazyLoadImageProps to include our specific needs if necessary
 interface ResponsiveLazyImageProps extends LazyLoadImageProps {
-  // We can add custom props here if needed in the future
+  // Custom props
+  wrapperClassName?: string;
 }
 
 export function ResponsiveLazyImage({
   src,
   alt,
   className = "",
+  wrapperClassName,
   sizes = "(max-width: 768px) 100vw, 1200px", // Default sizes
   effect = "blur", // Default effect
   ...rest // Pass down other LazyLoadImage props like width, height, etc.
 }: ResponsiveLazyImageProps) {
   const srcSet = generateSrcSet(src);
 
+  // If wrapperClassName is provided, wrap the image in a div with that class
+  if (wrapperClassName) {
+    return (
+      <div className={wrapperClassName}>
+        <LazyLoadImage
+          src={src}
+          srcSet={srcSet}
+          sizes={sizes}
+          alt={alt || "Image"} // Provide a default alt text
+          className={className}
+          effect={effect}
+          {...rest} // Spread the rest of the props
+        />
+      </div>
+    );
+  }
+
+  // Otherwise, render the image directly without a wrapper
   return (
     <LazyLoadImage
       src={src}

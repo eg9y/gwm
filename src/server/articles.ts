@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { db } from "../db";
 import type { Article, NewArticle } from "../db";
 import { articles } from "../db/schema";
-import { eq, like, desc, and, or, sql } from "drizzle-orm";
+import { eq, like, desc, and, or, sql, ne } from "drizzle-orm";
 import type { SQL, asc } from "drizzle-orm";
 import slugify from "slugify";
 import { JSDOM } from "jsdom";
@@ -96,6 +96,8 @@ interface ArticleInput {
   featuredImageUrl?: string;
   featuredImageAlt?: string;
   published?: boolean;
+  customSlug?: string;
+  metaDescription?: string;
 }
 
 // Create a new article
@@ -112,6 +114,8 @@ export const createArticle = createServerFn({ method: "POST" })
     const featuredImageUrl = formData.get("featuredImageUrl")?.toString();
     const featuredImageAlt = formData.get("featuredImageAlt")?.toString();
     const published = formData.get("published") === "true";
+    const customSlug = formData.get("slug")?.toString() || "";
+    const metaDescription = formData.get("metaDescription")?.toString();
 
     if (!title || !content || !excerpt || !category) {
       throw new Error("Title, content, excerpt, and category are required");
@@ -125,12 +129,33 @@ export const createArticle = createServerFn({ method: "POST" })
       featuredImageUrl,
       featuredImageAlt,
       published,
+      customSlug,
+      metaDescription,
     };
   })
   .handler(async ({ data }) => {
     try {
-      // Generate a slug from the title
-      const slug = generateSlug(data.title);
+      // Generate a slug from the title or use custom slug if provided
+      let slug = data.customSlug
+        ? data.customSlug.trim()
+        : generateSlug(data.title);
+
+      // Ensure slug is not empty
+      if (!slug) {
+        slug = generateSlug(data.title);
+      }
+
+      // Check if slug already exists
+      const existingArticle = await db
+        .select()
+        .from(articles)
+        .where(eq(articles.slug, slug))
+        .get();
+
+      if (existingArticle) {
+        // If slug already exists, add a timestamp to make it unique
+        slug = `${slug}-${Date.now()}`;
+      }
 
       // Sanitize content
       const sanitizedContent = sanitizeContent(data.content);
@@ -146,6 +171,7 @@ export const createArticle = createServerFn({ method: "POST" })
         featuredImageAlt: data.featuredImageAlt,
         published: data.published ? 1 : 0,
         publishedAt: data.published ? new Date().toISOString() : null,
+        metaDescription: data.metaDescription ?? null,
       };
 
       // Insert the article
@@ -186,6 +212,8 @@ export const updateArticle = createServerFn({ method: "POST" })
     const featuredImageUrl = formData.get("featuredImageUrl")?.toString();
     const featuredImageAlt = formData.get("featuredImageAlt")?.toString();
     const published = formData.get("published") === "true";
+    const customSlug = formData.get("slug")?.toString() || "";
+    const metaDescription = formData.get("metaDescription")?.toString();
 
     if (!id || Number.isNaN(id)) {
       throw new Error("Valid article ID is required");
@@ -204,6 +232,8 @@ export const updateArticle = createServerFn({ method: "POST" })
       featuredImageUrl,
       featuredImageAlt,
       published,
+      customSlug,
+      metaDescription,
     };
   })
   .handler(async ({ data }) => {
@@ -219,11 +249,38 @@ export const updateArticle = createServerFn({ method: "POST" })
         throw new Error("Article not found");
       }
 
-      // Generate a slug only if the title has changed
-      const slug =
-        data.title !== existingArticle.title
-          ? generateSlug(data.title, data.id)
-          : existingArticle.slug;
+      // Generate a slug based on provided slug, or current slug if unchanged,
+      // or regenerate from title if needed
+      let slug = existingArticle.slug;
+
+      // If a custom slug was provided, use it
+      if (data.customSlug?.trim()) {
+        slug = data.customSlug.trim();
+      }
+      // If title changed and no custom slug was provided, regenerate slug
+      else if (
+        data.title !== existingArticle.title &&
+        !data.customSlug?.trim()
+      ) {
+        slug = generateSlug(data.title, data.id);
+      }
+
+      // If custom slug is provided but already exists for a different article, make it unique
+      if (
+        data.customSlug?.trim() &&
+        data.customSlug.trim() !== existingArticle.slug
+      ) {
+        const slugExists = await db
+          .select()
+          .from(articles)
+          .where(and(eq(articles.slug, slug), ne(articles.id, data.id)))
+          .get();
+
+        if (slugExists) {
+          // If slug already exists for a different article, add the ID to make it unique
+          slug = `${slug}-${data.id}`;
+        }
+      }
 
       // Sanitize content
       const sanitizedContent = sanitizeContent(data.content);
@@ -255,6 +312,7 @@ export const updateArticle = createServerFn({ method: "POST" })
           published: data.published ? 1 : 0,
           publishedAt,
           updatedAt: new Date().toISOString(),
+          metaDescription: data.metaDescription ?? null,
         })
         .where(eq(articles.id, data.id));
 

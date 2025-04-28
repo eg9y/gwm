@@ -32,6 +32,7 @@ export const articles = sqliteTable("articles", {
     .notNull()
     .$default(() => new Date().toISOString()),
   published: integer("published").notNull().default(0),
+  metaDescription: text("meta_description"),
 });
 
 // Define contact information table that can be edited in admin
@@ -171,3 +172,17 @@ export type HomepageFeatureSectionDb =
 // Keep the old type name for potential compatibility during refactoring,
 // but it refers to the new structure now.
 export type HomepageFeatureSection = HomepageFeatureSectionDb;
+
+// Define about us page content that can be edited in admin
+export const aboutUs = sqliteTable("about_us", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  mission: text("mission"),
+  vision: text("vision"),
+  imageUrl: text("image_url"),
+  imageAlt: text("image_alt"),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$default(() => new Date().toISOString()),
+});
