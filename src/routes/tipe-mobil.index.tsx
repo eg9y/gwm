@@ -109,8 +109,4 @@ function TipeMobilPage() {
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a2929348136fd28c0ba03cc9d808f1289b7b4076
