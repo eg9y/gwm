@@ -622,12 +622,13 @@ function HomepageEditorPage() {
               (url) =>
                 !imagesToDeleteOnSuccess.includes(url) && url.startsWith("http")
             );
-            
+
             // If no mobile images, use desktop images as fallback
-            const finalMobileUrls = filteredMobileUrls.length > 0 ? 
-              filteredMobileUrls : 
-              filteredDesktopUrls;
-              
+            const finalMobileUrls =
+              filteredMobileUrls.length > 0
+                ? filteredMobileUrls
+                : filteredDesktopUrls;
+
             return {
               ...section,
               id: section.id,
@@ -777,7 +778,13 @@ function HomepageEditorPage() {
                 watch={watch}
                 setValue={setValue}
                 handleRemove={addRemovedUrl}
-                handleUploadClick={addNewFileMapping}
+                onFileSelected={(fieldName, file) => {
+                  const previewUrl = URL.createObjectURL(file);
+                  setValue(fieldName as any, previewUrl, {
+                    shouldValidate: true,
+                  });
+                  addNewFileMapping(previewUrl, file);
+                }}
                 error={errors.heroDesktopImageUrl?.message}
                 altText="Hero desktop background"
               />
@@ -794,7 +801,13 @@ function HomepageEditorPage() {
                 watch={watch}
                 setValue={setValue}
                 handleRemove={addRemovedUrl}
-                handleUploadClick={addNewFileMapping}
+                onFileSelected={(fieldName, file) => {
+                  const previewUrl = URL.createObjectURL(file);
+                  setValue(fieldName as any, previewUrl, {
+                    shouldValidate: true,
+                  });
+                  addNewFileMapping(previewUrl, file);
+                }}
                 error={errors.heroMobileImageUrl?.message}
                 altText="Hero mobile background"
               />

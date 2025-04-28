@@ -1,15 +1,22 @@
 import { Upload, Link } from "lucide-react";
 import { useRef, useState } from "react";
-import type { UseFormWatch, Path, FieldValues, UseFormSetValue } from "react-hook-form";
+import type {
+  UseFormWatch,
+  Path,
+  FieldValues,
+  UseFormSetValue,
+} from "react-hook-form";
+import toast from "react-hot-toast";
 
 // Define the props for the ImageUploadField
 // Using generics to make it adaptable to different form schemas
 interface ImageUploadFieldProps<TFormValues extends FieldValues> {
   fieldName: Path<TFormValues>; // Use Path for type safety
   watch: UseFormWatch<TFormValues>;
-  setValue: UseFormSetValue<TFormValues>;
+  setValue?: UseFormSetValue<TFormValues>; // Make this optional as it might not be used
   handleRemove: (fieldName: Path<TFormValues>) => void;
-  handleUploadClick: (blobUrl: string, file: File) => void;
+  handleUploadClick?: (fieldName: Path<TFormValues>) => void; // Keep for backward compatibility
+  onFileSelected?: (fieldName: Path<TFormValues>, file: File) => void; // New callback for file selection
   error?: string;
   altText?: string;
 }
@@ -21,6 +28,7 @@ export function ImageUploadField<TFormValues extends FieldValues>({
   setValue,
   handleRemove,
   handleUploadClick,
+  onFileSelected,
   error,
   altText = "Image preview", // More descriptive default alt text
 }: ImageUploadFieldProps<TFormValues>) {
@@ -37,8 +45,13 @@ export function ImageUploadField<TFormValues extends FieldValues>({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const blobUrl = URL.createObjectURL(file);
-      handleUploadClick(blobUrl, file);
+      // If new callback is provided, use it, otherwise fallback to legacy behavior
+      if (onFileSelected) {
+        onFileSelected(fieldName, file);
+      } else if (handleUploadClick) {
+        // Legacy behavior
+        handleUploadClick(fieldName);
+      }
 
       // Reset the file input for future selections
       if (fileInputRef.current) {
@@ -46,26 +59,31 @@ export function ImageUploadField<TFormValues extends FieldValues>({
       }
     }
   };
-  
+
   const handleUrlSubmit = (e: React.MouseEvent | React.FormEvent) => {
     e.preventDefault();
     if (inputUrl.trim() && inputUrl.trim().startsWith("http")) {
       const newUrl = inputUrl.trim();
-      
+
       // Test if URL leads to a valid image
       const testImage = new Image();
       testImage.onload = () => {
         // Valid image URL
-        setValue(fieldName, newUrl as any);
+        if (setValue) {
+          // Only use setValue if it's provided
+          setValue(fieldName, newUrl as any);
+        }
         setShowUrlInput(false);
         setInputUrl("");
         toast.success("Image URL added successfully");
       };
-      
+
       testImage.onerror = () => {
-        toast.error("Could not load image from URL. Please check the URL and try again.");
+        toast.error(
+          "Could not load image from URL. Please check the URL and try again."
+        );
       };
-      
+
       // Start loading the image
       testImage.src = newUrl;
     } else {
@@ -156,7 +174,9 @@ export function ImageUploadField<TFormValues extends FieldValues>({
                   <p className="text-sm text-gray-500 font-medium">
                     Click to upload image
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Recommended: 16:9</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Recommended: 16:9
+                  </p>
                 </button>
                 <button
                   type="button"

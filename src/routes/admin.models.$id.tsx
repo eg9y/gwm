@@ -33,12 +33,7 @@ import {
   getPresignedUploadUrl,
   deleteImageFromR2,
 } from "../services/r2Service";
-import {
-  getTransformUrl,
-  getOptimizedVersions,
-  getTransformationDownloadUrls,
-  type CloudflareTransformOptions,
-} from "../services/cloudflareImageService";
+import { getTransformationDownloadUrls } from "../services/cloudflareImageService";
 import type {
   CarModelFeature,
   CarModelColor,
@@ -1016,10 +1011,9 @@ function CarModelEditorPage() {
 
   // Handle image selection
   const handleImageSelect = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    fieldName: ModelFieldPath // Use the local alias
+    fieldName: string, // Use string as the type for simplicity and compatibility
+    file: File
   ) => {
-    const file = event.target.files?.[0];
     if (!file) return;
 
     // Create preview URL
@@ -1027,7 +1021,7 @@ function CarModelEditorPage() {
     const originalFileName = file.name; // Store original filename
 
     // Get the current value to store for potential deletion
-    const currentValue = watch(fieldName);
+    const currentValue = watch(fieldName as any);
     if (
       currentValue &&
       typeof currentValue === "string" &&
@@ -1063,11 +1057,6 @@ function CarModelEditorPage() {
       setValue(fieldName as keyof CarModelFormData, previewUrl, {
         shouldValidate: true,
       });
-    }
-
-    // Clear the input value
-    if (event.target) {
-      event.target.value = "";
     }
   };
 
@@ -1124,32 +1113,6 @@ function CarModelEditorPage() {
     if (typeof currentValue === "string" && currentValue.startsWith("blob:")) {
       URL.revokeObjectURL(currentValue);
     }
-  };
-
-  // Update the handleImageSelect event handler to safely handle DOM events
-  const handleFileUploadClick = (fieldName: ModelFieldPath) => {
-    // Use the local alias
-    // Create a unique ID for the input element
-    const inputId = `file-input-${fieldName.replace(/[\.\[\]]/g, "-")}`;
-    let input = document.getElementById(inputId) as HTMLInputElement | null;
-
-    if (!input) {
-      // Create a file input if it doesn't exist
-      input = document.createElement("input");
-      input.id = inputId;
-      input.type = "file";
-      input.accept = "image/*";
-      input.style.display = "none"; // Hide it
-      input.onchange = (e: Event) => {
-        handleImageSelect(
-          { target: e.target } as React.ChangeEvent<HTMLInputElement>,
-          fieldName
-        );
-      };
-      document.body.appendChild(input); // Append to body temporarily
-    }
-
-    input.click();
   };
 
   // If not signed in, don't render (parent layout will redirect)
@@ -1418,7 +1381,7 @@ function CarModelEditorPage() {
                   fieldName="featuredImage"
                   watch={watch}
                   handleRemove={handleRemoveImage}
-                  handleUploadClick={handleFileUploadClick}
+                  onFileSelected={handleImageSelect}
                   error={errors.featuredImage?.message}
                   altText="Featured hero image"
                 />
@@ -1439,7 +1402,7 @@ function CarModelEditorPage() {
                   fieldName="mainProductImage"
                   watch={watch}
                   handleRemove={handleRemoveImage}
-                  handleUploadClick={handleFileUploadClick}
+                  onFileSelected={handleImageSelect}
                   error={errors.mainProductImage?.message}
                   altText="Main product image"
                 />
@@ -1460,7 +1423,7 @@ function CarModelEditorPage() {
                   fieldName="subImage"
                   watch={watch}
                   handleRemove={handleRemoveImage}
-                  handleUploadClick={handleFileUploadClick}
+                  onFileSelected={handleImageSelect}
                   error={errors.subImage?.message}
                   altText="Sub image"
                 />
@@ -1866,7 +1829,7 @@ function CarModelEditorPage() {
                         fieldName={`colors.${index}.imageUrl`}
                         watch={watch}
                         handleRemove={handleRemoveImage}
-                        handleUploadClick={handleFileUploadClick}
+                        onFileSelected={handleImageSelect}
                         error={errors.colors?.[index]?.imageUrl?.message}
                         altText={`Color ${watch(`colors.${index}.name`) || index + 1}`}
                       />
@@ -1980,7 +1943,7 @@ function CarModelEditorPage() {
                         fieldName={`gallery.${index}.imageUrl`}
                         watch={watch}
                         handleRemove={handleRemoveImage}
-                        handleUploadClick={handleFileUploadClick}
+                        onFileSelected={handleImageSelect}
                         error={errors.gallery?.[index]?.imageUrl?.message}
                         altText={
                           watch(`gallery.${index}.alt`) ||
