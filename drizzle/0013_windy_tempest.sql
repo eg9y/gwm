@@ -1,0 +1,2 @@
+ALTER TABLE `homepage_feature_sections` RENAME COLUMN "desktop_image_url" TO "desktop_image_urls";--> statement-breakpoint
+ALTER TABLE `homepage_feature_sections` RENAME COLUMN "mobile_image_url" TO "mobile_image_urls";

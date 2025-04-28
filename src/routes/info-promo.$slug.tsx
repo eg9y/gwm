@@ -4,7 +4,7 @@ import DOMPurify from "dompurify";
 import { getArticleBySlug } from "../server/articles";
 import type { Article } from "../db";
 
-// Add CSS for resizable images
+// Add CSS for resizable images and YouTube videos
 const articleStyles = `
   .resize-image {
     display: block;
@@ -38,7 +38,57 @@ const articleStyles = `
     display: table;
     clear: both;
   }
+
+  /* YouTube video responsive styling */
+  .youtube-video {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+  }
+  
+  .youtube-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
 `;
+
+// Function to process YouTube embeds in HTML content
+function processYouTubeEmbeds(html: string): string {
+  // Regular expression to find YouTube div elements
+  const youtubeRegex =
+    /<div data-youtube-video[^>]*data-src="([^"]+)"[^>]*><\/div>/g;
+
+  // Replace each match with proper iframe embed
+  return html.replace(youtubeRegex, (match, src) => {
+    // Extract video ID if needed
+    const getYouTubeVideoId = (youtubeUrl: string) => {
+      const regExp =
+        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = youtubeUrl.match(regExp);
+      return match && match[2].length === 11 ? match[2] : null;
+    };
+
+    const videoId = getYouTubeVideoId(src);
+    if (!videoId) return match;
+
+    return `<div class="youtube-video">
+      <iframe 
+        src="https://www.youtube.com/embed/${videoId}" 
+        title="YouTube video player" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen
+      ></iframe>
+    </div>`;
+  });
+}
 
 export const Route = createFileRoute("/info-promo/$slug")({
   // Add a loader to fetch article data on the server
@@ -313,18 +363,26 @@ function ArticleDetailPage() {
                 </div>
               )}
 
-              {/* YouTube Video Embed if available */}
-              {article.youtubeUrl && <YouTubeEmbed url={article.youtubeUrl} />}
-
               {/* Content rendered using DOMPurify to sanitize HTML */}
               <div
                 className="prose prose-lg max-w-none text-gray-700 tiptap-content article-content prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-ul:list-disc prose-ul:pl-5 prose-ol:list-decimal prose-ol:pl-5 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:rounded-sm"
                 // We use DOMPurify to sanitize HTML from Tiptap to prevent XSS attacks
                 // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(article.content, {
-                    ADD_ATTR: ["alignment", "width", "height", "class"],
-                  }),
+                  __html: processYouTubeEmbeds(
+                    DOMPurify.sanitize(article.content, {
+                      ADD_ATTR: [
+                        "alignment",
+                        "width",
+                        "height",
+                        "class",
+                        "data-youtube-video",
+                        "data-src",
+                        "allowfullscreen",
+                      ],
+                      ADD_TAGS: ["iframe"],
+                    })
+                  ),
                 }}
               />
             </div>

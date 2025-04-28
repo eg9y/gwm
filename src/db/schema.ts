@@ -114,3 +114,60 @@ export type LeadStatus =
   | "qualified"
   | "closed_won"
   | "closed_lost";
+
+// Define the table for homepage configuration
+export const homepageConfig = sqliteTable("homepage_config", {
+  id: text("id").primaryKey().default("main"), // Use a fixed ID for the single config row
+  heroDesktopImageUrl: text("hero_desktop_image_url").notNull(),
+  heroMobileImageUrl: text("hero_mobile_image_url").notNull(),
+  heroTitle: text("hero_title").notNull(),
+  heroSubtitle: text("hero_subtitle"),
+  heroPrimaryButtonText: text("hero_primary_button_text"),
+  heroPrimaryButtonLink: text("hero_primary_button_link"),
+  heroSecondaryButtonText: text("hero_secondary_button_text"),
+  heroSecondaryButtonLink: text("hero_secondary_button_link"),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$default(() => new Date().toISOString()),
+});
+
+// Define the table for homepage feature sections
+export const homepageFeatureSections = sqliteTable(
+  "homepage_feature_sections",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    homepageConfigId: text("homepage_config_id")
+      .notNull()
+      .references(() => homepageConfig.id, { onDelete: "cascade" }), // Link to homepageConfig
+    order: integer("order").notNull(), // For ordering sections
+    title: text("title").notNull(),
+    subtitle: text("subtitle"),
+    description: text("description").notNull(),
+    desktopImageUrls: text("desktop_image_urls", { mode: "json" })
+      .notNull()
+      .$type<string[]>(), // Array of desktop image URLs
+    mobileImageUrls: text("mobile_image_urls", { mode: "json" }).$type<
+      string[]
+    >(), // Array of mobile image URLs - Now optional (nullable)
+    imageAlt: text("image_alt").notNull().default("Feature section image"),
+    features: text("features", { mode: "json" }).$type<string[]>(), // JSON array of feature strings
+    primaryButtonText: text("primary_button_text"),
+    primaryButtonLink: text("primary_button_link"),
+    secondaryButtonText: text("secondary_button_text"),
+    secondaryButtonLink: text("secondary_button_link"),
+    createdAt: text("created_at")
+      .notNull()
+      .$default(() => new Date().toISOString()),
+    updatedAt: text("updated_at")
+      .notNull()
+      .$default(() => new Date().toISOString()),
+  }
+);
+
+// Define type for homepage feature section data based on the updated schema
+export type HomepageFeatureSectionDb =
+  typeof homepageFeatureSections.$inferSelect;
+
+// Keep the old type name for potential compatibility during refactoring,
+// but it refers to the new structure now.
+export type HomepageFeatureSection = HomepageFeatureSectionDb;

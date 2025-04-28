@@ -2,7 +2,7 @@ import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@clerk/tanstack-start";
 import { Link, useNavigate, useMatches } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Users, FileText, Phone, Car } from "lucide-react";
+import { Users, FileText, Phone, Car, Home } from "lucide-react";
 import { ClerkProvider } from "@clerk/tanstack-start";
 
 // Define the wrapper component
@@ -55,6 +55,17 @@ function AdminLayout() {
                 </h1>
               </div>
               <div className="ml-6 flex space-x-4">
+                <Link
+                  to="/admin/homepage"
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
+                    currentPath.includes("/admin/homepage")
+                      ? "text-white bg-primary"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <Home className="h-5 w-5 mr-2" />
+                  Home
+                </Link>
                 <Link
                   to="/admin/kontak"
                   className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${

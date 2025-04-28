@@ -71,6 +71,27 @@
       "when": 1742978320980,
       "tag": "0010_slimy_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1745238613078,
+      "tag": "0011_bouncy_bromley",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1745246932982,
+      "tag": "0012_purple_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1745333475743,
+      "tag": "0013_windy_tempest",
+      "breakpoints": true
     }
   ]
 }

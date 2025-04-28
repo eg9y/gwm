@@ -7,7 +7,8 @@ import {
   useFieldArray,
   Controller,
   type Control,
-  type FieldErrors, // Import FieldErrors
+  type FieldErrors,
+  type FieldPath, // Ensure FieldPath is imported
 } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -45,6 +46,8 @@ import type {
   CarModelSpecificationCategory,
 } from "../db/schema";
 import slugify from "slugify";
+import ImageUploadField from "../components/admin/ImageUploadField";
+import { eq, asc, desc, like, or, and } from "drizzle-orm";
 
 // Define schema for individual specification item
 const specSchema = z.object({
@@ -101,20 +104,14 @@ const carModelFormSchema = z.object({
 // Form data type
 type CarModelFormData = z.infer<typeof carModelFormSchema>;
 
-// Type for safer field names
-type FieldPath =
-  | keyof Omit<
-      CarModelFormData,
-      "features" | "colors" | "gallery" | "specifications"
-    >
-  | `colors.${number}.imageUrl`
-  | `gallery.${number}.imageUrl`;
+// Type for safer field names (Keep this type defined locally)
+type ModelFieldPath = FieldPath<CarModelFormData>; // Use imported FieldPath
 
 // File upload state type
 interface FileUpload {
   file: File;
   previewUrl: string;
-  fieldName: FieldPath;
+  fieldName: ModelFieldPath; // Use the local alias
   originalFileName: string; // Store the original filename for naming conventions
 }
 
@@ -1020,7 +1017,7 @@ function CarModelEditorPage() {
   // Handle image selection
   const handleImageSelect = (
     event: React.ChangeEvent<HTMLInputElement>,
-    fieldName: FieldPath
+    fieldName: ModelFieldPath // Use the local alias
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1075,7 +1072,8 @@ function CarModelEditorPage() {
   };
 
   // Helper function to handle image removal
-  const handleRemoveImage = (fieldName: FieldPath) => {
+  const handleRemoveImage = (fieldName: ModelFieldPath) => {
+    // Use the local alias
     // Get the current value to store for potential deletion
     const currentValue = watch(fieldName);
     console.log(
@@ -1129,7 +1127,8 @@ function CarModelEditorPage() {
   };
 
   // Update the handleImageSelect event handler to safely handle DOM events
-  const handleFileUploadClick = (fieldName: FieldPath) => {
+  const handleFileUploadClick = (fieldName: ModelFieldPath) => {
+    // Use the local alias
     // Create a unique ID for the input element
     const inputId = `file-input-${fieldName.replace(/[\.\[\]]/g, "-")}`;
     let input = document.getElementById(inputId) as HTMLInputElement | null;
@@ -1152,60 +1151,6 @@ function CarModelEditorPage() {
 
     input.click();
   };
-
-  function ImageUploadField({
-    fieldName,
-    watch,
-    handleRemove,
-    handleUploadClick,
-    error,
-    altText = "Image",
-  }: ImageUploadFieldProps) {
-    const imageUrl = watch(fieldName);
-    const isUrl = typeof imageUrl === "string";
-
-    return (
-      <div>
-        <div className="mb-2">
-          {isUrl && imageUrl ? (
-            <div className="relative group">
-              <img
-                src={imageUrl}
-                alt={altText}
-                className="w-full h-44 object-cover rounded-md"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/placeholder-image.svg"; // Path to a generic placeholder
-                  target.alt = "Image failed to load";
-                }}
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-md">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleRemove(fieldName);
-                  }}
-                  className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors w-full h-44"
-              onClick={() => handleFileUploadClick(fieldName)}
-            >
-              <Upload className="h-8 w-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">Click to upload image</p>
-            </button>
-          )}
-        </div>
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-      </div>
-    );
-  }
 
   // If not signed in, don't render (parent layout will redirect)
   if (!isSignedIn) {
@@ -2118,16 +2063,6 @@ function CarModelEditorPage() {
       </div>
     </div>
   );
-}
-
-// Reusable Image Upload Field Component
-interface ImageUploadFieldProps {
-  fieldName: FieldPath;
-  watch: ReturnType<typeof useForm<CarModelFormData>>["watch"];
-  handleRemove: (fieldName: FieldPath) => void;
-  handleUploadClick: (fieldName: FieldPath) => void;
-  error?: string;
-  altText?: string;
 }
 
 // ** NEW ** Specification Category Field Component
