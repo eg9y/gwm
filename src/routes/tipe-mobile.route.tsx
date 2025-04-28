@@ -19,7 +19,7 @@ export const Route = createFileRoute("/tipe-mobile")({
     links: [
       {
         rel: "canonical",
-        href: "https://gwm.co.id/tipe-mobile",
+        href: "https://gwmindonesia.com/tipe-mobile",
       },
     ],
   }),

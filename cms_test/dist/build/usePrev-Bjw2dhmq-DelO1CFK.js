@@ -1,0 +1,1 @@
+import{r as e}from"./strapi-zKTenPKb.js";const n=r=>r&&r.startsWith("/")?`${window.strapi.backendURL}${r}`:r,c=r=>{const t=e.useRef();return e.useEffect(()=>{t.current=r},[r]),t.current};export{n as p,c as u};

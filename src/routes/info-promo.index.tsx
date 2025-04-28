@@ -19,7 +19,7 @@ export const Route = createFileRoute("/info-promo/")({
     links: [
       {
         rel: "canonical",
-        href: "https://gwm.co.id/info-promo",
+        href: "https://gwmindonesia.com/info-promo",
       },
     ],
   }),

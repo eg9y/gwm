@@ -1,7 +1,19 @@
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, EffectFade } from "swiper/modules";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/autoplay";
+
 interface ModelShowcaseProps {
-  modelId: string;
-  imageUrls: string[];
+  desktopImageUrls: string[];
+  mobileImageUrls: string[];
+  imageAlt?: string;
   title: string;
+  subtitle?: string;
   description: string;
   price?: string;
   features?: string[];
@@ -12,26 +24,19 @@ interface ModelShowcaseProps {
   isReversed?: boolean;
 }
 
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade } from "swiper/modules";
-import { useEffect, useRef, useState } from "react";
-
-// Import Swiper styles
-import "swiper/css";
-import "swiper/css/effect-fade";
-import "swiper/css/autoplay";
-import { Link } from "@tanstack/react-router";
-
 const ModelShowcase = ({
-  modelId,
-  imageUrls,
+  desktopImageUrls,
+  mobileImageUrls,
+  imageAlt,
   title,
+  subtitle,
   description,
   price,
   features = [],
   primaryButtonText,
-  // secondaryButtonText,
-  // secondaryButtonLink = "/",
+  primaryButtonLink,
+  secondaryButtonText,
+  secondaryButtonLink,
   isReversed = false,
 }: ModelShowcaseProps) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -57,6 +62,16 @@ const ModelShowcase = ({
       observer.disconnect();
     };
   }, []);
+
+  // Fallback if arrays are empty
+  const desktopImages =
+    desktopImageUrls?.length > 0
+      ? desktopImageUrls
+      : ["/placeholder-desktop.webp"];
+  const mobileImages =
+    mobileImageUrls?.length > 0
+      ? mobileImageUrls
+      : ["/placeholder-mobile.webp"];
 
   return (
     <section
@@ -89,6 +104,7 @@ const ModelShowcase = ({
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 pointer-events-none" />
 
+        {/* Use Swiper */}
         <Swiper
           modules={[Autoplay, EffectFade]}
           effect="fade"
@@ -97,23 +113,37 @@ const ModelShowcase = ({
             disableOnInteraction: false,
           }}
           speed={1500 + Math.floor(Math.random() * 1500)}
-          loop={true}
+          loop={desktopImages.length > 1}
           slidesPerView={1}
           className="w-full h-full"
         >
-          {imageUrls.map((imageUrl, index) => (
+          {/* Map over desktop images for slides */}
+          {desktopImages.map((imageUrl, index) => (
             <SwiperSlide
-              key={`${title}-slide-${imageUrl.substring(imageUrl.lastIndexOf("/") + 1)}`}
+              key={`${title}-desktop-${index}-${imageUrl.substring(imageUrl.lastIndexOf("/") + 1)}`}
             >
-              <img
-                src={imageUrl}
-                alt={`${title} view ${index + 1}`}
-                className="w-full h-full object-cover object-center scale-[1.02] hover:scale-[1.05] transition-transform duration-7000"
-                loading="lazy"
-                decoding="async"
-                width="600"
-                height="400"
-              />
+              {/* Use picture element inside SwiperSlide for responsive sources */}
+              <picture>
+                {/* Provide mobile sources if available and distinct, otherwise fallback to desktop */}
+                {mobileImages.length > 0 && (
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={mobileImages[index % mobileImages.length]}
+                  />
+                )}
+                {/* Desktop source */}
+                <source media="(min-width: 768px)" srcSet={imageUrl} />
+                {/* Fallback img tag */}
+                <img
+                  src={imageUrl}
+                  alt={imageAlt || `${title} view ${index + 1}`}
+                  className="w-full h-full object-cover object-center scale-[1.02] hover:scale-[1.05] transition-transform duration-7000"
+                  loading="lazy"
+                  decoding="async"
+                  width="600"
+                  height="400"
+                />
+              </picture>
             </SwiperSlide>
           ))}
         </Swiper>
@@ -137,6 +167,13 @@ const ModelShowcase = ({
             </h2>
             <div className="h-1 w-12 bg-red-500 mt-3 rounded-full" />
           </div>
+
+          {/* Display Subtitle if provided */}
+          {subtitle && (
+            <p className="text-lg sm:text-xl md:text-2xl font-light text-gray-600 mb-3 sm:mb-5">
+              {subtitle}
+            </p>
+          )}
 
           {/* Price with improved styling */}
           {price && (
@@ -197,7 +234,7 @@ const ModelShowcase = ({
             </div>
           )}
 
-          {/* Enhanced button */}
+          {/* Enhanced buttons using props */}
           <div
             className={`flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto ${
               isVisible
@@ -209,12 +246,27 @@ const ModelShowcase = ({
               transitionDelay: "0.8s",
             }}
           >
-            {primaryButtonText && (
+            {/* Primary Button */}
+            {primaryButtonText && primaryButtonLink && (
               <Link
-                to={"/tipe-mobil/$model"}
-                params={{
-                  model: modelId,
-                }}
+                to={
+                  primaryButtonLink.startsWith("/")
+                    ? primaryButtonLink
+                    : undefined
+                }
+                href={
+                  !primaryButtonLink.startsWith("/")
+                    ? primaryButtonLink
+                    : undefined
+                }
+                target={
+                  !primaryButtonLink.startsWith("/") ? "_blank" : undefined
+                }
+                rel={
+                  !primaryButtonLink.startsWith("/")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
                 className="group px-6 py-3.5 bg-primary text-white text-sm font-semibold text-center uppercase tracking-wide transition-all duration-300 hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg active:translate-y-0 relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
@@ -238,6 +290,35 @@ const ModelShowcase = ({
                   </svg>
                 </span>
                 <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+              </Link>
+            )}
+            {/* Secondary Button */}
+            {secondaryButtonText && secondaryButtonLink && (
+              <Link
+                to={
+                  secondaryButtonLink.startsWith("/")
+                    ? secondaryButtonLink
+                    : undefined
+                }
+                href={
+                  !secondaryButtonLink.startsWith("/")
+                    ? secondaryButtonLink
+                    : undefined
+                }
+                target={
+                  !secondaryButtonLink.startsWith("/") ? "_blank" : undefined
+                }
+                rel={
+                  !secondaryButtonLink.startsWith("/")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
+                className="group px-6 py-3.5 bg-transparent border border-primary text-primary text-sm font-semibold text-center uppercase tracking-wide transition-all duration-300 hover:bg-primary/5 hover:-translate-y-1 hover:shadow-md active:translate-y-0 relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {secondaryButtonText}
+                </span>
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
               </Link>
             )}
           </div>

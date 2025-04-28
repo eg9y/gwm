@@ -113,7 +113,7 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
       links: [
         {
           rel: "canonical",
-          href: `https://gwm.co.id/tipe-mobil/${vehicle.id}`,
+          href: `https://gwmindonesia.com/tipe-mobil/${vehicle.id}`,
         },
       ],
     };
