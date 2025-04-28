@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://gwm.co.id/" />
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Prevent FOUC with inline styles -->
+    <style>
+      /* Initial loading styles */
+      .initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        flex-direction: column;
+      }
+      .initial-loader-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top-color: #1b3a63; /* Primary GWM blue color */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+      }
+      .initial-loader-text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #1b3a63; /* Match primary GWM blue color */
+        font-weight: 500;
+        font-size: 16px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg) }
+      }
+      /* Hide content until CSS is loaded */
+      html.loading * {
+        transition: none !important;
+      }
+      /* Make sure app content isn't visible during initial load */
+      html.loading [data-react-root] {
+        visibility: hidden !important;
+      }
+    </style>
+    <script>
+      // Add loading class to html element
+      document.documentElement.classList.add('loading');
+      
+      // Add a data attribute to the root element to target it with CSS
+      document.addEventListener('DOMContentLoaded', function() {
+        const appElements = document.querySelectorAll('div[id^="root"], div[id^="app"]');
+        appElements.forEach(function(el) {
+          el.setAttribute('data-react-root', 'true');
+        });
+      });
+    </script>
+    
+    <!--head-tags-->
+    <script type="module" crossorigin src="/assets/index-CeWoe5eg.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D7oV5uwH.css">
+  </head>
+  <body>
+    <!-- Initial loading spinner (will be removed after hydration) -->
+    <div id="initial-loader" class="initial-loader">
+      <div class="initial-loader-spinner"></div>
+      <div class="initial-loader-text">Loading GWM Indonesia...</div>
+    </div>
+    
+    <!--app-html-->
+    
+    <!-- Script to remove loader once page is loaded -->
+    <script>
+      // Remove loader once page is fully loaded
+      window.addEventListener('load', function() {
+        document.documentElement.classList.remove('loading');
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.3s ease';
+          setTimeout(function() {
+            if (loader.parentNode) {
+              loader.parentNode.removeChild(loader);
+            }
+          }, 300);
+        }
+      });
+    </script>
+    
+    <!-- Structured data for SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "GWM Indonesia",
+        "alternateName": "Great Wall Motors Indonesia",
+        "url": "https://gwm.co.id",
+        "logo": "https://gwm.co.id/logo.png",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+6282123456789",
+          "contactType": "customer service",
+          "availableLanguage": ["Indonesian", "English"]
+        },
+        "sameAs": [
+          "https://www.facebook.com/indo.tank",
+          "https://www.twitter.com/indo.tank",
+          "https://www.instagram.com/indo.tank",
+          "https://www.youtube.com/indo.tank"
+        ]
+      }
+    </script>
+  </body>
+</html>

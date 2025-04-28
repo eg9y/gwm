@@ -795,3 +795,4 @@ function VehicleDetailPage() {
     </div>
   );
 }
+

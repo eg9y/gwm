@@ -11,7 +11,6 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as TestTransformImport } from './routes/test-transform'
 import { Route as SignUpImport } from './routes/sign-up'
 import { Route as SignInImport } from './routes/sign-in'
 import { Route as KontakImport } from './routes/kontak'
@@ -41,12 +40,6 @@ import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathl
 import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathlessLayout/_nested-layout/route-a'
 
 // Create/Update Routes
-
-const TestTransformRoute = TestTransformImport.update({
-  id: '/test-transform',
-  path: '/test-transform',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const SignUpRoute = SignUpImport.update({
   id: '/sign-up',
@@ -277,13 +270,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpImport
-      parentRoute: typeof rootRoute
-    }
-    '/test-transform': {
-      id: '/test-transform'
-      path: '/test-transform'
-      fullPath: '/test-transform'
-      preLoaderRoute: typeof TestTransformImport
       parentRoute: typeof rootRoute
     }
     '/admin/articles': {
@@ -521,7 +507,6 @@ export interface FileRoutesByFullPath {
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/test-transform': typeof TestTransformRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
   '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/admin/contact-info': typeof AdminContactInfoRoute
@@ -549,7 +534,6 @@ export interface FileRoutesByTo {
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/test-transform': typeof TestTransformRoute
   '/admin/contact-info': typeof AdminContactInfoRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/kontak': typeof AdminKontakRoute
@@ -578,7 +562,6 @@ export interface FileRoutesById {
   '/kontak': typeof KontakRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/test-transform': typeof TestTransformRoute
   '/admin/articles': typeof AdminArticlesRouteRouteWithChildren
   '/admin/models': typeof AdminModelsRouteRouteWithChildren
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
@@ -611,7 +594,6 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
-    | '/test-transform'
     | '/admin/articles'
     | '/admin/models'
     | '/admin/contact-info'
@@ -638,7 +620,6 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
-    | '/test-transform'
     | '/admin/contact-info'
     | '/admin/homepage'
     | '/admin/kontak'
@@ -665,7 +646,6 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/sign-in'
     | '/sign-up'
-    | '/test-transform'
     | '/admin/articles'
     | '/admin/models'
     | '/_pathlessLayout/_nested-layout'
@@ -697,7 +677,6 @@ export interface RootRouteChildren {
   KontakRoute: typeof KontakRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  TestTransformRoute: typeof TestTransformRoute
   TipeMobilModelRoute: typeof TipeMobilModelRoute
   TipeMobilIndexRoute: typeof TipeMobilIndexRoute
 }
@@ -712,7 +691,6 @@ const rootRouteChildren: RootRouteChildren = {
   KontakRoute: KontakRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
-  TestTransformRoute: TestTransformRoute,
   TipeMobilModelRoute: TipeMobilModelRoute,
   TipeMobilIndexRoute: TipeMobilIndexRoute,
 }
@@ -736,7 +714,6 @@ export const routeTree = rootRoute
         "/kontak",
         "/sign-in",
         "/sign-up",
-        "/test-transform",
         "/tipe-mobil/$model",
         "/tipe-mobil/"
       ]
@@ -782,9 +759,6 @@ export const routeTree = rootRoute
     },
     "/sign-up": {
       "filePath": "sign-up.tsx"
-    },
-    "/test-transform": {
-      "filePath": "test-transform.tsx"
     },
     "/admin/articles": {
       "filePath": "admin.articles.route.tsx",
