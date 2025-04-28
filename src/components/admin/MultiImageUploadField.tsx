@@ -34,6 +34,8 @@ import {
   Maximize,
   X,
   AlertCircle,
+  Link,
+  Plus,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -86,6 +88,7 @@ function SortableImageItem({
   isLoading?: boolean;
 }) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const {
     attributes,
     listeners,
@@ -122,11 +125,19 @@ function SortableImageItem({
         {...attributes}
         {...listeners}
       >
-        <img
-          src={url}
-          alt={isNew ? "New upload preview" : "Existing image"}
-          className="w-full h-36 object-cover"
-        />
+        {imageError ? (
+          <div className="w-full h-36 flex items-center justify-center bg-red-50 text-red-500">
+            <AlertCircle className="h-6 w-6 mr-2" />
+            <span className="text-sm">Image failed to load</span>
+          </div>
+        ) : (
+          <img
+            src={url}
+            alt={isNew ? "New upload preview" : "Existing image"}
+            className="w-full h-36 object-cover"
+            onError={() => setImageError(true)}
+          />
+        )}
 
         {isLoading && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -145,6 +156,11 @@ function SortableImageItem({
                     Large file
                   </span>
                 )}
+              </div>
+            )}
+            {!file && url && (
+              <div className="text-white text-xs truncate">
+                {url.substring(0, 30)}...
               </div>
             )}
           </div>
@@ -177,7 +193,7 @@ function SortableImageItem({
         </div>
       )}
 
-      {isPreviewOpen && (
+      {isPreviewOpen && !imageError && (
         <dialog
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 cursor-zoom-out"
           open
@@ -208,6 +224,7 @@ function SortableImageItem({
               }
             }}
             tabIndex={-1}
+            onError={() => setImageError(true)}
           />
         </dialog>
       )}
@@ -239,25 +256,8 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
   const [isDragAccept, setIsDragAccept] = useState(false);
   const [isDragReject, setIsDragReject] = useState(false);
   const [dragRejectionReason, setDragRejectionReason] = useState<string>("");
-
-  // Update local state if the form state changes externally (e.g., reset)
-  useEffect(() => {
-    const formValues = control._formValues[fieldName] as string[] | undefined;
-    const formUrls = Array.isArray(formValues) ? formValues : [];
-
-    // Basic sync: Check if the non-new items in local state match form state
-    const localExistingUrls = imageItems
-      .filter((item) => !item.isNew)
-      .map((item) => item.url);
-
-    if (
-      formUrls.length !== localExistingUrls.length ||
-      !formUrls.every((url, i) => url === localExistingUrls[i])
-    ) {
-      setImageItems(formUrls.map((url) => ({ id: url, url, isNew: false })));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [control._formValues[fieldName], imageItems, fieldName]);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [inputUrl, setInputUrl] = useState<string>("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -386,6 +386,95 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
     }
 
     toast.success("Image removed");
+  };
+
+  const handleUrlSubmit = (e: React.MouseEvent | React.FormEvent) => {
+    e.preventDefault();
+
+    // Parse URLs - allow multiple URLs separated by newlines or spaces
+    const inputUrls = inputUrl
+      .split(/[\n\s]+/)
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+
+    if (inputUrls.length === 0) {
+      toast.error("Please enter at least one valid URL");
+      return;
+    }
+
+    // Process each URL
+    let validCount = 0;
+    const validationPromises = inputUrls.map((url) => {
+      return new Promise<{ url: string; valid: boolean }>((resolve) => {
+        // Check if it's a valid URL starting with http/https
+        if (!url || !url.startsWith("http")) {
+          resolve({ url, valid: false });
+          return;
+        }
+
+        // Check if the URL already exists in the array
+        if (imageItems.some((item) => item.url === url)) {
+          resolve({ url, valid: false });
+          return;
+        }
+
+        // Test if URL leads to a valid image
+        const testImage = new Image();
+        testImage.onload = () => {
+          resolve({ url, valid: true });
+        };
+
+        testImage.onerror = () => {
+          resolve({ url, valid: false });
+        };
+
+        // Start loading the image to validate it
+        testImage.src = url;
+      });
+    });
+
+    // Handle all URL validations
+    Promise.all(validationPromises).then((results) => {
+      const validUrls = results.filter((r) => r.valid).map((r) => r.url);
+      const invalidCount = results.length - validUrls.length;
+
+      if (validUrls.length === 0) {
+        toast.error("None of the provided URLs were valid image URLs");
+        return;
+      }
+
+      // Add all valid URLs
+      const newItems = validUrls.map((url) => ({
+        id: url,
+        url: url,
+        isNew: false, // Not a blob URL that needs uploading
+      }));
+
+      // Update state with the new items
+      const updatedItems = [...imageItems, ...newItems];
+      setImageItems(updatedItems);
+
+      // Update the form field value
+      setValue(
+        fieldName,
+        updatedItems.map(
+          (item) => item.url
+        ) as TFieldValues[FieldPath<TFieldValues>],
+        { shouldValidate: true, shouldDirty: true }
+      );
+
+      // Reset the input and UI state
+      setInputUrl("");
+      setShowUrlInput(false);
+
+      if (invalidCount > 0) {
+        toast.success(
+          `Added ${validUrls.length} image URL(s). ${invalidCount} invalid URL(s) were skipped.`
+        );
+      } else {
+        toast.success(`Added ${validUrls.length} image URL(s)`);
+      }
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -559,25 +648,70 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
           </div>
         )}
 
-        <div className="mt-4 flex justify-center">
-          <label
-            htmlFor={inputId}
-            className="cursor-pointer inline-flex items-center px-4 py-2.5 bg-primary/90 text-white rounded-md hover:bg-primary transition-colors duration-200 shadow-sm focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            <span className="text-sm font-medium">
-              {imageItems.length > 0 ? "Add More Images" : "Select Images"}
-            </span>
-            <input
-              id={inputId}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="sr-only"
-              aria-describedby={rootError ? `${inputId}-error` : undefined}
-            />
-          </label>
+        <div className="mt-4 flex flex-col items-center space-y-3">
+          <div className="flex space-x-3">
+            <label
+              htmlFor={inputId}
+              className="cursor-pointer inline-flex items-center px-4 py-2.5 bg-primary/90 text-white rounded-md hover:bg-primary transition-colors duration-200 shadow-sm focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              <span className="text-sm font-medium">
+                {imageItems.length > 0 ? "Add More Images" : "Select Images"}
+              </span>
+              <input
+                id={inputId}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileSelect}
+                className="sr-only"
+                aria-describedby={rootError ? `${inputId}-error` : undefined}
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={() => setShowUrlInput(!showUrlInput)}
+              className="inline-flex items-center px-4 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              <Link className="h-4 w-4 mr-2" />
+              <span className="text-sm font-medium">Add Image URL</span>
+            </button>
+          </div>
+
+          {showUrlInput && (
+            <div className="w-full max-w-md mt-2 p-3 border border-gray-200 rounded-md bg-white">
+              <div className="flex flex-col space-y-2">
+                <textarea
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                  placeholder="Enter image URLs (one per line or separated by spaces)"
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm min-h-[80px]"
+                  required
+                />
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-gray-500">
+                    Enter image URLs (jpg, png, webp, etc.)
+                  </p>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleUrlSubmit(e);
+                    }}
+                    className="inline-flex items-center px-3 py-1.5 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors duration-200 shadow-sm focus:outline-none text-sm"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add URLs
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  You can add multiple URLs at once by separating them with
+                  spaces or line breaks
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {isDragging && (

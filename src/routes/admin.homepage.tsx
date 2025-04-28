@@ -1,23 +1,8 @@
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  useLoaderData,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/tanstack-start";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useForm,
-  Controller,
-  useFieldArray,
-  type FieldValues,
-  type FieldPath,
-  type Control,
-  type SubmitHandler,
-  type FieldErrors,
-  type ControllerRenderProps,
-} from "react-hook-form";
+import { useForm, useFieldArray, type FieldPath } from "react-hook-form";
 import { z } from "zod";
 import {
   Home,
@@ -25,19 +10,14 @@ import {
   Plus,
   Trash2,
   Eye,
-  Upload,
   Loader2,
   ChevronLeft,
-  ArrowUpDown,
-  GripVertical,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import {
   getHomepageConfig,
   updateHomepageConfig,
-  type HomepageConfig,
   type HomepageConfigWithSections,
-  type HomepageFeatureSectionDb,
 } from "../server/homepage";
 import {
   getPresignedUploadUrl,
@@ -59,13 +39,17 @@ const featureSectionSchema = z.object({
     .min(1, "At least one Desktop Image is required"),
   mobileImageUrls: z
     .array(z.string().url("Must be a valid URL or temporary blob URL"))
-    .optional(),
+    .optional()
+    .default([]),
   imageAlt: z.string().optional(),
   features: z.string().optional(),
   primaryButtonText: z.string().optional(),
   primaryButtonLink: z.string().optional().or(z.literal("")),
   secondaryButtonText: z.string().optional(),
   secondaryButtonLink: z.string().optional().or(z.literal("")),
+  // For server-side compatibility
+  desktopImageUrl: z.string().optional(),
+  mobileImageUrl: z.string().optional(),
 });
 
 // Update form validation schema
@@ -89,8 +73,6 @@ const homepageFormSchema = z.object({
 
 // Update form data type
 type HomepageFormData = z.infer<typeof homepageFormSchema>;
-// Update field path type to handle nested arrays
-type HomepageFieldPath = FieldPath<HomepageFormData>;
 
 function generateUniquePrefix(): string {
   const timestamp = Date.now();
@@ -631,20 +613,33 @@ function HomepageEditorPage() {
         heroSecondaryButtonText: finalData.heroSecondaryButtonText,
         heroSecondaryButtonLink: finalData.heroSecondaryButtonLink,
         featureSections: (finalData.featureSections || []).map(
-          (section, index) => ({
-            ...section,
-            id: section.id,
-            order: index,
-            features: parseFeaturesString(section.features),
-            desktopImageUrls: (section.desktopImageUrls || []).filter(
+          (section, index) => {
+            const filteredDesktopUrls = (section.desktopImageUrls || []).filter(
               (url) =>
                 !imagesToDeleteOnSuccess.includes(url) && url.startsWith("http")
-            ),
-            mobileImageUrls: (section.mobileImageUrls || []).filter(
+            );
+            const filteredMobileUrls = (section.mobileImageUrls || []).filter(
               (url) =>
                 !imagesToDeleteOnSuccess.includes(url) && url.startsWith("http")
-            ),
-          })
+            );
+            
+            // If no mobile images, use desktop images as fallback
+            const finalMobileUrls = filteredMobileUrls.length > 0 ? 
+              filteredMobileUrls : 
+              filteredDesktopUrls;
+              
+            return {
+              ...section,
+              id: section.id,
+              order: index,
+              features: parseFeaturesString(section.features),
+              desktopImageUrls: filteredDesktopUrls,
+              mobileImageUrls: finalMobileUrls,
+              // For server compatibility - use first URL if available
+              desktopImageUrl: filteredDesktopUrls[0] || "",
+              mobileImageUrl: finalMobileUrls[0] || "",
+            };
+          }
         ),
       };
 
@@ -656,12 +651,7 @@ function HomepageEditorPage() {
           );
           validationError = true;
         }
-        if (section.mobileImageUrls.length === 0) {
-          toast.error(
-            `Section ${index + 1} requires at least one mobile image after processing.`
-          );
-          validationError = true;
-        }
+        // Mobile images are optional - no validation needed for them
       }
       if (validationError) {
         setIsSubmitting(false);
@@ -785,6 +775,7 @@ function HomepageEditorPage() {
               <ImageUploadField<HomepageFormData>
                 fieldName="heroDesktopImageUrl"
                 watch={watch}
+                setValue={setValue}
                 handleRemove={addRemovedUrl}
                 handleUploadClick={addNewFileMapping}
                 error={errors.heroDesktopImageUrl?.message}
@@ -801,6 +792,7 @@ function HomepageEditorPage() {
               <ImageUploadField<HomepageFormData>
                 fieldName="heroMobileImageUrl"
                 watch={watch}
+                setValue={setValue}
                 handleRemove={addRemovedUrl}
                 handleUploadClick={addNewFileMapping}
                 error={errors.heroMobileImageUrl?.message}
@@ -1029,7 +1021,7 @@ function HomepageEditorPage() {
                         control={control}
                         setValue={setValue}
                         errors={errors}
-                        label="Mobile Images (e.g., 1:1 or 9:16) *"
+                        label="Mobile Images (e.g., 1:1 or 9:16) (Optional)"
                         target="mobile"
                         addRemovedUrl={addRemovedUrl}
                         addNewFileMapping={addNewFileMapping}

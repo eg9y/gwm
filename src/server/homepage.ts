@@ -18,7 +18,7 @@ const featureSectionSchema = z.object({
   mobileImageUrl: z
     .string()
     .url("Must be a valid URL")
-    .min(1, "Mobile Image URL is required"),
+    .optional(), // Mobile image URL is optional
   imageAlt: z.string().optional(),
   features: z.array(z.string()).optional(),
   primaryButtonText: z.string().optional(),
@@ -38,7 +38,24 @@ const homepageConfigUpdateSchema = z.object({
   heroSecondaryButtonText: z.string().optional(),
   heroSecondaryButtonLink: z.string().optional().or(z.literal("")), // Allow empty string
   // Ensure feature sections is truly optional
-  featureSections: z.array(featureSectionSchema).optional(), // Keep .optional()
+  featureSections: z.array(z.object({
+    id: z.number().optional(), // Optional for existing sections
+    order: z.number().optional().or(z.number()),
+    title: z.string().min(1, "Title is required"),
+    subtitle: z.string().optional(),
+    description: z.string().min(1, "Description is required"),
+    desktopImageUrl: z.string().url("Must be a valid URL").min(1, "Desktop Image URL is required"),
+    mobileImageUrl: z.string().url("Must be a valid URL").optional(), // Make mobile URL optional
+    imageAlt: z.string().optional(),
+    features: z.array(z.string()).optional(),
+    primaryButtonText: z.string().optional(),
+    primaryButtonLink: z.string().optional().or(z.literal("")),
+    secondaryButtonText: z.string().optional(),
+    secondaryButtonLink: z.string().optional().or(z.literal("")),
+    // Support for arrays (from client side format)
+    desktopImageUrls: z.array(z.string()).optional(),
+    mobileImageUrls: z.array(z.string()).optional(),
+  })).optional(), // Keep .optional()
 });
 
 // Type for the homepage configuration data, including sections
@@ -87,6 +104,10 @@ export const getHomepageConfig = createServerFn({ method: "GET" }).handler(
  */
 export const updateHomepageConfig = createServerFn({ method: "POST" })
   .validator((data: unknown) => {
+    // For debugging - log the structure of the incoming data
+    console.log("Validating homepage config data:", 
+      JSON.stringify(data, null, 2).substring(0, 500) + "...");
+    
     const result = homepageConfigUpdateSchema.safeParse(data);
     if (!result.success) {
       // Log the detailed error for server-side debugging
@@ -94,6 +115,48 @@ export const updateHomepageConfig = createServerFn({ method: "POST" })
         "Homepage config validation failed:",
         result.error.flatten()
       );
+      
+      // Try again with a more lenient approach if needed
+      try {
+        // Cast to any to handle processing
+        const anyData = data as any;
+        
+        // Process feature sections if they exist
+        if (anyData.featureSections && Array.isArray(anyData.featureSections)) {
+          anyData.featureSections = anyData.featureSections.map((section: any) => {
+            // Handle mobile image URLs being empty arrays
+            if (section.mobileImageUrls && Array.isArray(section.mobileImageUrls) && section.mobileImageUrls.length === 0) {
+              section.mobileImageUrl = section.desktopImageUrl || 
+                (section.desktopImageUrls && section.desktopImageUrls.length > 0 ? 
+                  section.desktopImageUrls[0] : undefined);
+            } else if (section.mobileImageUrls && Array.isArray(section.mobileImageUrls) && section.mobileImageUrls.length > 0) {
+              section.mobileImageUrl = section.mobileImageUrls[0];
+            }
+            
+            // Ensure desktopImageUrl is set
+            if (!section.desktopImageUrl && section.desktopImageUrls && Array.isArray(section.desktopImageUrls) && section.desktopImageUrls.length > 0) {
+              section.desktopImageUrl = section.desktopImageUrls[0];
+            }
+            
+            return section;
+          });
+        }
+        
+        // Try validation again
+        const secondAttempt = homepageConfigUpdateSchema.safeParse(anyData);
+        if (secondAttempt.success) {
+          return secondAttempt.data;
+        }
+        
+        // If still failing, log that too
+        console.error(
+          "Second validation attempt failed:",
+          secondAttempt.error.flatten()
+        );
+      } catch (err) {
+        console.error("Error in fallback validation:", err);
+      }
+      
       // Provide a user-friendly error message
       throw new Error(
         `Validation failed: ${JSON.stringify(result.error.flatten().fieldErrors)}`
@@ -131,19 +194,41 @@ export const updateHomepageConfig = createServerFn({ method: "POST" })
 
         // 3. Insert the new feature sections
         if (featureSections.length > 0) {
-          const sectionsToInsert = featureSections.map((section, index) => ({
-            ...section,
-            homepageConfigId: configId,
-            order: index, // Ensure order is set based on the array index
-            features: section.features || [], // Ensure features is an array
-            desktopImageUrl: section.desktopImageUrl, // Add desktop image URL
-            mobileImageUrl: section.mobileImageUrl, // Add mobile image URL
-            imageAlt: section.imageAlt || `Feature section ${index + 1}`, // Provide default alt text
-            updatedAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(), // Set createdAt for new inserts
-            // Remove id if it exists, as it's auto-incremented
-            id: undefined,
-          }));
+          const sectionsToInsert = featureSections.map((section, index) => {
+            // Process image data, supporting both single URLs and arrays
+            
+            // Handle desktop images (required)
+            const desktopImageUrl = section.desktopImageUrl || 
+              (section.desktopImageUrls && section.desktopImageUrls.length > 0 ? section.desktopImageUrls[0] : "");
+            
+            const desktopImageUrls = section.desktopImageUrls || (desktopImageUrl ? [desktopImageUrl] : []);
+            
+            // Handle mobile images (optional, fallback to desktop)
+            const hasMobileImages = section.mobileImageUrl || 
+              (section.mobileImageUrls && section.mobileImageUrls.length > 0);
+            
+            // For mobile, if we have no mobile images, use desktop as fallback
+            const mobileImageUrl = section.mobileImageUrl || 
+              (section.mobileImageUrls && section.mobileImageUrls.length > 0 ? section.mobileImageUrls[0] : desktopImageUrl);
+              
+            const mobileImageUrls = hasMobileImages ? 
+              (section.mobileImageUrls || (section.mobileImageUrl ? [section.mobileImageUrl] : [])) : 
+              desktopImageUrls; // Fallback to desktop
+            
+            return {
+              ...section,
+              homepageConfigId: configId,
+              order: index, // Ensure order is set based on the array index
+              features: section.features || [], // Ensure features is an array
+              desktopImageUrls: desktopImageUrls, // Use processed arrays
+              mobileImageUrls: mobileImageUrls, // Use processed arrays
+              imageAlt: section.imageAlt || `Feature section ${index + 1}`, // Provide default alt text
+              updatedAt: new Date().toISOString(),
+              createdAt: new Date().toISOString(), // Set createdAt for new inserts
+              // Remove id if it exists, as it's auto-incremented
+              id: undefined,
+            };
+          });
           await tx.insert(homepageFeatureSections).values(sectionsToInsert);
         }
 
