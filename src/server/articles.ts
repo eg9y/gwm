@@ -77,7 +77,6 @@ function sanitizeContent(content: string): string {
         "frameborder",
         "allowfullscreen",
         "allow",
-        "data-youtube-video",
       ],
     });
   } catch (error) {

@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import DOMPurify from "dompurify";
 import { getArticleBySlug } from "../server/articles";
 import type { Article } from "../db";
 
@@ -39,56 +38,19 @@ const articleStyles = `
     clear: both;
   }
 
-  /* YouTube video responsive styling */
-  .youtube-video {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    height: 0;
-    overflow: hidden;
-    margin: 1.5rem 0;
+  /* YouTube video responsive styling (applied directly to iframe) */
+  iframe.youtube-video {
+    display: block; /* Ensure it's treated as a block */
+    width: 100%; /* Take full width */
+    max-width: 640px; /* Optional: Set a max-width like Tiptap's default */
+    aspect-ratio: 16 / 9; /* Maintain 16:9 aspect ratio */
+    height: auto; /* Let height adjust based on width and aspect-ratio */
+    margin: 1.5rem auto; /* Center the video horizontally and add vertical margin */
     border-radius: 0.5rem;
-  }
-  
-  .youtube-video iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
+    border: 0; /* Remove default iframe border */
+    overflow: hidden; /* Hide anything outside the border radius */
   }
 `;
-
-// Function to process YouTube embeds in HTML content
-function processYouTubeEmbeds(html: string): string {
-  // Regular expression to find YouTube div elements
-  const youtubeRegex =
-    /<div data-youtube-video[^>]*data-src="([^"]+)"[^>]*><\/div>/g;
-
-  // Replace each match with proper iframe embed
-  return html.replace(youtubeRegex, (match, src) => {
-    // Extract video ID if needed
-    const getYouTubeVideoId = (youtubeUrl: string) => {
-      const regExp =
-        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-      const match = youtubeUrl.match(regExp);
-      return match && match[2].length === 11 ? match[2] : null;
-    };
-
-    const videoId = getYouTubeVideoId(src);
-    if (!videoId) return match;
-
-    return `<div class="youtube-video">
-      <iframe 
-        src="https://www.youtube.com/embed/${videoId}" 
-        title="YouTube video player" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen
-      ></iframe>
-    </div>`;
-  });
-}
 
 export const Route = createFileRoute("/info-promo/$slug")({
   // Add a loader to fetch article data on the server
@@ -250,35 +212,6 @@ function ArticleDetailPage() {
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
 
-  // YouTube embed component
-  const YouTubeEmbed = ({ url }: { url: string }) => {
-    // Extract video ID from YouTube URL
-    const getYouTubeVideoId = (youtubeUrl: string) => {
-      const regExp =
-        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-      const match = youtubeUrl.match(regExp);
-      return match && match[2].length === 11 ? match[2] : null;
-    };
-
-    const videoId = getYouTubeVideoId(url);
-
-    if (!videoId) {
-      return <div className="text-red-500">Invalid YouTube URL</div>;
-    }
-
-    return (
-      <div className="relative w-full my-6" style={{ paddingBottom: "56.25%" }}>
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="absolute top-0 left-0 w-full h-full rounded-lg"
-        />
-      </div>
-    );
-  };
-
   // Add debug output to help troubleshoot
   console.log("Rendering state:", { isLoading, error, article, isPageLoaded });
 
@@ -330,6 +263,7 @@ function ArticleDetailPage() {
       {!isLoading && article && (
         <div className="container mx-auto px-4 py-12">
           {/* Add the resizable image styles */}
+          {/* eslint-disable-next-line react/no-danger */}
           <style dangerouslySetInnerHTML={{ __html: articleStyles }} />
 
           <div className="max-w-3xl mx-auto">
@@ -367,26 +301,14 @@ function ArticleDetailPage() {
                 </div>
               )}
 
-              {/* Content rendered using DOMPurify to sanitize HTML */}
+              {/* Content rendered using dangerouslySetInnerHTML. 
+                  Sanitization is handled server-side before saving. */}
               <div
                 className="prose prose-lg max-w-none text-gray-700 tiptap-content article-content prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-ul:list-disc prose-ul:pl-5 prose-ol:list-decimal prose-ol:pl-5 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:rounded-sm"
-                // We use DOMPurify to sanitize HTML from Tiptap to prevent XSS attacks
+                // Render the server-sanitized content directly
                 // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
-                  __html: processYouTubeEmbeds(
-                    DOMPurify.sanitize(article.content, {
-                      ADD_ATTR: [
-                        "alignment",
-                        "width",
-                        "height",
-                        "class",
-                        "data-youtube-video",
-                        "data-src",
-                        "allowfullscreen",
-                      ],
-                      ADD_TAGS: ["iframe"],
-                    })
-                  ),
+                  __html: article.content, // Use raw content from DB
                 }}
               />
             </div>

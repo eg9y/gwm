@@ -128,7 +128,6 @@ const TiptapEditor = ({
       Youtube.configure({
         controls: true,
         modestBranding: true,
-        nocookie: true, // Use privacy-enhanced mode
         HTMLAttributes: {
           class: "youtube-video my-6 rounded-lg overflow-hidden mx-auto",
         },
