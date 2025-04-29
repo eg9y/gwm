@@ -42,10 +42,27 @@ export const Route = createRootRoute({
   loader: async () => {
     try {
       const contactInfo = await getContactInfo();
-      return { contactInfo };
+      // Ensure logo URLs are included, provide defaults if necessary
+      const logoUrl =
+        contactInfo?.logoUrl || "https://gwm.kopimap.com/gwm_logo.webp"; // Default logo
+      const logoWhiteUrl = contactInfo?.logoWhiteUrl || logoUrl; // Default to main logo if white is missing
+      const whatsappUrl = contactInfo?.whatsappUrl || defaultWhatsAppUrl;
+
+      return {
+        contactInfo, // Pass the full object if needed elsewhere
+        logoUrl,
+        logoWhiteUrl,
+        whatsappUrl,
+      };
     } catch (error) {
       console.error("Error fetching contact info in root loader:", error);
-      return { contactInfo: null };
+      // Return defaults even on error
+      return {
+        contactInfo: null,
+        logoUrl: "https://gwm.kopimap.com/gwm_logo.webp",
+        logoWhiteUrl: "https://gwm.kopimap.com/gwm_initial_logo.webp",
+        whatsappUrl: defaultWhatsAppUrl,
+      };
     }
   },
   head: () => ({
@@ -112,8 +129,16 @@ export const Route = createRootRoute({
     ],
   }),
   errorComponent: (props) => {
+    // Define default logo URLs for the error boundary case
+    const defaultLogoUrl = "https://gwm.kopimap.com/gwm_logo.webp";
+    const defaultLogoWhiteUrl = defaultLogoUrl; // Use main logo as fallback
+
     return (
-      <RootDocument whatsappUrl={defaultWhatsAppUrl}>
+      <RootDocument
+        logoUrl={defaultLogoUrl}
+        logoWhiteUrl={defaultLogoWhiteUrl}
+        whatsappUrl={defaultWhatsAppUrl}
+      >
         <DefaultCatchBoundary {...props} />
       </RootDocument>
     );
@@ -123,12 +148,18 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const { contactInfo } = Route.useLoaderData();
+  const { contactInfo, logoUrl, logoWhiteUrl, whatsappUrl } =
+    Route.useLoaderData();
 
-  const finalWhatsappUrl = contactInfo?.whatsappUrl || defaultWhatsAppUrl;
+  // Use whatsappUrl directly from loader data
+  // const finalWhatsappUrl = contactInfo?.whatsappUrl || defaultWhatsAppUrl;
 
   return (
-    <RootDocument whatsappUrl={finalWhatsappUrl}>
+    <RootDocument
+      logoUrl={logoUrl}
+      logoWhiteUrl={logoWhiteUrl}
+      whatsappUrl={whatsappUrl} // Pass whatsappUrl from loader
+    >
       <ScrollToTop />
       <Outlet />
     </RootDocument>
@@ -137,9 +168,13 @@ function RootComponent() {
 
 function RootDocument({
   children,
+  logoUrl,
+  logoWhiteUrl,
   whatsappUrl,
 }: {
   children: React.ReactNode;
+  logoUrl: string;
+  logoWhiteUrl: string;
   whatsappUrl: string;
 }) {
   // Get the router state to detect when routes are loading
@@ -163,7 +198,12 @@ function RootDocument({
           {isLoading && <LoadingSpinner />}
           {/* Keep navbar fixed at the top and outside of any transition effects */}
           <div className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-            <Navbar whatsappUrl={whatsappUrl} />
+            <Navbar
+              logoUrl={logoUrl}
+              logoWhiteUrl={logoWhiteUrl}
+              whatsappUrl={whatsappUrl}
+            />{" "}
+            {/* Pass logo URLs */}
           </div>
           {/* Add padding to account for fixed navbar */}
           <div className="">
@@ -174,8 +214,7 @@ function RootDocument({
                 <Scripts />
               </div>
             </main>
-
-            <Footer />
+            <Footer logoUrl={logoUrl} /> {/* Pass logoUrl to Footer */}
             {!isAdminPage && <WhatsAppButton whatsappUrl={whatsappUrl} />}
           </div>
         </div>

@@ -46,6 +46,24 @@ export const contactInfo = sqliteTable("contact_info", {
   x: text("x").notNull(), // Twitter/X
   youtube: text("youtube").notNull(),
   whatsappUrl: text("whatsapp_url").default(""),
+  // Adding new fields for contact page configuration
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords"),
+  metaImage: text("meta_image"),
+  heroDesktopImageUrl: text("hero_desktop_image_url"),
+  heroMobileImageUrl: text("hero_mobile_image_url"),
+  heroTitle: text("hero_title"),
+  heroTagline: text("hero_tagline"),
+  heroSubtitle: text("hero_subtitle"),
+  heroHighlightColor: text("hero_highlight_color"),
+  formTitle: text("form_title"),
+  formDescription: text("form_description"),
+  gmapsPlaceQuery: text("gmaps_place_query"),
+  locationOptions: text("location_options", { mode: "json" }).$type<string[]>(),
+  // Existing logo fields
+  logoUrl: text("logo_url"), // Main company logo URL
+  logoWhiteUrl: text("logo_white_url"), // White version of the logo URL
   updatedAt: text("updated_at")
     .notNull()
     .$default(() => new Date().toISOString()),

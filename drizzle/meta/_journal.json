@@ -134,6 +134,20 @@
       "when": 1745939334010,
       "tag": "0019_red_polaris",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1745940824399,
+      "tag": "0020_demonic_ben_urich",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1745942742180,
+      "tag": "0021_blue_mimic",
+      "breakpoints": true
     }
   ]
 }

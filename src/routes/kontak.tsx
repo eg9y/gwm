@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { seo } from "../utils/seo";
 import { submitContactForm } from "../server/contact";
 import { getContactInfo } from "../server/contact-info";
+import { getPublishedCarModelsForForm } from "../server/car-models";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,30 +38,65 @@ declare global {
   }
 }
 
+// Data structure for car models in the form
+type CarModelForForm = {
+  id: string;
+  name: string;
+  mainProductImage: string;
+};
+
 // Lazy-load the Contact component
 export const Route = createFileRoute("/kontak")({
   component: ContactPage,
-  head: () => ({
-    meta: [
-      ...seo({
-        title: "Kontak GWM Indonesia - Hubungi Kami",
-        description:
-          "Hubungi GWM Indonesia untuk informasi produk, test drive, atau layanan purna jual. Temukan dealer terdekat dan jadwalkan kunjungan Anda.",
-        keywords:
-          "kontak GWM, dealer GWM, test drive GWM, layanan purna jual, Great Wall Motors Indonesia",
-        image: "https://gwm.kopimap.com/kontak_banner.jpg",
-      }),
-    ],
-    links: [
-      {
-        rel: "canonical",
-        href: "https://gwm.co.id/kontak",
-      },
-    ],
-  }),
+  loader: async () => {
+    try {
+      // Fetch contact info and published car models in parallel
+      const [contactInfo, carModels] = await Promise.all([
+        getContactInfo(),
+        getPublishedCarModelsForForm(),
+      ]);
+
+      return { contactInfo, carModels };
+    } catch (error) {
+      console.error("Error in kontak page loader:", error);
+      return {
+        contactInfo: null,
+        carModels: [],
+        error: "Failed to load contact page data",
+      };
+    }
+  },
+  head: ({ data }) => {
+    // Extract contactInfo from loader data with fallbacks
+    const contactInfo = data?.contactInfo || {};
+
+    return {
+      meta: [
+        ...seo({
+          title: contactInfo.metaTitle || "Kontak GWM Indonesia - Hubungi Kami",
+          description:
+            contactInfo.metaDescription ||
+            "Hubungi GWM Indonesia untuk informasi produk, test drive, atau layanan purna jual. Temukan dealer terdekat dan jadwalkan kunjungan Anda.",
+          keywords:
+            contactInfo.metaKeywords ||
+            "kontak GWM, dealer GWM, test drive GWM, layanan purna jual, Great Wall Motors Indonesia",
+          image:
+            contactInfo.metaImage ||
+            "https://gwm.kopimap.com/kontak_banner.jpg",
+        }),
+      ],
+      links: [
+        {
+          rel: "canonical",
+          href: "https://gwmindonesia.com/kontak",
+        },
+      ],
+    };
+  },
 });
 
 function ContactPage() {
+  const { contactInfo, carModels, error } = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formStatus, setFormStatus] = useState<{
     success?: boolean;
@@ -68,24 +104,6 @@ function ContactPage() {
   }>({});
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const notificationRef = useRef<HTMLDivElement>(null);
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch contact info
-  useEffect(() => {
-    const fetchContactInfo = async () => {
-      try {
-        const info = await getContactInfo();
-        setContactInfo(info);
-      } catch (error) {
-        console.error("Error fetching contact info:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchContactInfo();
-  }, []);
 
   // React Hook Form setup with Zod validation
   const {
@@ -205,13 +223,22 @@ function ContactPage() {
     <div className="min-h-screen bg-white grainy-bg">
       {/* Hero Section with darker background */}
       <Hero
-        desktopImage="https://gwm.kopimap.com/kontak.webp"
-        mobileImage="https://gwm.kopimap.com/kontak.webp"
-        title="Hubungi Kami"
-        tagline="GWM Jakarta"
-        subtitle="Diskusikan kebutuhan mobil Anda dengan tim kami yang siap membantu"
+        desktopImage={
+          contactInfo?.heroDesktopImageUrl ||
+          "https://gwm.kopimap.com/kontak.webp"
+        }
+        mobileImage={
+          contactInfo?.heroMobileImageUrl ||
+          "https://gwm.kopimap.com/kontak.webp"
+        }
+        title={contactInfo?.heroTitle || "Hubungi Kami"}
+        tagline={contactInfo?.heroTagline || "GWM Jakarta"}
+        subtitle={
+          contactInfo?.heroSubtitle ||
+          "Diskusikan kebutuhan mobil Anda dengan tim kami yang siap membantu"
+        }
         overlayOpacity={0.6}
-        highlightColor="#CF0E0E"
+        highlightColor={contactInfo?.heroHighlightColor || "#CF0E0E"}
         imageDarkenAmount={60}
       />
 
@@ -221,12 +248,15 @@ function ContactPage() {
           <div className="md:flex">
             {/* Left Side - Contact Information */}
             <div className="md:w-2/5 bg-gradient-to-br from-gray-50 to-white p-6">
-              <h1 className="text-2xl md:text-3xl font-medium text-primary mb-3">
-                Kontak GWM Jakarta
+              <h1
+                className="text-2xl md:text-3xl font-medium text-primary mb-3"
+                id="form-title"
+              >
+                {contactInfo?.formTitle || "Kontak GWM Jakarta"}
               </h1>
-              <p className="text-sm text-secondary mb-6">
-                Dealer resmi GWM Jakarta siap membantu kebutuhan mobil Anda
-                dengan layanan terbaik
+              <p className="text-sm text-secondary mb-6" id="form-description">
+                {contactInfo?.formDescription ||
+                  "Dealer resmi GWM Jakarta siap membantu kebutuhan mobil Anda dengan layanan terbaik"}
               </p>
 
               <div className="space-y-4">
@@ -390,7 +420,7 @@ function ContactPage() {
               {/* Map Button - Smaller for Mobile */}
               <div className="mt-4 md:hidden">
                 <a
-                  href="https://www.google.com/maps/dir//AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia"
+                  href={`https://www.google.com/maps/dir//${contactInfo?.gmapsPlaceQuery || "AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-full py-2 px-3 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-all"
@@ -423,7 +453,7 @@ function ContactPage() {
               {/* Small Map for desktop */}
               <div className="hidden md:block mt-6 h-32 rounded-lg overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed/v1/place?q=AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+                  src={`https://www.google.com/maps/embed/v1/place?q=${contactInfo?.gmapsPlaceQuery || "AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia"}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -683,11 +713,20 @@ function ContactPage() {
                         {...register("location")}
                       >
                         <option value="">Pilih kota</option>
-                        <option value="Jakarta">Jakarta</option>
-                        <option value="Surabaya">Surabaya</option>
-                        <option value="Bandung">Bandung</option>
-                        <option value="Bali">Bali</option>
-                        <option value="Lainnya">Lainnya</option>
+                        {/* Generate location options dynamically */}
+                        {(
+                          contactInfo?.locationOptions || [
+                            "Jakarta",
+                            "Surabaya",
+                            "Bandung",
+                            "Bali",
+                            "Lainnya",
+                          ]
+                        ).map((location, index) => (
+                          <option key={index} value={location}>
+                            {location}
+                          </option>
+                        ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                         <svg
@@ -735,211 +774,67 @@ function ContactPage() {
                     Model Mobil yang Diminati *
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {/* Tank 300 */}
-                    <button
-                      type="button"
-                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
-                        watch("carModelInterest") === "Tank 300"
-                          ? "border-red-500 ring-2 ring-red-500/20"
-                          : "border-gray-200 hover:border-red-500/50"
-                      }`}
-                      onClick={() =>
-                        setValue("carModelInterest", "Tank 300", {
-                          shouldValidate: true,
-                        })
-                      }
-                      aria-pressed={watch("carModelInterest") === "Tank 300"}
-                      aria-label="Select Tank 300 model"
-                    >
-                      <div className="aspect-[4/3] relative">
-                        <img
-                          src="https://gwm.kopimap.com/navbar/tank_300_nav_shot.png"
-                          alt="Tank 300"
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                      </div>
-                      <div
-                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
-                          watch("carModelInterest") === "Tank 300"
-                            ? "bg-red-500 text-white"
-                            : "bg-white text-primary"
-                        }`}
-                      >
-                        Tank 300
-                      </div>
-                      {watch("carModelInterest") === "Tank 300" && (
-                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3 text-white"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <title>Selected Model</title>
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
+                    {carModels && carModels.length > 0 ? (
+                      carModels.map((model) => (
+                        <button
+                          key={model.id}
+                          type="button"
+                          className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
+                            watch("carModelInterest") === model.name
+                              ? "border-red-500 ring-2 ring-red-500/20"
+                              : "border-gray-200 hover:border-red-500/50"
+                          }`}
+                          onClick={() =>
+                            setValue("carModelInterest", model.name, {
+                              shouldValidate: true,
+                            })
+                          }
+                          aria-pressed={
+                            watch("carModelInterest") === model.name
+                          }
+                          aria-label={`Select ${model.name} model`}
+                        >
+                          <div className="aspect-[4/3] relative">
+                            <img
+                              src={model.mainProductImage}
+                              alt={model.name}
+                              className="absolute inset-0 w-full h-full object-cover"
                             />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-
-                    {/* Tank 500 */}
-                    <button
-                      type="button"
-                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
-                        watch("carModelInterest") === "Tank 500"
-                          ? "border-red-500 ring-2 ring-red-500/20"
-                          : "border-gray-200 hover:border-red-500/50"
-                      }`}
-                      onClick={() =>
-                        setValue("carModelInterest", "Tank 500", {
-                          shouldValidate: true,
-                        })
-                      }
-                      aria-pressed={watch("carModelInterest") === "Tank 500"}
-                      aria-label="Select Tank 500 model"
-                    >
-                      <div className="aspect-[4/3] relative">
-                        <img
-                          src="https://gwm.kopimap.com/navbar/tank_500_nav_shot.png"
-                          alt="Tank 500"
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                      </div>
-                      <div
-                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
-                          watch("carModelInterest") === "Tank 500"
-                            ? "bg-red-500 text-white"
-                            : "bg-white text-primary"
-                        }`}
-                      >
-                        Tank 500
-                      </div>
-                      {watch("carModelInterest") === "Tank 500" && (
-                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3 text-white"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                          </div>
+                          <div
+                            className={`px-2 py-1.5 text-xs font-medium transition-colors ${
+                              watch("carModelInterest") === model.name
+                                ? "bg-red-500 text-white"
+                                : "bg-white text-primary"
+                            }`}
                           >
-                            <title>Selected Model</title>
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-
-                    {/* Haval Jolion */}
-                    <button
-                      type="button"
-                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
-                        watch("carModelInterest") === "Haval Jolion"
-                          ? "border-red-500 ring-2 ring-red-500/20"
-                          : "border-gray-200 hover:border-red-500/50"
-                      }`}
-                      onClick={() =>
-                        setValue("carModelInterest", "Haval Jolion", {
-                          shouldValidate: true,
-                        })
-                      }
-                      aria-pressed={
-                        watch("carModelInterest") === "Haval Jolion"
-                      }
-                      aria-label="Select Haval Jolion model"
-                    >
-                      <div className="aspect-[4/3] relative">
-                        <img
-                          src="https://gwm.kopimap.com/navbar/haval_jolion_nav_shot.png"
-                          alt="Haval Jolion"
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
+                            {model.name}
+                          </div>
+                          {watch("carModelInterest") === model.name && (
+                            <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3 w-3 text-white"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <title>Selected Model</title>
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="col-span-4 text-center py-3 text-gray-500 bg-gray-50 rounded-lg">
+                        No car models available. Please check the admin
+                        dashboard to publish car models.
                       </div>
-                      <div
-                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
-                          watch("carModelInterest") === "Haval Jolion"
-                            ? "bg-red-500 text-white"
-                            : "bg-white text-primary"
-                        }`}
-                      >
-                        Haval Jolion
-                      </div>
-                      {watch("carModelInterest") === "Haval Jolion" && (
-                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3 text-white"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <title>Selected Model</title>
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-
-                    {/* Haval H6 */}
-                    <button
-                      type="button"
-                      className={`relative rounded-lg border cursor-pointer transition-all duration-200 overflow-hidden text-left ${
-                        watch("carModelInterest") === "Haval H6"
-                          ? "border-red-500 ring-2 ring-red-500/20"
-                          : "border-gray-200 hover:border-red-500/50"
-                      }`}
-                      onClick={() =>
-                        setValue("carModelInterest", "Haval H6", {
-                          shouldValidate: true,
-                        })
-                      }
-                      aria-pressed={watch("carModelInterest") === "Haval H6"}
-                      aria-label="Select Haval H6 model"
-                    >
-                      <div className="aspect-[4/3] relative">
-                        <img
-                          src="https://gwm.kopimap.com/navbar/haval_h6_nav_shot.png"
-                          alt="Haval H6"
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                      </div>
-                      <div
-                        className={`px-2 py-1.5 text-xs font-medium transition-colors ${
-                          watch("carModelInterest") === "Haval H6"
-                            ? "bg-red-500 text-white"
-                            : "bg-white text-primary"
-                        }`}
-                      >
-                        Haval H6
-                      </div>
-                      {watch("carModelInterest") === "Haval H6" && (
-                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-0.5 shadow-sm">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3 text-white"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <title>Selected Model</title>
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
+                    )}
                   </div>
 
                   {/* Hidden input for form submission */}

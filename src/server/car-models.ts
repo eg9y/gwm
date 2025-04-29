@@ -381,3 +381,25 @@ export const searchCarModels = createServerFn()
       throw new Error("Failed to search car models");
     }
   });
+
+// Fetch published car models for the contact form (minimized data)
+export const getPublishedCarModelsForForm = createServerFn().handler(
+  async () => {
+    try {
+      const models = await db
+        .select({
+          id: carModels.id,
+          name: carModels.name,
+          mainProductImage: carModels.mainProductImage,
+        })
+        .from(carModels)
+        .where(eq(carModels.published, 1))
+        .orderBy(asc(carModels.name));
+
+      return models;
+    } catch (error) {
+      console.error("Error fetching car models for contact form:", error);
+      throw new Error("Failed to fetch car models for contact form");
+    }
+  }
+);

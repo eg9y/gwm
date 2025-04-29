@@ -19,7 +19,27 @@ export const initContactInfo = createServerFn().handler(async () => {
       x: "https://twitter.com/gwmindonesia",
       youtube: "https://youtube.com/gwmindonesia",
       whatsappUrl:
-        "https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:", // Default WhatsApp URL
+        "https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:",
+      // Adding defaults for new fields
+      metaTitle: "Kontak GWM Indonesia - Hubungi Kami",
+      metaDescription:
+        "Hubungi GWM Indonesia untuk informasi produk, test drive, atau layanan purna jual. Temukan dealer terdekat dan jadwalkan kunjungan Anda.",
+      metaKeywords:
+        "kontak GWM, dealer GWM, test drive GWM, layanan purna jual, Great Wall Motors Indonesia",
+      metaImage: "https://gwm.kopimap.com/kontak_banner.jpg",
+      heroDesktopImageUrl: "https://gwm.kopimap.com/kontak.webp",
+      heroMobileImageUrl: "https://gwm.kopimap.com/kontak.webp",
+      heroTitle: "Hubungi Kami",
+      heroTagline: "GWM Jakarta",
+      heroSubtitle:
+        "Diskusikan kebutuhan mobil Anda dengan tim kami yang siap membantu",
+      heroHighlightColor: "#CF0E0E",
+      formTitle: "Kontak GWM Jakarta",
+      formDescription:
+        "Dealer resmi GWM Jakarta siap membantu kebutuhan mobil Anda dengan layanan terbaik",
+      gmapsPlaceQuery:
+        "AGORA+Mall,+Jalan+M.H.+Thamrin,+Kebon+Melati,+Central+Jakarta+City,+Jakarta,+Indonesia",
+      locationOptions: ["Jakarta", "Surabaya", "Bandung", "Bali", "Lainnya"],
     };
 
     await db.insert(contactInfo).values(defaultContactInfo);
@@ -32,6 +52,7 @@ export const initContactInfo = createServerFn().handler(async () => {
 // Get the contact info
 export const getContactInfo = createServerFn().handler(async () => {
   try {
+    // Select all fields, including the new fields
     const info = await db.select().from(contactInfo).limit(1);
     return info.length > 0 ? info[0] : null;
   } catch (error) {
@@ -54,6 +75,24 @@ const updateContactInfoSchema = z.object({
     .string()
     .url("Valid WhatsApp URL is required (e.g., https://wa.me/...)")
     .min(1, "WhatsApp URL is required"),
+  // New fields validation
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
+  metaImage: z.string().url().optional(),
+  heroDesktopImageUrl: z.string().url().optional(),
+  heroMobileImageUrl: z.string().url().optional(),
+  heroTitle: z.string().optional(),
+  heroTagline: z.string().optional(),
+  heroSubtitle: z.string().optional(),
+  heroHighlightColor: z.string().optional(),
+  formTitle: z.string().optional(),
+  formDescription: z.string().optional(),
+  gmapsPlaceQuery: z.string().optional(),
+  locationOptions: z.array(z.string()).optional(),
+  // Existing fields
+  logoUrl: z.string().url().optional(),
+  logoWhiteUrl: z.string().url().optional(),
 });
 
 // Update or create contact info (upsert)
@@ -82,6 +121,24 @@ export const updateContactInfo = createServerFn()
           x: data.x,
           youtube: data.youtube,
           whatsappUrl: data.whatsappUrl,
+          // New fields
+          metaTitle: data.metaTitle,
+          metaDescription: data.metaDescription,
+          metaKeywords: data.metaKeywords,
+          metaImage: data.metaImage,
+          heroDesktopImageUrl: data.heroDesktopImageUrl,
+          heroMobileImageUrl: data.heroMobileImageUrl,
+          heroTitle: data.heroTitle,
+          heroTagline: data.heroTagline,
+          heroSubtitle: data.heroSubtitle,
+          heroHighlightColor: data.heroHighlightColor,
+          formTitle: data.formTitle,
+          formDescription: data.formDescription,
+          gmapsPlaceQuery: data.gmapsPlaceQuery,
+          locationOptions: data.locationOptions,
+          // Existing fields
+          logoUrl: data.logoUrl,
+          logoWhiteUrl: data.logoWhiteUrl,
           updatedAt: new Date().toISOString(),
         };
 

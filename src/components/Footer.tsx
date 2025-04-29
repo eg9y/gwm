@@ -3,12 +3,17 @@ import { useEffect, useState } from "react";
 import { getContactInfo } from "../server/contact-info";
 import type { ContactInfo } from "../db";
 
-const Footer = () => {
+// Update Footer props to accept logoUrl
+interface FooterProps {
+  logoUrl: string;
+}
+
+const Footer = ({ logoUrl }: FooterProps) => {
   const currentYear = new Date().getFullYear();
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch contact info
+  // Fetch contact info (excluding logo now, as it's passed via props)
   useEffect(() => {
     const fetchContactInfo = async () => {
       try {
@@ -36,12 +41,13 @@ const Footer = () => {
   return (
     <footer className="bg-gwm-gray-800 text-primary py-12 grainy-bg">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Logo and About */}
+        {/* Logo and About - Use logoUrl prop */}
         <div className="md:col-span-1">
           <img
-            src="https://gwm.kopimap.com/gwm_logo.webp"
-            alt="GWM Logo White"
+            src={logoUrl} // Use the logoUrl prop
+            alt="GWM Logo"
             className="h-10 mb-4"
+            loading="lazy"
           />
           <p className="text-sm text-gwm-gray-300">
             Leading the future of mobility with innovative and sustainable

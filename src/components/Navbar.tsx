@@ -8,10 +8,12 @@ const transparentNavbarPages = ["/", "/kontak"];
 
 // Define props for Navbar
 interface NavbarProps {
+  logoUrl: string; // Added logoUrl prop
+  logoWhiteUrl: string; // Added logoWhiteUrl prop
   whatsappUrl: string; // Expect whatsappUrl as a prop
 }
 
-const Navbar = ({ whatsappUrl }: NavbarProps) => {
+const Navbar = ({ logoUrl, logoWhiteUrl, whatsappUrl }: NavbarProps) => {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -183,10 +185,9 @@ const Navbar = ({ whatsappUrl }: NavbarProps) => {
   // Get logo color
   const getLogoVariant = () => {
     if (shouldStartTransparent && !scrolled) {
-      //   return "/gwm_logo_white.webp"; // White logo for transparent navbar
-      return "https://gwm.kopimap.com/gwm_initial_logo.webp"; // Default colored logo
+      return logoWhiteUrl || logoUrl; // Use white logo, fallback to main logo
     }
-    return "https://gwm.kopimap.com/gwm_logo.webp"; // Default colored logo
+    return logoUrl; // Use main logo
   };
 
   // Group vehicle models by category
