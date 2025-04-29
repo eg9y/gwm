@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useForm,
   useFieldArray,
-  Controller,
   type Control,
   type FieldErrors,
   type FieldPath, // Ensure FieldPath is imported
@@ -17,17 +16,15 @@ import {
   Plus,
   Trash2,
   Eye,
-  Upload,
   Loader2,
   Image as ImageIcon,
   ListChecks,
 } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import {
   getCarModelById,
   createCarModel,
   updateCarModel,
-  type CarModel,
 } from "../server/car-models";
 import {
   getPresignedUploadUrl,
@@ -1122,9 +1119,6 @@ function CarModelEditorPage() {
 
   return (
     <div className="p-8 pb-24">
-      {/* Toast container */}
-      <Toaster position="top-right" />
-
       <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-sm">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">

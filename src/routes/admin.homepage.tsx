@@ -370,9 +370,27 @@ function HomepageEditorPage() {
     });
   }, []);
 
-  const addRemovedUrl = useCallback((url: string) => {
-    setRemovedImageUrls((prev) => (prev.includes(url) ? prev : [...prev, url]));
-  }, []);
+  const addRemovedUrl = useCallback(
+    (url: string) => {
+      if (!url) return; // Guard against null/undefined URLs
+
+      if (url.startsWith("http")) {
+        // Add persisted URLs (http/https) to the list for potential server-side deletion
+        setRemovedImageUrls((prev) =>
+          prev.includes(url) ? prev : [...prev, url]
+        );
+      } else if (url.startsWith("blob:")) {
+        // If it's a newly added image (blob URL), remove it from the mapping
+        // and revoke the object URL.
+        // We can reuse the removeNewFileMapping logic here.
+        removeNewFileMapping(url);
+      }
+      // Note: Clearing the specific field value (e.g., setValue('heroDesktopImageUrl', ''))
+      // should happen within the ImageUploadField/MultiImageUploadField components
+      // when their internal remove handler calls this callback.
+    },
+    [removeNewFileMapping] // Dependency: Include removeNewFileMapping
+  );
 
   const prepareConfigData = useCallback(
     (cfg: HomepageConfigWithSections | null): HomepageFormData => {
@@ -780,9 +798,13 @@ function HomepageEditorPage() {
                 handleRemove={addRemovedUrl}
                 onFileSelected={(fieldName, file) => {
                   const previewUrl = URL.createObjectURL(file);
-                  setValue(fieldName as any, previewUrl, {
-                    shouldValidate: true,
-                  });
+                  setValue(
+                    fieldName as FieldPath<HomepageFormData>,
+                    previewUrl,
+                    {
+                      shouldValidate: true,
+                    }
+                  );
                   addNewFileMapping(previewUrl, file);
                 }}
                 error={errors.heroDesktopImageUrl?.message}
@@ -803,9 +825,13 @@ function HomepageEditorPage() {
                 handleRemove={addRemovedUrl}
                 onFileSelected={(fieldName, file) => {
                   const previewUrl = URL.createObjectURL(file);
-                  setValue(fieldName as any, previewUrl, {
-                    shouldValidate: true,
-                  });
+                  setValue(
+                    fieldName as FieldPath<HomepageFormData>,
+                    previewUrl,
+                    {
+                      shouldValidate: true,
+                    }
+                  );
                   addNewFileMapping(previewUrl, file);
                 }}
                 error={errors.heroMobileImageUrl?.message}

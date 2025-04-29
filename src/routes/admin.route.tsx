@@ -4,6 +4,7 @@ import { Link, useNavigate, useMatches } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Users, FileText, Phone, Car, Home, Info } from "lucide-react";
 import { ClerkProvider } from "@clerk/tanstack-start";
+import { Toaster } from "react-hot-toast";
 
 // Define the wrapper component
 function AdminRouteWrapper() {
@@ -44,6 +45,9 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen pt-16">
+      {/* Toast container */}
+      <Toaster position="top-right" />
+
       {/* Admin Navigation */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,7 +117,7 @@ function AdminLayout() {
                   <Info className="h-5 w-5 mr-2" />
                   About Us
                 </Link>
-                
+
                 <Link
                   to="/admin/contact-info"
                   className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${

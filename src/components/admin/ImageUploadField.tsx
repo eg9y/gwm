@@ -120,7 +120,18 @@ export function ImageUploadField<TFormValues extends FieldValues>({
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 flex items-center justify-center transition-opacity rounded-md opacity-0 group-hover:opacity-100">
               <button
                 type="button"
-                onClick={() => handleRemove(fieldName)} // No need for extra closure
+                onClick={() => {
+                  // Ensure imageUrl is a string before passing
+                  if (typeof imageUrl === "string") {
+                    handleRemove(imageUrl);
+                  }
+                  // Optionally, also clear the field value using setValue if it's provided
+                  if (setValue) {
+                    setValue(fieldName, "" as TFormValues[Path<TFormValues>], {
+                      shouldValidate: true,
+                    }); // Clear the value
+                  }
+                }}
                 className="bg-red-600 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm hover:bg-red-700 transition-colors"
               >
                 Remove
