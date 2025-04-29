@@ -1,0 +1,1 @@
+ALTER TABLE `contact_info` ADD `whatsapp_url` text NOT NULL;

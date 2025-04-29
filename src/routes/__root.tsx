@@ -16,6 +16,11 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppButton from "~/components/WhatsAppButton";
 import { LoadingSpinner } from "~/components/LoadingSpinner";
+import { getContactInfo } from "../server/contact-info";
+
+// Define a default WhatsApp URL as a fallback
+const defaultWhatsAppUrl =
+  "https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:";
 
 // Create scroll restoration component
 function ScrollToTop() {
@@ -34,6 +39,15 @@ function ScrollToTop() {
 }
 
 export const Route = createRootRoute({
+  loader: async () => {
+    try {
+      const contactInfo = await getContactInfo();
+      return { contactInfo };
+    } catch (error) {
+      console.error("Error fetching contact info in root loader:", error);
+      return { contactInfo: null };
+    }
+  },
   head: () => ({
     meta: [
       {
@@ -99,7 +113,7 @@ export const Route = createRootRoute({
   }),
   errorComponent: (props) => {
     return (
-      <RootDocument>
+      <RootDocument whatsappUrl={defaultWhatsAppUrl}>
         <DefaultCatchBoundary {...props} />
       </RootDocument>
     );
@@ -109,15 +123,25 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const { contactInfo } = Route.useLoaderData();
+
+  const finalWhatsappUrl = contactInfo?.whatsappUrl || defaultWhatsAppUrl;
+
   return (
-    <RootDocument>
+    <RootDocument whatsappUrl={finalWhatsappUrl}>
       <ScrollToTop />
       <Outlet />
     </RootDocument>
   );
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({
+  children,
+  whatsappUrl,
+}: {
+  children: React.ReactNode;
+  whatsappUrl: string;
+}) {
   // Get the router state to detect when routes are loading
   const { isLoading, location } = useRouterState();
   const isAdminPage = location.pathname.startsWith("/admin");
@@ -139,7 +163,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {isLoading && <LoadingSpinner />}
           {/* Keep navbar fixed at the top and outside of any transition effects */}
           <div className="fixed top-0 left-0 right-0 z-50 bg-transparent">
-            <Navbar />
+            <Navbar whatsappUrl={whatsappUrl} />
           </div>
           {/* Add padding to account for fixed navbar */}
           <div className="">
@@ -152,7 +176,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </main>
 
             <Footer />
-            {!isAdminPage && <WhatsAppButton />}
+            {!isAdminPage && <WhatsAppButton whatsappUrl={whatsappUrl} />}
           </div>
         </div>
       </body>

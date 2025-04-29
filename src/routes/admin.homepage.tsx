@@ -13,7 +13,7 @@ import {
   Loader2,
   ChevronLeft,
 } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import {
   getHomepageConfig,
   updateHomepageConfig,
@@ -68,6 +68,8 @@ const homepageFormSchema = z.object({
   heroPrimaryButtonLink: z.string().optional().or(z.literal("")),
   heroSecondaryButtonText: z.string().optional(),
   heroSecondaryButtonLink: z.string().optional().or(z.literal("")),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
   featureSections: z.array(featureSectionSchema).optional(),
 });
 
@@ -121,6 +123,8 @@ const defaultValues: HomepageFormData = {
   heroPrimaryButtonLink: "/tipe-mobil",
   heroSecondaryButtonText: "Contact Us",
   heroSecondaryButtonLink: "/kontak",
+  metaTitle: "",
+  metaDescription: "",
   featureSections: [defaultFeatureSectionValue],
 };
 
@@ -404,6 +408,8 @@ function HomepageEditorPage() {
         heroPrimaryButtonLink: cfg.heroPrimaryButtonLink || "",
         heroSecondaryButtonText: cfg.heroSecondaryButtonText || "",
         heroSecondaryButtonLink: cfg.heroSecondaryButtonLink || "",
+        metaTitle: cfg.metaTitle || "",
+        metaDescription: cfg.metaDescription || "",
         featureSections: cfg.featureSections?.map((section) => ({
           id: section.id,
           order: section.order,
@@ -630,6 +636,8 @@ function HomepageEditorPage() {
         heroPrimaryButtonLink: finalData.heroPrimaryButtonLink,
         heroSecondaryButtonText: finalData.heroSecondaryButtonText,
         heroSecondaryButtonLink: finalData.heroSecondaryButtonLink,
+        metaTitle: finalData.metaTitle,
+        metaDescription: finalData.metaDescription,
         featureSections: (finalData.featureSections || []).map(
           (section, index) => {
             const filteredDesktopUrls = (section.desktopImageUrls || []).filter(
@@ -928,6 +936,46 @@ function HomepageEditorPage() {
                 placeholder="e.g., /kontak or https://wa.me/..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               />
+            </div>
+          </div>
+
+          {/* SEO Meta Fields */}
+          <div className="mt-6 border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                htmlFor="metaTitle"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Meta Title (Optional, for SEO)
+              </label>
+              <input
+                type="text"
+                id="metaTitle"
+                {...register("metaTitle")}
+                placeholder="e.g., GWM Indonesia | Premium SUVs & Hybrid Cars"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Recommended length: 50-60 characters. Used in search results.
+              </p>
+            </div>
+            <div>
+              <label
+                htmlFor="metaDescription"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Meta Description (Optional, for SEO)
+              </label>
+              <input
+                type="text"
+                id="metaDescription"
+                {...register("metaDescription")}
+                placeholder="e.g., Explore the latest models from Great Wall Motor Indonesia..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Recommended length: 150-160 characters. Used in search results.
+              </p>
             </div>
           </div>
         </div>

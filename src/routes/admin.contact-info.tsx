@@ -16,6 +16,10 @@ const contactInfoSchema = z.object({
   instagram: z.string().min(1, "Instagram URL is required"),
   x: z.string().min(1, "X/Twitter URL is required"),
   youtube: z.string().min(1, "YouTube URL is required"),
+  whatsappUrl: z
+    .string()
+    .url("Valid WhatsApp URL is required (e.g., https://wa.me/...)")
+    .min(1, "WhatsApp URL is required"),
 });
 
 // Type based on the schema
@@ -30,6 +34,8 @@ const defaultContactInfo: Omit<ContactInfoFormData, "id"> = {
   instagram: "https://instagram.com/carsales",
   x: "https://twitter.com/carsales",
   youtube: "https://youtube.com/carsales",
+  whatsappUrl:
+    "https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:",
 };
 
 export const Route = createFileRoute("/admin/contact-info")({
@@ -308,6 +314,28 @@ function AdminContactInfoPage() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* WhatsApp URL */}
+          <div>
+            <label
+              htmlFor="whatsappUrl"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              WhatsApp URL
+            </label>
+            <input
+              type="text"
+              id="whatsappUrl"
+              {...register("whatsappUrl")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              placeholder="https://wa.me/..."
+            />
+            {errors.whatsappUrl && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.whatsappUrl.message}
+              </p>
+            )}
           </div>
 
           {/* Submit Button */}

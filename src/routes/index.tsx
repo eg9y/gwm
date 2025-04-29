@@ -37,19 +37,26 @@ export const Route = createFileRoute("/")({
       featureSections: HomepageFeatureSectionDb[];
     };
     const config = data?.config;
+
+    // Use fetched title/description or fallbacks
+    const title = config?.metaTitle || config?.heroTitle || "GWM Indonesia";
+    const description =
+      config?.metaDescription ||
+      config?.heroSubtitle ||
+      "Great Wall Motors - Premium SUVs and Innovative Technology";
+
     // Use fetched image URLs or fallbacks
     const desktopImageUrl =
       config?.heroDesktopImageUrl || "/placeholder-desktop.webp"; // Replace with actual fallback
     const mobileImageUrl =
       config?.heroMobileImageUrl || "/placeholder-mobile.webp"; // Replace with actual fallback
-    const title = config?.heroTitle || "GWM Indonesia";
-    const description =
-      config?.heroSubtitle ||
-      "Great Wall Motors - Premium SUVs and Innovative Technology";
 
     return {
+      // Use the dynamically determined title
+      title: title,
       meta: [
         ...seo({
+          // Pass the dynamic title and description to the seo util
           title: title,
           description: description,
           keywords:
@@ -96,6 +103,9 @@ function HomePage() {
     heroPrimaryButtonLink: "/",
     heroSecondaryButtonText: "Contact",
     heroSecondaryButtonLink: "/kontak",
+    metaTitle: "GWM Indonesia", // Add fallback
+    metaDescription:
+      "Great Wall Motors - Premium SUVs and Innovative Technology", // Add fallback
   };
 
   return (

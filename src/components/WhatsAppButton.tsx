@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 
-const WhatsAppButton = () => {
+// Define props for WhatsAppButton
+interface WhatsAppButtonProps {
+  whatsappUrl: string; // Expect whatsappUrl as a prop
+}
+
+const WhatsAppButton = ({ whatsappUrl }: WhatsAppButtonProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -20,8 +25,10 @@ const WhatsAppButton = () => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const whatsappUrl =
-    "https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:";
+  // Don't render the button if the URL is somehow invalid/empty (passed from parent)
+  if (!whatsappUrl) {
+    return null;
+  }
 
   return (
     <div

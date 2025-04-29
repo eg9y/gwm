@@ -113,6 +113,27 @@
       "when": 1745855186750,
       "tag": "0016_common_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1745934843995,
+      "tag": "0017_silly_cerise",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1745939197892,
+      "tag": "0018_mysterious_valeria_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1745939334010,
+      "tag": "0019_red_polaris",
+      "breakpoints": true
     }
   ]
 }

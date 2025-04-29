@@ -18,6 +18,8 @@ export const initContactInfo = createServerFn().handler(async () => {
       instagram: "https://instagram.com/indo.tank",
       x: "https://twitter.com/gwmindonesia",
       youtube: "https://youtube.com/gwmindonesia",
+      whatsappUrl:
+        "https://wa.me/6287884818135?text=Halo,%20saya%20ingin%20mengetahui%20informasi%20lebih%20lanjut%20mengenai%20product%20GWM.%0ANama%20:%0ADomisili%20:%0AType%20:", // Default WhatsApp URL
     };
 
     await db.insert(contactInfo).values(defaultContactInfo);
@@ -48,6 +50,10 @@ const updateContactInfoSchema = z.object({
   instagram: z.string().min(1, "Instagram URL is required"),
   x: z.string().min(1, "X/Twitter URL is required"),
   youtube: z.string().min(1, "YouTube URL is required"),
+  whatsappUrl: z
+    .string()
+    .url("Valid WhatsApp URL is required (e.g., https://wa.me/...)")
+    .min(1, "WhatsApp URL is required"),
 });
 
 // Update or create contact info (upsert)
@@ -75,6 +81,7 @@ export const updateContactInfo = createServerFn()
           instagram: data.instagram,
           x: data.x,
           youtube: data.youtube,
+          whatsappUrl: data.whatsappUrl,
           updatedAt: new Date().toISOString(),
         };
 

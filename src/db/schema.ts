@@ -45,6 +45,7 @@ export const contactInfo = sqliteTable("contact_info", {
   instagram: text("instagram").notNull(),
   x: text("x").notNull(), // Twitter/X
   youtube: text("youtube").notNull(),
+  whatsappUrl: text("whatsapp_url").default(""),
   updatedAt: text("updated_at")
     .notNull()
     .$default(() => new Date().toISOString()),
@@ -127,6 +128,8 @@ export const homepageConfig = sqliteTable("homepage_config", {
   heroPrimaryButtonLink: text("hero_primary_button_link"),
   heroSecondaryButtonText: text("hero_secondary_button_text"),
   heroSecondaryButtonLink: text("hero_secondary_button_link"),
+  metaTitle: text("meta_title"), // Optional Meta Title for SEO
+  metaDescription: text("meta_description"), // Optional Meta Description for SEO
   updatedAt: text("updated_at")
     .notNull()
     .$default(() => new Date().toISOString()),
