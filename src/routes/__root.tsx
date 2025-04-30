@@ -17,6 +17,7 @@ import Footer from "../components/Footer";
 import WhatsAppButton from "~/components/WhatsAppButton";
 import { LoadingSpinner } from "~/components/LoadingSpinner";
 import { getContactInfo } from "../server/contact-info";
+import { getSiteSettings } from "../server/site-settings";
 
 // Define a default WhatsApp URL as a fallback
 const defaultWhatsAppUrl =
@@ -41,7 +42,12 @@ function ScrollToTop() {
 export const Route = createRootRoute({
   loader: async () => {
     try {
-      const contactInfo = await getContactInfo();
+      // Fetch both contact info and site settings concurrently
+      const [contactInfo, siteSettings] = await Promise.all([
+        getContactInfo(),
+        getSiteSettings(), // Fetch site settings
+      ]);
+
       // Ensure logo URLs are included, provide defaults if necessary
       const logoUrl =
         contactInfo?.logoUrl || "https://gwm.kopimap.com/gwm_logo.webp"; // Default logo
@@ -53,81 +59,115 @@ export const Route = createRootRoute({
         logoUrl,
         logoWhiteUrl,
         whatsappUrl,
+        siteSettings, // Pass site settings
       };
     } catch (error) {
-      console.error("Error fetching contact info in root loader:", error);
-      // Return defaults even on error
+      console.error("Error fetching data in root loader:", error);
+      // Return defaults even on error for both
       return {
         contactInfo: null,
         logoUrl: "https://gwm.kopimap.com/gwm_logo.webp",
         logoWhiteUrl: "https://gwm.kopimap.com/gwm_initial_logo.webp",
         whatsappUrl: defaultWhatsAppUrl,
+        siteSettings: null, // Default site settings to null on error
       };
     }
   },
-  head: () => ({
-    meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      // Base SEO that will be used if child routes don't override
-      ...seo({
-        title: "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
-        description:
-          "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
-        keywords:
-          "GWM, Great Wall Motors, Haval H6, Haval Jolion, Tank 300, Tank 500, SUV Premium, Mobil Hybrid, Indonesia",
-      }),
-    ],
-    links: [
-      // Reverted async loading due to type/compatibility issues.
-      // Using standard blocking stylesheet link.
-      { rel: "stylesheet", href: appCss },
-      {
-        rel: "apple-touch-icon",
-        sizes: "180x180",
-        href: "https://gwm.kopimap.com/favicon.png",
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "32x32",
-        href: "https://gwm.kopimap.com/favicon.png",
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "16x16",
-        href: "https://gwm.kopimap.com/favicon.png",
-      },
-      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
-      { rel: "icon", href: "https://gwm.kopimap.com/favicon.png" },
-    ],
-    scripts: [
-      ...(import.meta.env.PROD
-        ? [
-            {
-              async: true,
-              src: "https://www.googletagmanager.com/gtag/js?id=G-RYBLP114YY",
-            },
-            {
-              children: `
-          if (!window.location.pathname.startsWith('/admin')) {
+  head: ({ loaderData }) => {
+    // Access siteSettings from loaderData
+    const { siteSettings } = loaderData;
+    const gaId = siteSettings?.googleAnalyticsId;
+
+    // Construct the Google Analytics script source URL dynamically
+    const gaSrc = gaId
+      ? `https://www.googletagmanager.com/gtag/js?id=${gaId}`
+      : null;
+
+    return {
+      meta: [
+        {
+          charSet: "utf-8",
+        },
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1",
+        },
+        // Base SEO that will be used if child routes don't override
+        ...seo({
+          title:
+            "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
+          description:
+            "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
+          keywords:
+            "GWM, Great Wall Motors, Haval H6, Haval Jolion, Tank 300, Tank 500, SUV Premium, Mobil Hybrid, Indonesia",
+        }),
+      ],
+      links: [
+        // Reverted async loading due to type/compatibility issues.
+        // Using standard blocking stylesheet link.
+        { rel: "stylesheet", href: appCss },
+        {
+          rel: "apple-touch-icon",
+          sizes: "180x180",
+          href: "https://gwm.kopimap.com/favicon.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "32x32",
+          href: "https://gwm.kopimap.com/favicon.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "16x16",
+          href: "https://gwm.kopimap.com/favicon.png",
+        },
+        { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
+        { rel: "icon", href: "https://gwm.kopimap.com/favicon.png" },
+      ],
+      scripts: [
+        // Only include the external script tag in head.scripts
+        ...(import.meta.env.PROD && gaId
+          ? [
+              {
+                async: true,
+                // Use gaSrc || undefined to ensure src is undefined when gaId is null
+                src: gaSrc || undefined,
+              },
+            ]
+          : []),
+      ],
+    };
+  },
+  scripts: ({ loaderData }) => {
+    const { siteSettings } = loaderData;
+    const gaId = siteSettings?.googleAnalyticsId;
+
+    // Construct the Google Analytics config script content dynamically
+    const gaConfigScript = gaId
+      ? `
+          // Check for admin path within the script itself
+          if (window.location.pathname && !window.location.pathname.startsWith('/admin')) {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-RYBLP114YY');
+            gtag('config', '${gaId}');
           }
-        `,
-            },
-          ]
-        : []),
-    ],
-  }),
+        `
+      : "";
+
+    console.log("hello", gaConfigScript);
+
+    // Return the inline script object if in PROD and gaId exists
+    return import.meta.env.PROD && gaId
+      ? [
+          {
+            children: gaConfigScript,
+          },
+        ]
+      : [];
+  },
   errorComponent: (props) => {
     // Define default logo URLs for the error boundary case
     const defaultLogoUrl = "https://gwm.kopimap.com/gwm_logo.webp";
@@ -138,6 +178,8 @@ export const Route = createRootRoute({
         logoUrl={defaultLogoUrl}
         logoWhiteUrl={defaultLogoWhiteUrl}
         whatsappUrl={defaultWhatsAppUrl}
+        // siteSettings might not be available here, handle appropriately
+        // Or consider passing default/null site settings if needed
       >
         <DefaultCatchBoundary {...props} />
       </RootDocument>
@@ -148,7 +190,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const { contactInfo, logoUrl, logoWhiteUrl, whatsappUrl } =
+  const { contactInfo, logoUrl, logoWhiteUrl, whatsappUrl, siteSettings } =
     Route.useLoaderData();
 
   // Use whatsappUrl directly from loader data
@@ -159,6 +201,8 @@ function RootComponent() {
       logoUrl={logoUrl}
       logoWhiteUrl={logoWhiteUrl}
       whatsappUrl={whatsappUrl} // Pass whatsappUrl from loader
+      // Pass siteSettings down if RootDocument needs them
+      // siteSettings={siteSettings}
     >
       <ScrollToTop />
       <Outlet />
@@ -171,11 +215,15 @@ function RootDocument({
   logoUrl,
   logoWhiteUrl,
   whatsappUrl,
+  // Add siteSettings prop if needed
+  // siteSettings?: SiteSettings | null;
 }: {
   children: React.ReactNode;
   logoUrl: string;
   logoWhiteUrl: string;
   whatsappUrl: string;
+  // Add siteSettings prop if needed
+  // siteSettings?: SiteSettings | null;
 }) {
   // Get the router state to detect when routes are loading
   const { isLoading, location } = useRouterState();

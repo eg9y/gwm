@@ -194,6 +194,16 @@ export type HomepageFeatureSectionDb =
 // but it refers to the new structure now.
 export type HomepageFeatureSection = HomepageFeatureSectionDb;
 
+// Define the table for site-wide settings like Analytics IDs
+export const siteSettings = sqliteTable("site_settings", {
+  id: text("id").primaryKey().default("main"), // Use a fixed ID for the single settings row
+  googleAnalyticsId: text("google_analytics_id"), // e.g., G-XXXXXXXXXX
+  googleTagManagerId: text("google_tag_manager_id"), // e.g., GTM-XXXXXXX
+  updatedAt: text("updated_at")
+    .notNull()
+    .$default(() => new Date().toISOString()),
+});
+
 // Define about us page content that can be edited in admin
 export const aboutUs = sqliteTable("about_us", {
   id: integer("id").primaryKey({ autoIncrement: true }),

@@ -2,7 +2,15 @@ import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@clerk/tanstack-start";
 import { Link, useNavigate, useMatches } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Users, FileText, Phone, Car, Home, Info } from "lucide-react";
+import {
+  Users,
+  FileText,
+  Phone,
+  Car,
+  Home,
+  Info,
+  Settings,
+} from "lucide-react";
 import { ClerkProvider } from "@clerk/tanstack-start";
 import { Toaster } from "react-hot-toast";
 
@@ -128,6 +136,17 @@ function AdminLayout() {
                 >
                   <Phone className="h-5 w-5 mr-2" />
                   Contact Info
+                </Link>
+                <Link
+                  to="/admin/site-settings"
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
+                    currentPath.includes("/admin/site-settings")
+                      ? "text-white bg-primary"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <Settings className="h-5 w-5 mr-2" />
+                  Site Settings
                 </Link>
               </div>
             </div>
