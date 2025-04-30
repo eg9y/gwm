@@ -62,7 +62,7 @@ export function ImageUploadField<TFormValues extends FieldValues>({
 
   const handleUrlSubmit = (e: React.MouseEvent | React.FormEvent) => {
     e.preventDefault();
-    if (inputUrl.trim() && inputUrl.trim().startsWith("http")) {
+    if (inputUrl.trim()?.startsWith("http")) {
       const newUrl = inputUrl.trim();
 
       // Test if URL leads to a valid image
@@ -71,7 +71,7 @@ export function ImageUploadField<TFormValues extends FieldValues>({
         // Valid image URL
         if (setValue) {
           // Only use setValue if it's provided
-          setValue(fieldName, newUrl as any);
+          setValue(fieldName, newUrl as TFormValues[Path<TFormValues>]);
         }
         setShowUrlInput(false);
         setInputUrl("");

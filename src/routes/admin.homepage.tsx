@@ -486,9 +486,36 @@ function HomepageEditorPage() {
         file: File;
         target: "desktop" | "mobile";
         fieldName: string;
-        sectionIndex: number;
+        sectionIndex: number | null; // Allow null for hero images
       }[] = [];
 
+      // Check Hero Images
+      if (
+        data.heroDesktopImageUrl.startsWith("blob:") &&
+        filesToUploadMap[data.heroDesktopImageUrl]
+      ) {
+        uploadTasks.push({
+          blobUrl: data.heroDesktopImageUrl,
+          file: filesToUploadMap[data.heroDesktopImageUrl],
+          target: "desktop",
+          fieldName: "heroDesktopImageUrl",
+          sectionIndex: null,
+        });
+      }
+      if (
+        data.heroMobileImageUrl.startsWith("blob:") &&
+        filesToUploadMap[data.heroMobileImageUrl]
+      ) {
+        uploadTasks.push({
+          blobUrl: data.heroMobileImageUrl,
+          file: filesToUploadMap[data.heroMobileImageUrl],
+          target: "mobile",
+          fieldName: "heroMobileImageUrl",
+          sectionIndex: null,
+        });
+      }
+
+      // Check Feature Section Images
       for (const [sectionIndex, section] of data.featureSections?.entries() ||
         []) {
         for (const url of section.desktopImageUrls || []) {
@@ -621,6 +648,16 @@ function HomepageEditorPage() {
             ),
           })
         );
+
+        // Update Hero Images in finalData
+        if (uploadedUrlMap[finalData.heroDesktopImageUrl]) {
+          finalData.heroDesktopImageUrl =
+            uploadedUrlMap[finalData.heroDesktopImageUrl];
+        }
+        if (uploadedUrlMap[finalData.heroMobileImageUrl]) {
+          finalData.heroMobileImageUrl =
+            uploadedUrlMap[finalData.heroMobileImageUrl];
+        }
 
         for (const blobUrl of Object.keys(uploadedUrlMap)) {
           URL.revokeObjectURL(blobUrl);
