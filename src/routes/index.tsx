@@ -7,8 +7,10 @@ import { seo } from "../utils/seo";
 import {
   getHomepageConfig,
   type HomepageConfigWithSections,
-  type HomepageFeatureSectionDb,
+  type HomepageFeatureSectionUnion,
 } from "../server/homepage";
+import FeatureCardsGridSection from "../components/FeatureCardsGridSection";
+import Banner from "../components/Banner";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -33,8 +35,8 @@ export const Route = createFileRoute("/")({
   // Update head metadata using fetched data if available
   head: (params) => {
     const data = params.loaderData as {
-      config: HomepageConfigWithSections | null;
-      featureSections: HomepageFeatureSectionDb[];
+      config: HomepageConfigWithSections["config"] | null;
+      featureSections: HomepageFeatureSectionUnion[];
     };
     const config = data?.config;
 
@@ -125,30 +127,80 @@ function HomePage() {
         />
       </div>
 
-      {/* Feature Sections (previously Model Showcase) using dynamic data */}
-      {featureSections.map((section, index) => (
-        <div
-          key={section.id || index} // Use section ID or index as key
-          id={`feature-${index}`} // Create dynamic ID
-          className="section-container-auto-height"
-        >
-          <ModelShowcase
-            // Pass arrays of image URLs
-            desktopImageUrls={section.desktopImageUrls || []} // Pass desktop URL array
-            mobileImageUrls={section.mobileImageUrls || []} // Pass mobile URL array
-            imageAlt={section.imageAlt ?? undefined}
-            title={section.title}
-            subtitle={section.subtitle ?? undefined}
-            description={section.description}
-            features={section.features || []} // Ensure features is an array
-            primaryButtonText={section.primaryButtonText ?? undefined}
-            primaryButtonLink={section.primaryButtonLink ?? undefined}
-            secondaryButtonText={section.secondaryButtonText ?? undefined}
-            secondaryButtonLink={section.secondaryButtonLink ?? undefined}
-            isReversed={index % 2 !== 0} // Keep alternating layout
-          />
-        </div>
-      ))}
+      {/* Feature Sections - Conditionally render based on type */}
+      {featureSections.map((section, index) => {
+        if (section.sectionType === "feature_cards_grid") {
+          // Cast typeSpecificData for this block
+          const typeData = section.typeSpecificData as any;
+          return (
+            <div
+              key={section.id || index}
+              id={`feature-${index}`}
+              className="section-container-auto-height"
+            >
+              <FeatureCardsGridSection
+                title={section.title}
+                subtitle={section.subtitle}
+                cards={typeData.cards || []}
+              />
+            </div>
+          );
+        }
+
+        // Default case: Render the original ModelShowcase component
+        if (section.sectionType === "default") {
+          // Cast typeSpecificData for this block
+          const typeData = section.typeSpecificData as any;
+          return (
+            <div
+              key={section.id || index} // Use section ID or index as key
+              id={`feature-${index}`} // Create dynamic ID
+              className="section-container-auto-height"
+            >
+              <ModelShowcase
+                // Pass data from typeSpecificData for default type
+                desktopImageUrls={typeData.desktopImageUrls || []}
+                mobileImageUrls={typeData.mobileImageUrls || []}
+                imageAlt={typeData.imageAlt}
+                title={section.title}
+                subtitle={section.subtitle}
+                description={typeData.description}
+                features={typeData.features || []}
+                primaryButtonText={typeData.primaryButtonText}
+                primaryButtonLink={typeData.primaryButtonLink}
+                secondaryButtonText={typeData.secondaryButtonText}
+                secondaryButtonLink={typeData.secondaryButtonLink}
+                isReversed={index % 2 !== 0} // Keep alternating layout
+              />
+            </div>
+          );
+        }
+
+        // Add case for 'banner' section type
+        if (section.sectionType === "banner") {
+          // Cast typeSpecificData for this block
+          const typeData = section.typeSpecificData as any;
+          return (
+            <div
+              key={section.id || index}
+              id={`feature-${index}`}
+              className="section-container-auto-height w-full max-w-full p-0 m-0" // Basic container, adjust styling as needed
+            >
+              <Banner
+                imageUrl={typeData.imageUrl}
+                altText={typeData.altText}
+                link={typeData.link}
+              />
+            </div>
+          );
+        }
+
+        // Optional: Handle unknown section types or return null
+        console.warn(
+          `Unknown section type encountered during render: ${section.sectionType}`
+        );
+        return null;
+      })}
 
       {/* Promos section - Keep as is or make dynamic later */}
       <div id="promos" className="section-container-auto-height grainy-bg">
