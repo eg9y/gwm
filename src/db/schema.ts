@@ -185,7 +185,7 @@ export const homepageFeatureSections = sqliteTable(
     // Type-specific data stored as JSON
     typeSpecificData: text("type_specific_data", {
       mode: "json",
-    }).$type<TypeSpecificDataUnion>(), // Use the specific union type
+    }),
 
     // Keep existing fields for backward compatibility (or potential common fields)
     description: text("description"), // Make nullable

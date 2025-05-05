@@ -123,7 +123,8 @@ export type HomepageConfigWithSections = HomepageConfig & {
 // Helper to map raw DB data to the union type, handling legacy sections
 function mapDbSectionToUnion(
   section: HomepageFeatureSectionDb
-): HomepageFeatureSectionUnion {
+): HomepageFeatureSectionUnion | null {
+  // Return null if parsing fails
   const base = {
     id: section.id,
     order: section.order,
@@ -131,49 +132,100 @@ function mapDbSectionToUnion(
     subtitle: section.subtitle ?? undefined,
   };
 
+  let parsedData: any = null; // Initialize as null
+  try {
+    // Manually parse the JSON string, handle null/empty string
+    if (
+      section.typeSpecificData &&
+      typeof section.typeSpecificData === "string"
+    ) {
+      parsedData = JSON.parse(section.typeSpecificData);
+    }
+  } catch (error) {
+    console.error(
+      `Error parsing typeSpecificData JSON for section ID ${section.id}:`,
+      section.typeSpecificData, // Log the problematic data
+      error
+    );
+    return null; // Skip this section if JSON is invalid
+  }
+
+  // Validate sectionType *before* accessing parsedData based on it
+  if (
+    !["default", "feature_cards_grid", "banner"].includes(
+      section.sectionType || ""
+    )
+  ) {
+    console.warn(
+      `Invalid section type "${section.sectionType}" for section ID ${section.id}. Skipping.`
+    );
+    return null;
+  }
+
   if (section.sectionType === "feature_cards_grid") {
-    // Explicitly cast and validate/default the typeSpecificData
-    const gridData = section.typeSpecificData as
-      | z.infer<typeof featureCardsGridDataSchema>
-      | null
-      | undefined;
+    // Validate parsedData against the expected schema for this type
+    const gridDataResult = featureCardsGridDataSchema.safeParse(parsedData);
+    if (!gridDataResult.success) {
+      console.warn(
+        `Invalid data structure for feature_cards_grid section ID ${section.id}. Skipping.`
+      );
+      return null;
+    }
     return {
       ...base,
       sectionType: "feature_cards_grid",
-      // Ensure the returned structure matches featureCardsGridSchema
-      typeSpecificData: { cards: gridData?.cards || [] }, // Default to empty array if data is null/missing
+      typeSpecificData: gridDataResult.data, // Use validated data
     };
   }
 
   if (section.sectionType === "banner") {
-    // Explicitly cast and validate/default the typeSpecificData
-    const bannerData = section.typeSpecificData as
-      | z.infer<typeof bannerSectionDataSchema>
-      | null
-      | undefined;
+    // Validate parsedData against the expected schema for this type
+    const bannerDataResult = bannerSectionDataSchema.safeParse(parsedData);
+    if (!bannerDataResult.success) {
+      console.warn(
+        `Invalid data structure for banner section ID ${section.id}. Skipping.`
+      );
+      return null;
+    }
     return {
       ...base,
       sectionType: "banner",
-      // Ensure the returned structure matches bannerSectionSchema
-      typeSpecificData: {
-        imageUrl: bannerData?.imageUrl || "", // Provide default empty string
-        altText: bannerData?.altText ?? undefined,
-        link: bannerData?.link ?? undefined,
-      },
+      typeSpecificData: bannerDataResult.data, // Use validated data
     };
   }
 
-  // Default case: Handle 'default' section type (map legacy fields)
+  // Default case: Handle 'default' section type (map legacy fields or use parsed data if valid)
+  // Validate parsedData against the expected schema for this type
+  const defaultDataResult = defaultSectionDataSchema.safeParse(parsedData);
+  // Even if parsing fails, try to use legacy fields
   const typeSpecificData: z.infer<typeof defaultSectionDataSchema> = {
-    description: section.description || "", // Provide default
-    desktopImageUrls: section.desktopImageUrls || [], // Provide default
-    mobileImageUrls: section.mobileImageUrls || [], // Provide default
-    imageAlt: section.imageAlt ?? undefined,
-    features: section.features || [], // Provide default
-    primaryButtonText: section.primaryButtonText ?? undefined,
-    primaryButtonLink: section.primaryButtonLink ?? undefined,
-    secondaryButtonText: section.secondaryButtonText ?? undefined,
-    secondaryButtonLink: section.secondaryButtonLink ?? undefined,
+    description: defaultDataResult.success
+      ? defaultDataResult.data.description
+      : section.description || "",
+    desktopImageUrls: defaultDataResult.success
+      ? defaultDataResult.data.desktopImageUrls
+      : section.desktopImageUrls || [],
+    mobileImageUrls: defaultDataResult.success
+      ? defaultDataResult.data.mobileImageUrls
+      : section.mobileImageUrls || [],
+    imageAlt: defaultDataResult.success
+      ? defaultDataResult.data.imageAlt
+      : (section.imageAlt ?? undefined),
+    features: defaultDataResult.success
+      ? defaultDataResult.data.features
+      : section.features || [],
+    primaryButtonText: defaultDataResult.success
+      ? defaultDataResult.data.primaryButtonText
+      : (section.primaryButtonText ?? undefined),
+    primaryButtonLink: defaultDataResult.success
+      ? defaultDataResult.data.primaryButtonLink
+      : (section.primaryButtonLink ?? undefined),
+    secondaryButtonText: defaultDataResult.success
+      ? defaultDataResult.data.secondaryButtonText
+      : (section.secondaryButtonText ?? undefined),
+    secondaryButtonLink: defaultDataResult.success
+      ? defaultDataResult.data.secondaryButtonLink
+      : (section.secondaryButtonLink ?? undefined),
   };
 
   return {
@@ -208,7 +260,9 @@ export const getHomepageConfig = createServerFn({ method: "GET" }).handler(
         .orderBy(asc(homepageFeatureSections.order));
 
       // Map DB sections to the union type
-      const sectionsUnion = sectionsDb.map(mapDbSectionToUnion);
+      const sectionsUnion = sectionsDb
+        .map(mapDbSectionToUnion)
+        .filter(Boolean) as HomepageFeatureSectionUnion[]; // Filter out nulls
 
       return { ...config, featureSections: sectionsUnion }; // Return mapped sections
     } catch (error) {
@@ -278,10 +332,13 @@ export const updateHomepageConfig = createServerFn({ method: "POST" })
                 sectionType: section.sectionType,
                 title: section.title,
                 subtitle: section.subtitle,
-                typeSpecificData: section.typeSpecificData as any, // Store validated data, cast for Drizzle type
+                // Stringify the typeSpecificData before insertion/update
+                typeSpecificData: section.typeSpecificData
+                  ? JSON.stringify(section.typeSpecificData)
+                  : null,
                 updatedAt: now,
                 createdAt: now,
-                // Initialize legacy fields as null or empty arrays
+                // Initialize legacy fields as null or empty arrays/strings
                 description: null,
                 desktopImageUrls: [],
                 mobileImageUrls: [],
@@ -331,7 +388,9 @@ export const updateHomepageConfig = createServerFn({ method: "POST" })
           .where(eq(homepageFeatureSections.homepageConfigId, configId))
           .orderBy(asc(homepageFeatureSections.order));
 
-        const updatedSectionsUnion = updatedSectionsDb.map(mapDbSectionToUnion);
+        const updatedSectionsUnion = updatedSectionsDb
+          .map(mapDbSectionToUnion)
+          .filter(Boolean) as HomepageFeatureSectionUnion[]; // Filter out nulls
 
         return { ...upsertedConfig, featureSections: updatedSectionsUnion };
       });
