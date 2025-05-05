@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { LazyLoadImage } from "react-lazy-load-image-component";
+import LazyLoadImage from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css"; // Optional blur effect
 
 // Define the structure of a single card based on the Zod schema

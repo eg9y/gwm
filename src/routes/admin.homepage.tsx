@@ -686,9 +686,9 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   />
-                  {errors.featureSections?.[index]?.typeSpecificData
-                    ?.description?.message &&
-                    sectionType === "default" && ( // Check type before accessing error
+                  {sectionType === "default" && // <-- Add type guard here
+                    errors.featureSections?.[index]?.typeSpecificData
+                      ?.description?.message && (
                       <p className="mt-1 text-sm text-red-600">
                         {
                           errors.featureSections?.[index]?.typeSpecificData
@@ -715,9 +715,9 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       enableCrop={true}
                       cropAspect={16 / 9}
                     />
-                    {errors.featureSections?.[index]?.typeSpecificData
-                      ?.desktopImageUrls?.message &&
-                      sectionType === "default" && ( // Check type
+                    {sectionType === "default" && // <-- Add type guard here
+                      errors.featureSections?.[index]?.typeSpecificData
+                        ?.desktopImageUrls?.message && ( // Check type
                         <p className="mt-1 text-sm text-red-600">
                           {
                             errors.featureSections?.[index]?.typeSpecificData
@@ -742,9 +742,9 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       enableCrop={true}
                       cropAspect={9 / 16}
                     />
-                    {errors.featureSections?.[index]?.typeSpecificData
-                      ?.mobileImageUrls?.message &&
-                      sectionType === "default" && ( // Check type
+                    {sectionType === "default" && // <-- Add type guard here
+                      errors.featureSections?.[index]?.typeSpecificData
+                        ?.mobileImageUrls?.message && ( // Check type
                         <p className="mt-1 text-sm text-red-600">
                           {
                             errors.featureSections?.[index]?.typeSpecificData
@@ -873,11 +873,11 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                 <h4 className="text-md font-semibold text-gray-600 mb-2">
                   Feature Cards (Max 3)
                 </h4>
-                {(errors.featureSections?.[index]?.typeSpecificData?.cards
-                  ?.message || // Check type
-                  errors.featureSections?.[index]?.typeSpecificData?.cards?.root
-                    ?.message) &&
-                  sectionType === "feature_cards_grid" && (
+                {sectionType === "feature_cards_grid" && // <-- Add type guard here
+                  (errors.featureSections?.[index]?.typeSpecificData?.cards
+                    ?.message || // Check type
+                    errors.featureSections?.[index]?.typeSpecificData?.cards
+                      ?.root?.message) && (
                     <p className="mb-2 text-sm text-red-600">
                       {errors.featureSections?.[index]?.typeSpecificData?.cards
                         ?.message ||
@@ -947,8 +947,11 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                               addNewFileMapping(previewUrl, file);
                             }}
                             error={
-                              errors.featureSections?.[index]?.typeSpecificData
-                                ?.cards?.[cardIndex]?.imageUrl?.message // Safe now within type check
+                              sectionType === "feature_cards_grid" // <-- Add type guard here
+                                ? errors.featureSections?.[index]
+                                    ?.typeSpecificData?.cards?.[cardIndex]
+                                    ?.imageUrl?.message
+                                : undefined
                             }
                             altText={`Card ${cardIndex + 1} image`}
                             // --- Add cropping props ---
@@ -973,9 +976,9 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             )}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                           />
-                          {errors.featureSections?.[index]?.typeSpecificData
-                            ?.cards?.[cardIndex]?.title?.message &&
-                            sectionType === "feature_cards_grid" && ( // Check type
+                          {sectionType === "feature_cards_grid" && // <-- Add type guard here
+                            errors.featureSections?.[index]?.typeSpecificData
+                              ?.cards?.[cardIndex]?.title?.message && ( // Check type
                               <p className="mt-1 text-sm text-red-600">
                                 {
                                   errors.featureSections?.[index]
@@ -1001,9 +1004,9 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             rows={2}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                           />
-                          {errors.featureSections?.[index]?.typeSpecificData
-                            ?.cards?.[cardIndex]?.description?.message &&
-                            sectionType === "feature_cards_grid" && ( // Check type
+                          {sectionType === "feature_cards_grid" && // <-- Add type guard here
+                            errors.featureSections?.[index]?.typeSpecificData
+                              ?.cards?.[cardIndex]?.description?.message && ( // Check type
                               <p className="mt-1 text-sm text-red-600">
                                 {
                                   errors.featureSections?.[index]
@@ -1099,6 +1102,7 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       addNewFileMapping(previewUrl, file);
                     }}
                     error={
+                      sectionType === "banner" && // <-- Add type guard here
                       errors.featureSections?.[index]?.typeSpecificData
                         ?.imageUrl?.message // Safe now within type check
                     }

@@ -264,6 +264,8 @@ export const getHomepageConfig = createServerFn({ method: "GET" }).handler(
         .map(mapDbSectionToUnion)
         .filter(Boolean) as HomepageFeatureSectionUnion[]; // Filter out nulls
 
+      console.log("secitonsUnion", sectionsUnion);
+
       return { ...config, featureSections: sectionsUnion }; // Return mapped sections
     } catch (error) {
       console.error("Error fetching homepage config with sections:", error);

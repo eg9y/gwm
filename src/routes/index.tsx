@@ -14,31 +14,24 @@ import Banner from "../components/Banner";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
-  // Add loader to fetch dynamic homepage data
-  loader: async () => {
+  // Update loader to return HomepageConfigWithSections | null directly
+  loader: async (): Promise<HomepageConfigWithSections | null> => {
     try {
       const data = await getHomepageConfig();
-      if (!data) {
-        // Provide default/empty data if config is missing
-        return { config: null, featureSections: [] };
-      }
-      return {
-        config: data, // Base config for Hero
-        featureSections: data.featureSections || [], // Sections for ModelShowcase
-      };
+      console.log("data", data);
+      // Return data directly or null
+      return data ?? null; // Use null coalescing for clarity
     } catch (error) {
+      console.log("ajjay", error);
       console.error("Failed to load homepage data:", error);
-      // Return default/empty state on error
-      return { config: null, featureSections: [] };
+      // Return null on error
+      return null;
     }
   },
   // Update head metadata using fetched data if available
   head: (params) => {
-    const data = params.loaderData as {
-      config: HomepageConfigWithSections["config"] | null;
-      featureSections: HomepageFeatureSectionUnion[];
-    };
-    const config = data?.config;
+    // Loader data is now HomepageConfigWithSections | null
+    const config = params.loaderData;
 
     // Use fetched title/description or fallbacks
     const title = config?.metaTitle || config?.heroTitle || "GWM Indonesia";
@@ -92,23 +85,24 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { config, featureSections } = useLoaderData({ from: "/" });
-  // Remove router and state management for sections, as it's now just content blocks
+  // Load data directly - it's HomepageConfigWithSections | null
+  const homepageData = useLoaderData({ from: "/" });
 
-  // Use fallback defaults if config is null
-  const heroConfig = config || {
-    heroDesktopImageUrl: "/placeholder-desktop.webp",
-    heroMobileImageUrl: "/placeholder-mobile.webp",
-    heroTitle: "GWM Indonesia",
-    heroSubtitle: "Welcome",
-    heroPrimaryButtonText: "Explore",
-    heroPrimaryButtonLink: "/",
-    heroSecondaryButtonText: "Contact",
-    heroSecondaryButtonLink: "/kontak",
-    metaTitle: "GWM Indonesia", // Add fallback
-    metaDescription:
-      "Great Wall Motors - Premium SUVs and Innovative Technology", // Add fallback
-  };
+  // Handle the case where data might be null
+  if (!homepageData) {
+    // Optionally render a loading state or a default empty state
+    return (
+      <div className="relative min-h-screen flex items-center justify-center">
+        <p>Loading homepage...</p> {/* Or render a basic fallback */}
+      </div>
+    );
+  }
+
+  // Destructure data now that we know it's not null
+  const { featureSections = [], ...heroConfig } = homepageData;
+
+  // No need for fallback defaults here as heroConfig is derived from non-null homepageData
+  // const heroConfig = config || { ... }; // Removed
 
   return (
     <div className="relative min-h-screen">
@@ -129,77 +123,80 @@ function HomePage() {
 
       {/* Feature Sections - Conditionally render based on type */}
       {featureSections.map((section, index) => {
-        if (section.sectionType === "feature_cards_grid") {
-          // Cast typeSpecificData for this block
-          const typeData = section.typeSpecificData as any;
-          return (
-            <div
-              key={section.id || index}
-              id={`feature-${index}`}
-              className="section-container-auto-height"
-            >
-              <FeatureCardsGridSection
-                title={section.title}
-                subtitle={section.subtitle}
-                cards={typeData.cards || []}
-              />
-            </div>
-          );
+        // Use a switch statement for clearer type narrowing
+        switch (section.sectionType) {
+          case "feature_cards_grid": {
+            // section is now correctly typed as FeatureCardsGridSectionType
+            const typeData = section.typeSpecificData; // No need for 'as any'
+            return (
+              <div
+                key={section.id || index}
+                id={`feature-${index}`}
+                className="section-container-auto-height"
+              >
+                <FeatureCardsGridSection
+                  title={section.title}
+                  subtitle={section.subtitle}
+                  cards={typeData.cards || []} // Access typeData directly
+                />
+              </div>
+            );
+          }
+          case "default": {
+            // section is now correctly typed as DefaultSectionType
+            const typeData = section.typeSpecificData; // No need for 'as any'
+            return (
+              <div
+                key={section.id || index} // Use section ID or index as key
+                id={`feature-${index}`} // Create dynamic ID
+                className="section-container-auto-height"
+              >
+                <ModelShowcase
+                  // Pass data from typeSpecificData for default type
+                  desktopImageUrls={typeData.desktopImageUrls || []}
+                  mobileImageUrls={typeData.mobileImageUrls || []}
+                  imageAlt={typeData.imageAlt}
+                  title={section.title}
+                  subtitle={section.subtitle}
+                  description={typeData.description}
+                  features={typeData.features || []}
+                  primaryButtonText={typeData.primaryButtonText}
+                  primaryButtonLink={typeData.primaryButtonLink}
+                  secondaryButtonText={typeData.secondaryButtonText}
+                  secondaryButtonLink={typeData.secondaryButtonLink}
+                  isReversed={index % 2 !== 0} // Keep alternating layout
+                />
+              </div>
+            );
+          }
+          case "banner": {
+            // section is now correctly typed as BannerSectionType
+            const typeData = section.typeSpecificData; // No need for 'as any'
+            return (
+              <div
+                key={section.id || index}
+                id={`feature-${index}`}
+                className="section-container-auto-height w-full max-w-full p-0 m-0" // Basic container, adjust styling as needed
+              >
+                <Banner
+                  imageUrl={typeData.imageUrl}
+                  altText={typeData.altText}
+                  link={typeData.link}
+                />
+              </div>
+            );
+          }
+          default:
+            // Optional: Handle unknown section types explicitly or return null
+            // The switch statement with exhaustive checks might make this less necessary,
+            // but it's good practice for future changes.
+            // We can assert never here to ensure all types are handled.
+            const _exhaustiveCheck: never = section;
+            console.warn(
+              `Unknown section type encountered during render: ${(_exhaustiveCheck as any)?.sectionType}`
+            );
+            return null;
         }
-
-        // Default case: Render the original ModelShowcase component
-        if (section.sectionType === "default") {
-          // Cast typeSpecificData for this block
-          const typeData = section.typeSpecificData as any;
-          return (
-            <div
-              key={section.id || index} // Use section ID or index as key
-              id={`feature-${index}`} // Create dynamic ID
-              className="section-container-auto-height"
-            >
-              <ModelShowcase
-                // Pass data from typeSpecificData for default type
-                desktopImageUrls={typeData.desktopImageUrls || []}
-                mobileImageUrls={typeData.mobileImageUrls || []}
-                imageAlt={typeData.imageAlt}
-                title={section.title}
-                subtitle={section.subtitle}
-                description={typeData.description}
-                features={typeData.features || []}
-                primaryButtonText={typeData.primaryButtonText}
-                primaryButtonLink={typeData.primaryButtonLink}
-                secondaryButtonText={typeData.secondaryButtonText}
-                secondaryButtonLink={typeData.secondaryButtonLink}
-                isReversed={index % 2 !== 0} // Keep alternating layout
-              />
-            </div>
-          );
-        }
-
-        // Add case for 'banner' section type
-        if (section.sectionType === "banner") {
-          // Cast typeSpecificData for this block
-          const typeData = section.typeSpecificData as any;
-          return (
-            <div
-              key={section.id || index}
-              id={`feature-${index}`}
-              className="section-container-auto-height w-full max-w-full p-0 m-0" // Basic container, adjust styling as needed
-            >
-              <Banner
-                imageUrl={typeData.imageUrl}
-                altText={typeData.altText}
-                link={typeData.link}
-              />
-            </div>
-          );
-        }
-
-        // Optional: Handle unknown section types or return null
-        console.warn(
-          `Unknown section type encountered during render: ${section.sectionType}`
-        );
-        return null;
       })}
 
       {/* Promos section - Keep as is or make dynamic later */}
