@@ -11,6 +11,7 @@ import type {
   Path,
   FieldValues,
   UseFormSetValue,
+  PathValue,
 } from "react-hook-form";
 import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
@@ -187,7 +188,10 @@ export function ImageUploadField<TFormValues extends FieldValues>({
           // --- Original Logic (No Crop) ---
           if (setValue) {
             // Only use setValue if it's provided
-            setValue(fieldName, newUrl as TFormValues[Path<TFormValues>]);
+            setValue(
+              fieldName,
+              newUrl as PathValue<TFormValues, typeof fieldName>
+            );
             toast.success("Image URL added successfully");
           }
           setShowUrlInput(false);
@@ -240,7 +244,11 @@ export function ImageUploadField<TFormValues extends FieldValues>({
           // Fallback or alternative logic if needed, e.g., using setValue with blob URL
           if (setValue && addNewFileMapping) {
             const newBlobUrl = URL.createObjectURL(croppedFile);
-            setValue(fieldName, newBlobUrl as any, { shouldValidate: true });
+            setValue(
+              fieldName,
+              newBlobUrl as PathValue<TFormValues, typeof fieldName>,
+              { shouldValidate: true }
+            );
             addNewFileMapping(newBlobUrl, croppedFile); // Important for parent tracking
           } else {
             console.warn(
@@ -341,9 +349,10 @@ export function ImageUploadField<TFormValues extends FieldValues>({
                   }
                   // Optionally, also clear the field value using setValue if it's provided
                   if (setValue) {
-                    setValue(fieldName, "" as TFormValues[Path<TFormValues>], {
-                      shouldValidate: true,
-                    }); // Clear the value
+                    setValue(
+                      fieldName,
+                      "" as PathValue<TFormValues, typeof fieldName>
+                    ); // Call setValue with only 2 arguments
                   }
                 }}
                 className="bg-red-600 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm hover:bg-red-700 transition-colors"

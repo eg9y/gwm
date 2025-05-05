@@ -1370,6 +1370,7 @@ function CarModelEditorPage() {
                 <ImageUploadField
                   fieldName="featuredImage"
                   watch={watch}
+                  setValue={setValue}
                   handleRemove={handleRemoveImage}
                   onFileSelected={handleImageSelect}
                   error={errors.featuredImage?.message}
@@ -1391,6 +1392,7 @@ function CarModelEditorPage() {
                 <ImageUploadField
                   fieldName="mainProductImage"
                   watch={watch}
+                  setValue={setValue}
                   handleRemove={handleRemoveImage}
                   onFileSelected={handleImageSelect}
                   error={errors.mainProductImage?.message}
@@ -1412,6 +1414,7 @@ function CarModelEditorPage() {
                 <ImageUploadField
                   fieldName="subImage"
                   watch={watch}
+                  setValue={setValue}
                   handleRemove={handleRemoveImage}
                   onFileSelected={handleImageSelect}
                   error={errors.subImage?.message}
@@ -1809,6 +1812,7 @@ function CarModelEditorPage() {
                       <ImageUploadField
                         fieldName={`colors.${index}.imageUrl`}
                         watch={watch}
+                        setValue={setValue}
                         handleRemove={handleRemoveImage}
                         onFileSelected={handleImageSelect}
                         error={errors.colors?.[index]?.imageUrl?.message}
@@ -1923,6 +1927,7 @@ function CarModelEditorPage() {
                       <ImageUploadField
                         fieldName={`gallery.${index}.imageUrl`}
                         watch={watch}
+                        setValue={setValue}
                         handleRemove={handleRemoveImage}
                         onFileSelected={handleImageSelect}
                         error={errors.gallery?.[index]?.imageUrl?.message}
