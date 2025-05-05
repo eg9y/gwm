@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   useWatch,
   type Control,
@@ -38,6 +38,8 @@ import {
   Plus,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import Cropper from "react-easy-crop";
+import "react-easy-crop/react-easy-crop.css";
 
 // Interface for a single image item (existing URL or new file)
 interface ImageItem {
@@ -59,6 +61,8 @@ interface MultiImageUploadFieldProps<TFieldValues extends FieldValues> {
   // Function passed from parent to track *new* file uploads
   addNewFileMapping: (blobUrl: string, file: File) => void;
   removeNewFileMapping: (blobUrl: string) => void;
+  enableCrop?: boolean;
+  cropAspect?: number;
 }
 
 // Helper function to format file size
@@ -71,22 +75,92 @@ function formatFileSize(bytes: number): string {
 // Max file size constant
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+// --- Cropping Helper Function (Copied from ImageUploadField) ---
+const createCroppedFile = async (
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number },
+  fileName: string
+): Promise<File | null> => {
+  const image = new Image();
+  image.crossOrigin = "anonymous"; // Request CORS access
+  image.src = imageSrc;
+
+  return new Promise((resolve) => {
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        toast.error("Could not get canvas context for cropping.");
+        resolve(null);
+        return;
+      }
+
+      // Set canvas dimensions to the cropped area size
+      canvas.width = pixelCrop.width;
+      canvas.height = pixelCrop.height;
+
+      // Draw the cropped portion of the image onto the canvas
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        pixelCrop.width,
+        pixelCrop.height
+      );
+
+      // Convert canvas to blob and create a File
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            toast.error("Failed to create image blob from crop");
+            resolve(null);
+            return;
+          }
+
+          // Create a new filename with timestamp to avoid caching issues
+          const newFileName = `${Date.now()}_${fileName}`;
+          const file = new File([blob], newFileName, { type: "image/jpeg" });
+          resolve(file);
+        },
+        "image/jpeg",
+        0.95
+      );
+    };
+
+    image.onerror = () => {
+      toast.error(
+        "Error loading image for crop. The image server might not allow cross-origin access."
+      );
+      resolve(null);
+    };
+  });
+};
+
+// Sortable Item component Props
+interface SortableImageItemProps {
+  item: ImageItem;
+  onRemove: (id: string) => void;
+  isLoading?: boolean;
+  enableCrop?: boolean;
+  cropAspect?: number;
+  onEditCrop: (item: ImageItem) => void;
+}
+
 // Sortable Item component
 function SortableImageItem({
-  id,
-  url,
-  isNew,
-  file,
+  item,
   onRemove,
   isLoading,
-}: {
-  id: string;
-  url: string;
-  isNew?: boolean;
-  file?: File;
-  onRemove: () => void;
-  isLoading?: boolean;
-}) {
+  enableCrop,
+  cropAspect,
+  onEditCrop,
+}: SortableImageItemProps) {
+  const { id, url, isNew, file } = item;
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const {
@@ -138,13 +212,11 @@ function SortableImageItem({
             onError={() => setImageError(true)}
           />
         )}
-
         {isLoading && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <Loader2 className="h-6 w-6 text-white animate-spin" />
           </div>
         )}
-
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200">
           <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             {file && (
@@ -165,8 +237,33 @@ function SortableImageItem({
             )}
           </div>
         </div>
-
-        <div className="absolute top-1.5 right-1.5 flex gap-1.5 opacity-75 group-hover:opacity-100 transition-opacity duration-200">
+        <div className=" absolute top-1.5 right-1.5 flex flex-wrap gap-1.5 opacity-75 group-hover:opacity-100 transition-opacity duration-200">
+          {enableCrop && cropAspect && !isLoading && !imageError && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditCrop(item);
+              }}
+              className="p-1 bg-blue-500/70 text-white rounded-full hover:bg-blue-600/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              aria-label="Edit crop"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3.5 w-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                <path d="m15 5 4 4" />
+                <path d="M14 19.5V14a2 2 0 0 1 2-2h5.5" />
+              </svg>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setIsPreviewOpen(true)}
@@ -177,7 +274,10 @@ function SortableImageItem({
           </button>
           <button
             type="button"
-            onClick={onRemove}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(id);
+            }}
             className="p-1 bg-red-500/70 text-white rounded-full hover:bg-red-600/90 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
             aria-label="Remove image"
             disabled={isLoading}
@@ -186,13 +286,11 @@ function SortableImageItem({
           </button>
         </div>
       </div>
-
       {isNew && (
         <div className="absolute top-0 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-br">
           New
         </div>
       )}
-
       {isPreviewOpen && !imageError && (
         <dialog
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 cursor-zoom-out"
@@ -242,6 +340,8 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
   addRemovedUrl,
   addNewFileMapping,
   removeNewFileMapping,
+  enableCrop = false,
+  cropAspect,
 }: MultiImageUploadFieldProps<TFieldValues>) {
   // Use useWatch to get the current array of URLs from react-hook-form state
   const currentUrls =
@@ -258,11 +358,23 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
   const [dragRejectionReason, setDragRejectionReason] = useState<string>("");
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [inputUrl, setInputUrl] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- State for cropping ---
+  const [isCropping, setIsCropping] = useState(false);
+  const [imgSrc, setImgSrc] = useState("");
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppingItem, setCroppingItem] = useState<
+    ImageItem | { file: File } | { url: string } | null
+  >(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, // Small distance threshold to differentiate between click and drag
+        distance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -302,64 +414,105 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
 
       if (!files || files.length === 0) return;
 
-      const newItems: ImageItem[] = [];
+      // Collect valid files and rejected files separately
+      const validFiles: File[] = [];
       const rejectedFiles: { name: string; reason: string }[] = [];
 
       for (const file of files) {
-        // Validation
         const validation = validateFile(file);
-        if (!validation.valid) {
+        if (validation.valid) {
+          validFiles.push(file);
+        } else {
           rejectedFiles.push({
             name: file.name,
             reason: validation.reason || "Unknown error",
           });
-          continue;
         }
-
-        const previewUrl = URL.createObjectURL(file);
-        const newItem: ImageItem = {
-          id: previewUrl,
-          url: previewUrl,
-          file: file,
-          isNew: true,
-        };
-        newItems.push(newItem);
-        addNewFileMapping(previewUrl, file);
       }
 
-      if (newItems.length > 0) {
-        const updatedItems = [...imageItems, ...newItems];
-        setImageItems(updatedItems);
-        // Update RHF state with all current URLs
-        setValue(
-          fieldName,
-          updatedItems.map(
-            (item) => item.url
-          ) as TFieldValues[FieldPath<TFieldValues>],
-          { shouldValidate: true, shouldDirty: true }
-        );
+      // --- If cropping is enabled, process the first valid file ---
+      if (enableCrop && cropAspect && validFiles.length > 0) {
+        const fileToCrop = validFiles[0]; // Get the first valid file
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setRotation(0);
+        setCroppingItem({ file: fileToCrop });
 
-        toast.success(
-          `${newItems.length} image${newItems.length > 1 ? "s" : ""} added!`
-        );
-      }
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          setImgSrc(reader.result?.toString() || "");
+          setIsCropping(true);
+        });
+        reader.readAsDataURL(fileToCrop);
 
-      if (rejectedFiles.length > 0) {
-        if (rejectedFiles.length === 1) {
-          toast.error(`${rejectedFiles[0].name}: ${rejectedFiles[0].reason}`);
-        } else {
-          toast.error(
-            `${rejectedFiles.length} files were rejected. Check file types and sizes.`
+        if (validFiles.length > 1) {
+          toast("Cropping applied to the first selected image only.", {
+            icon: "ℹ️",
+          });
+        }
+        if (rejectedFiles.length > 0) {
+          if (rejectedFiles.length === 1) {
+            toast.error(`${rejectedFiles[0].name}: ${rejectedFiles[0].reason}`);
+          } else {
+            toast.error(
+              `${rejectedFiles.length} other files were rejected. Check file types and sizes.`
+            );
+          }
+        }
+      } else {
+        // --- Logic for adding a single file (cropping disabled) ---
+        if (validFiles.length > 0) {
+          const fileToAdd = validFiles[0]; // Take only the first valid file
+          const previewUrl = URL.createObjectURL(fileToAdd); // Create URL from file
+          addNewFileMapping(previewUrl, fileToAdd); // Map the correct file
+          const newItem: ImageItem = {
+            id: previewUrl,
+            url: previewUrl,
+            file: fileToAdd,
+            isNew: true,
+          };
+          const updatedItems = [...imageItems, newItem]; // Add the single new item
+          setImageItems(updatedItems);
+          setValue(
+            fieldName,
+            updatedItems.map(
+              (item) => item.url
+            ) as TFieldValues[FieldPath<TFieldValues>],
+            { shouldValidate: true, shouldDirty: true }
           );
+          toast.success(`Image "${fileToAdd.name}" added!`);
+        }
+
+        // Inform user if multiple files were selected/dropped but only one was used
+        if (files.length > 1) {
+          toast("Multiple files selected, only the first one was added.");
+        }
+
+        // Handle rejected files (show errors even if one was added successfully)
+        if (rejectedFiles.length > 0) {
+          if (rejectedFiles.length === 1) {
+            toast.error(`${rejectedFiles[0].name}: ${rejectedFiles[0].reason}`);
+          } else {
+            toast.error(
+              `${rejectedFiles.length} files were rejected. Check file types and sizes.`
+            );
+          }
         }
       }
 
-      // Clear the input value to allow selecting the same file again
-      if ("target" in event && event.target) {
-        (event.target as HTMLInputElement).value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     },
-    [imageItems, setValue, fieldName, addNewFileMapping, validateFile]
+    [
+      imageItems,
+      setValue,
+      fieldName,
+      addNewFileMapping,
+      validateFile,
+      enableCrop,
+      cropAspect,
+    ]
   );
 
   const handleRemoveItem = (idToRemove: string) => {
@@ -369,7 +522,6 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
     const updatedItems = imageItems.filter((item) => item.id !== idToRemove);
     setImageItems(updatedItems);
 
-    // Update RHF state
     setValue(
       fieldName,
       updatedItems.map(
@@ -391,90 +543,68 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
   const handleUrlSubmit = (e: React.MouseEvent | React.FormEvent) => {
     e.preventDefault();
 
-    // Parse URLs - allow multiple URLs separated by newlines or spaces
-    const inputUrls = inputUrl
-      .split(/[\n\s]+/)
-      .map((url) => url.trim())
-      .filter((url) => url.length > 0);
+    // Trim the input URL
+    const urlToAdd = inputUrl.trim();
 
-    if (inputUrls.length === 0) {
-      toast.error("Please enter at least one valid URL");
+    // --- Unified Logic: Always handle a single URL ---
+    if (!urlToAdd) {
+      toast.error("Please enter an image URL.");
       return;
     }
 
-    // Process each URL
-    let validCount = 0;
-    const validationPromises = inputUrls.map((url) => {
-      return new Promise<{ url: string; valid: boolean }>((resolve) => {
-        // Check if it's a valid URL starting with http/https
-        if (!url || !url.startsWith("http")) {
-          resolve({ url, valid: false });
-          return;
-        }
+    // Basic URL validation
+    if (!urlToAdd.startsWith("http")) {
+      toast.error("Please enter a valid URL starting with http:// or https://");
+      return;
+    }
 
-        // Check if the URL already exists in the array
-        if (imageItems.some((item) => item.url === url)) {
-          resolve({ url, valid: false });
-          return;
-        }
+    // Check if URL already exists
+    if (imageItems.some((item) => item.url === urlToAdd)) {
+      toast.error("This image URL has already been added.");
+      return;
+    }
 
-        // Test if URL leads to a valid image
-        const testImage = new Image();
-        testImage.onload = () => {
-          resolve({ url, valid: true });
-        };
-
-        testImage.onerror = () => {
-          resolve({ url, valid: false });
-        };
-
-        // Start loading the image to validate it
-        testImage.src = url;
-      });
-    });
-
-    // Handle all URL validations
-    Promise.all(validationPromises).then((results) => {
-      const validUrls = results.filter((r) => r.valid).map((r) => r.url);
-      const invalidCount = results.length - validUrls.length;
-
-      if (validUrls.length === 0) {
-        toast.error("None of the provided URLs were valid image URLs");
-        return;
-      }
-
-      // Add all valid URLs
-      const newItems = validUrls.map((url) => ({
-        id: url,
-        url: url,
-        isNew: false, // Not a blob URL that needs uploading
-      }));
-
-      // Update state with the new items
-      const updatedItems = [...imageItems, ...newItems];
-      setImageItems(updatedItems);
-
-      // Update the form field value
-      setValue(
-        fieldName,
-        updatedItems.map(
-          (item) => item.url
-        ) as TFieldValues[FieldPath<TFieldValues>],
-        { shouldValidate: true, shouldDirty: true }
-      );
-
-      // Reset the input and UI state
-      setInputUrl("");
-      setShowUrlInput(false);
-
-      if (invalidCount > 0) {
-        toast.success(
-          `Added ${validUrls.length} image URL(s). ${invalidCount} invalid URL(s) were skipped.`
-        );
+    // Test if URL leads to a valid image
+    const testImage = new Image();
+    testImage.onload = () => {
+      // --- Cropping Logic ---
+      if (enableCrop && cropAspect) {
+        // Reset crop state and open modal
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setRotation(0);
+        setCroppingItem({ url: urlToAdd }); // Mark as new URL for cropping
+        setImgSrc(urlToAdd); // Use the URL directly as source
+        setIsCropping(true); // Open the cropping modal
       } else {
-        toast.success(`Added ${validUrls.length} image URL(s)`);
+        // --- No Crop: Add directly ---
+        const newItem: ImageItem = {
+          id: urlToAdd,
+          url: urlToAdd,
+          isNew: false, // Not a blob URL
+        };
+        const updatedItems = [...imageItems, newItem];
+        setImageItems(updatedItems);
+        setValue(
+          fieldName,
+          updatedItems.map(
+            (item) => item.url
+          ) as TFieldValues[FieldPath<TFieldValues>],
+          { shouldValidate: true, shouldDirty: true }
+        );
+        toast.success(`Image URL added successfully.`);
       }
-    });
+      // Reset UI whether cropping or not
+      setShowUrlInput(false);
+      setInputUrl("");
+    };
+
+    testImage.onerror = () => {
+      toast.error("Could not load image from URL. Please check the URL.");
+    };
+
+    // Start loading the image
+    testImage.src = urlToAdd;
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -486,7 +616,6 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
         const newIndex = items.findIndex((item) => item.id === over.id);
         const reorderedItems = arrayMove(items, oldIndex, newIndex);
 
-        // Update RHF state after reorder
         setValue(
           fieldName,
           reorderedItems.map(
@@ -502,7 +631,6 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
     }
   };
 
-  // Drag and drop handlers
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -511,12 +639,10 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
     const dt = e.dataTransfer;
 
     if (dt.items && dt.items.length > 0) {
-      // Check for non-image files
       const nonImageItems = Array.from(dt.items).filter(
         (item) => item.kind === "file" && !item.type.startsWith("image/")
       );
 
-      // Check for files exceeding size limit (need to get file details)
       const hasInvalidItem = nonImageItems.length > 0;
 
       setIsDragAccept(!hasInvalidItem);
@@ -556,20 +682,127 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
     [handleFileSelect]
   );
 
-  // Get errors specific to this field array
   const fieldError = errors[fieldName as string] as
     | FieldErrors<string[]>
     | undefined;
   const rootError = fieldError?.root?.message;
 
-  // Generate a stable ID for the file input
   const inputId = `file-input-${fieldName.replace(/\W/g, "-")}`;
 
-  // Get aspect ratio hint based on target
   const aspectRatioHint =
     target === "desktop"
       ? "Recommended ratio: 16:9"
       : "Recommended ratio: 9:16 or 1:1";
+
+  // --- Cropping Handlers ---
+  const onCropComplete = (croppedArea: any, croppedAreaPixelsData: any) => {
+    setCroppedAreaPixels(croppedAreaPixelsData);
+  };
+
+  const resetCropState = () => {
+    setIsCropping(false);
+    setImgSrc("");
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setRotation(0);
+    setCroppedAreaPixels(null);
+    setCroppingItem(null);
+  };
+
+  const onCropCancel = () => {
+    resetCropState();
+  };
+
+  const onCropConfirm = async () => {
+    if (!croppedAreaPixels || !croppingItem) {
+      toast.error("Cropping data is missing.");
+      return;
+    }
+
+    let originalFileName = "cropped.jpg";
+    if ("file" in croppingItem && croppingItem.file) {
+      originalFileName = croppingItem.file.name;
+    } else if ("url" in croppingItem && croppingItem.url) {
+      originalFileName = croppingItem.url.split("/").pop() || originalFileName;
+      originalFileName = originalFileName.split("?")[0].split("#")[0];
+    }
+
+    try {
+      const croppedFile = await createCroppedFile(
+        imgSrc,
+        croppedAreaPixels,
+        originalFileName
+      );
+
+      if (!croppedFile) {
+        throw new Error("Failed to create cropped file.");
+      }
+
+      const newBlobUrl = URL.createObjectURL(croppedFile);
+      const newItem: ImageItem = {
+        id: newBlobUrl,
+        url: newBlobUrl,
+        file: croppedFile,
+        isNew: true,
+      };
+
+      addNewFileMapping(newBlobUrl, croppedFile);
+
+      let updatedItems: ImageItem[];
+
+      if ("id" in croppingItem) {
+        const indexToReplace = imageItems.findIndex(
+          (item) => item.id === croppingItem.id
+        );
+        if (indexToReplace !== -1) {
+          updatedItems = [...imageItems];
+          updatedItems[indexToReplace] = newItem;
+
+          const replacedItem = imageItems[indexToReplace];
+          if (replacedItem.isNew && replacedItem.url.startsWith("blob:")) {
+            URL.revokeObjectURL(replacedItem.url);
+            removeNewFileMapping(replacedItem.url);
+          } else if (
+            !replacedItem.isNew &&
+            replacedItem.url.startsWith("http")
+          ) {
+            addRemovedUrl(replacedItem.url);
+          }
+        } else {
+          updatedItems = [...imageItems, newItem];
+        }
+      } else {
+        updatedItems = [...imageItems, newItem];
+      }
+
+      setImageItems(updatedItems);
+      setValue(
+        fieldName,
+        updatedItems.map(
+          (item) => item.url
+        ) as TFieldValues[FieldPath<TFieldValues>],
+        { shouldValidate: true, shouldDirty: true }
+      );
+
+      toast.success("Image cropped successfully!");
+    } catch (error) {
+      console.error("Error during crop confirmation:", error);
+      toast.error("Failed to crop image.");
+    } finally {
+      resetCropState();
+    }
+  };
+
+  const handleEditCrop = (itemToCrop: ImageItem) => {
+    if (enableCrop && cropAspect) {
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setRotation(0);
+      setCroppingItem(itemToCrop);
+      setImgSrc(itemToCrop.url);
+      setIsCropping(true);
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -612,10 +845,10 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
           <div className="h-40 flex flex-col items-center justify-center text-center p-4">
             <ImagePlus className="h-12 w-12 text-gray-400 mb-2" />
             <p className="text-sm text-gray-500 mb-1 font-medium">
-              No images added yet
+              No image added yet
             </p>
             <p className="text-xs text-gray-400 mb-2">
-              Drag & drop images here or click the button below to browse
+              Drag & drop an image here or use the buttons below
             </p>
             <p className="text-xs text-gray-400 flex items-center">
               <Info className="h-3 w-3 mr-1" />
@@ -636,11 +869,11 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
                 {imageItems.map((item) => (
                   <SortableImageItem
                     key={item.id}
-                    id={item.id}
-                    url={item.url}
-                    isNew={item.isNew}
-                    file={item.file}
-                    onRemove={() => handleRemoveItem(item.id)}
+                    item={item}
+                    onRemove={handleRemoveItem}
+                    enableCrop={enableCrop}
+                    cropAspect={cropAspect}
+                    onEditCrop={handleEditCrop}
                   />
                 ))}
               </SortableContext>
@@ -656,13 +889,13 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
             >
               <Upload className="h-4 w-4 mr-2" />
               <span className="text-sm font-medium">
-                {imageItems.length > 0 ? "Add More Images" : "Select Images"}
+                {imageItems.length > 0 ? "Add Another Image" : "Select Image"}
               </span>
               <input
                 id={inputId}
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                multiple
                 onChange={handleFileSelect}
                 className="sr-only"
                 aria-describedby={rootError ? `${inputId}-error` : undefined}
@@ -685,13 +918,14 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
                 <textarea
                   value={inputUrl}
                   onChange={(e) => setInputUrl(e.target.value)}
-                  placeholder="Enter image URLs (one per line or separated by spaces)"
+                  placeholder="Enter a single image URL (jpg, png, webp, etc.)"
                   className="w-full border border-gray-300 rounded-md p-2 text-sm min-h-[80px]"
                   required
+                  rows={1}
                 />
                 <div className="flex justify-between items-center">
                   <p className="text-xs text-gray-500">
-                    Enter image URLs (jpg, png, webp, etc.)
+                    Paste a single image URL here.
                   </p>
                   <button
                     type="button"
@@ -702,13 +936,9 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
                     className="inline-flex items-center px-3 py-1.5 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors duration-200 shadow-sm focus:outline-none text-sm"
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add URLs
+                    Add URL
                   </button>
                 </div>
-                <p className="text-xs text-gray-500">
-                  You can add multiple URLs at once by separating them with
-                  spaces or line breaks
-                </p>
               </div>
             </div>
           )}
@@ -719,7 +949,7 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
             {isDragAccept ? (
               <p className="text-primary font-medium flex items-center justify-center">
                 <Upload className="h-4 w-4 mr-2" />
-                Drop to upload images
+                Drop image here to upload
               </p>
             ) : (
               <p className="text-red-500 font-medium flex items-center justify-center">
@@ -749,6 +979,106 @@ function MultiImageUploadField<TFieldValues extends FieldValues>({
           </div>
           <div className="text-xs font-medium text-primary">
             {imageItems.length} image{imageItems.length !== 1 ? "s" : ""} total
+          </div>
+        </div>
+      )}
+
+      {/* --- Cropping Modal --- */}
+      {isCropping && imgSrc && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 p-4"
+          aria-labelledby="crop-modal-title"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <h2
+              id="crop-modal-title"
+              className="text-xl font-semibold text-gray-800 mb-4"
+            >
+              Crop Image
+            </h2>
+            <button
+              onClick={onCropCancel}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              aria-label="Close cropping modal"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            <div
+              className="relative"
+              style={{ height: "400px", maxHeight: "60vh" }}
+            >
+              <Cropper
+                image={imgSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={cropAspect}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+                rotation={rotation}
+                onRotationChange={setRotation}
+                objectFit="contain"
+                showGrid={true}
+              />
+            </div>
+
+            <div className="mt-4">
+              <label
+                htmlFor="zoom"
+                className="block text-sm text-gray-700 mb-1"
+              >
+                Zoom ({zoom.toFixed(1)}x)
+              </label>
+              <input
+                type="range"
+                id="zoom"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+              />
+            </div>
+
+            <div className="mt-4">
+              <label
+                htmlFor="rotation"
+                className="block text-sm text-gray-700 mb-1"
+              >
+                Rotation ({rotation}°)
+              </label>
+              <input
+                type="range"
+                id="rotation"
+                min={0}
+                max={360}
+                step={1}
+                value={rotation}
+                onChange={(e) => setRotation(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-5 border-t pt-4">
+              <button
+                type="button"
+                onClick={onCropCancel}
+                className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onCropConfirm}
+                className="px-4 py-2 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+              >
+                Confirm Crop
+              </button>
+            </div>
           </div>
         </div>
       )}

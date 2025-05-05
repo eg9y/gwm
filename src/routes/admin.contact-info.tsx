@@ -131,9 +131,31 @@ function AdminContactInfoPage() {
     defaultValues: contactInfo
       ? {
           ...contactInfo,
-          whatsappUrl: contactInfo.whatsappUrl || undefined,
-          logoUrl: contactInfo.logoUrl || undefined,
-          logoWhiteUrl: contactInfo.logoWhiteUrl || undefined,
+          // Coerce null values from DB to undefined for the form
+          phone: contactInfo.phone ?? "",
+          email: contactInfo.email ?? "",
+          address: contactInfo.address ?? "",
+          facebook: contactInfo.facebook ?? "",
+          instagram: contactInfo.instagram ?? "",
+          x: contactInfo.x ?? "",
+          youtube: contactInfo.youtube ?? "",
+          whatsappUrl: contactInfo.whatsappUrl ?? "",
+          metaTitle: contactInfo.metaTitle ?? undefined,
+          metaDescription: contactInfo.metaDescription ?? undefined,
+          metaKeywords: contactInfo.metaKeywords ?? undefined,
+          metaImage: contactInfo.metaImage ?? undefined,
+          heroDesktopImageUrl: contactInfo.heroDesktopImageUrl ?? undefined,
+          heroMobileImageUrl: contactInfo.heroMobileImageUrl ?? undefined,
+          heroTitle: contactInfo.heroTitle ?? undefined,
+          heroTagline: contactInfo.heroTagline ?? undefined,
+          heroSubtitle: contactInfo.heroSubtitle ?? undefined,
+          heroHighlightColor: contactInfo.heroHighlightColor ?? undefined,
+          formTitle: contactInfo.formTitle ?? undefined,
+          formDescription: contactInfo.formDescription ?? undefined,
+          gmapsPlaceQuery: contactInfo.gmapsPlaceQuery ?? undefined,
+          locationOptions: contactInfo.locationOptions ?? [],
+          logoUrl: contactInfo.logoUrl ?? undefined,
+          logoWhiteUrl: contactInfo.logoWhiteUrl ?? undefined,
         }
       : {
           id: 0,
@@ -172,14 +194,22 @@ function AdminContactInfoPage() {
         URL.revokeObjectURL(url);
       }
 
-      // Determine which field to clear based on the URL
+      // Determine which field to clear based on the URL - REMOVED
+      /*
       if (watchLogoUrl === url) {
         setValue("logoUrl", "");
       } else if (watchLogoWhiteUrl === url) {
         setValue("logoWhiteUrl", "");
+      } else if (watch("metaImage") === url) {
+        setValue("metaImage", "");
+      } else if (watch("heroDesktopImageUrl") === url) {
+        setValue("heroDesktopImageUrl", "");
+      } else if (watch("heroMobileImageUrl") === url) {
+        setValue("heroMobileImageUrl", "");
       }
+      */
     },
-    [setValue, watchLogoUrl, watchLogoWhiteUrl]
+    [setValue, watchLogoUrl, watchLogoWhiteUrl, watch]
   );
 
   // Upload image to R2
@@ -670,12 +700,14 @@ function AdminContactInfoPage() {
                 watch={watch}
                 setValue={setValue}
                 handleRemove={addRemovedUrl}
+                enableCrop={true}
+                cropAspect={1.91 / 1}
+                addNewFileMapping={addNewFileMapping}
                 onFileSelected={(fieldName, file) => {
                   const previewUrl = URL.createObjectURL(file);
                   setValue(fieldName, previewUrl, {
                     shouldValidate: true,
                   });
-                  addNewFileMapping(previewUrl, file);
                 }}
                 error={errors.metaImage?.message}
                 altText="Meta image for contact page"
@@ -707,12 +739,14 @@ function AdminContactInfoPage() {
                   watch={watch}
                   setValue={setValue}
                   handleRemove={addRemovedUrl}
+                  enableCrop={true}
+                  cropAspect={16 / 9}
+                  addNewFileMapping={addNewFileMapping}
                   onFileSelected={(fieldName, file) => {
                     const previewUrl = URL.createObjectURL(file);
                     setValue(fieldName, previewUrl, {
                       shouldValidate: true,
                     });
-                    addNewFileMapping(previewUrl, file);
                   }}
                   error={errors.heroDesktopImageUrl?.message}
                   altText="Hero desktop image"
@@ -735,12 +769,14 @@ function AdminContactInfoPage() {
                   watch={watch}
                   setValue={setValue}
                   handleRemove={addRemovedUrl}
+                  enableCrop={true}
+                  cropAspect={9 / 16}
+                  addNewFileMapping={addNewFileMapping}
                   onFileSelected={(fieldName, file) => {
                     const previewUrl = URL.createObjectURL(file);
                     setValue(fieldName, previewUrl, {
                       shouldValidate: true,
                     });
-                    addNewFileMapping(previewUrl, file);
                   }}
                   error={errors.heroMobileImageUrl?.message}
                   altText="Hero mobile image"
@@ -1016,12 +1052,12 @@ function AdminContactInfoPage() {
                 watch={watch}
                 setValue={setValue}
                 handleRemove={addRemovedUrl}
+                enableCrop={false}
                 onFileSelected={(fieldName, file) => {
                   const previewUrl = URL.createObjectURL(file);
                   setValue(fieldName, previewUrl, {
                     shouldValidate: true,
                   });
-                  addNewFileMapping(previewUrl, file);
                 }}
                 error={errors.logoUrl?.message}
                 altText="Main company logo"
@@ -1050,12 +1086,12 @@ function AdminContactInfoPage() {
                 watch={watch}
                 setValue={setValue}
                 handleRemove={addRemovedUrl}
+                enableCrop={false}
                 onFileSelected={(fieldName, file) => {
                   const previewUrl = URL.createObjectURL(file);
                   setValue(fieldName, previewUrl, {
                     shouldValidate: true,
                   });
-                  addNewFileMapping(previewUrl, file);
                 }}
                 error={errors.logoWhiteUrl?.message}
                 altText="White company logo"

@@ -157,8 +157,6 @@ export const Route = createRootRoute({
         `
       : "";
 
-    console.log("hello", gaConfigScript);
-
     // Return the inline script object if in PROD and gaId exists
     return import.meta.env.PROD && gaId
       ? [

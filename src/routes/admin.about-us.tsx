@@ -132,10 +132,10 @@ function AdminAboutUsPage() {
         URL.revokeObjectURL(url);
       }
 
-      // Always clear the imageUrl field
-      setValue("imageUrl", "");
+      // Always clear the imageUrl field - REMOVED
+      // setValue("imageUrl", "");
     },
-    [setValue]
+    [setValue] // Keep setValue dependency for now, although it's not used directly here
   );
 
   // Upload image to R2
@@ -404,12 +404,14 @@ function AdminAboutUsPage() {
               watch={watch}
               setValue={setValue}
               handleRemove={addRemovedUrl}
+              enableCrop={true}
+              cropAspect={16 / 6}
+              addNewFileMapping={addNewFileMapping}
               onFileSelected={(fieldName, file) => {
                 const previewUrl = URL.createObjectURL(file);
                 setValue(fieldName, previewUrl, {
                   shouldValidate: true,
                 });
-                addNewFileMapping(previewUrl, file);
               }}
               error={errors.imageUrl?.message}
               altText={watch("imageAlt") || "About us featured image"}

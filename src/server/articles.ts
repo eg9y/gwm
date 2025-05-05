@@ -1,13 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "../db";
-import type { Article, NewArticle } from "../db";
+import type { NewArticle } from "../db";
 import { articles } from "../db/schema";
 import { eq, like, desc, and, or, sql, ne } from "drizzle-orm";
-import type { SQL, asc } from "drizzle-orm";
 import slugify from "slugify";
 import { JSDOM } from "jsdom";
 import createDOMPurify from "dompurify";
-import type { UploadResult } from "../services/r2Service";
 
 // Create a virtual DOM environment for DOMPurify
 const { window } = new JSDOM("");

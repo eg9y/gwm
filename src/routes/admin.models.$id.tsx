@@ -7,7 +7,7 @@ import {
   useFieldArray,
   type Control,
   type FieldErrors,
-  type FieldPath, // Ensure FieldPath is imported
+  type FieldPath,
 } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -97,13 +97,13 @@ const carModelFormSchema = z.object({
 type CarModelFormData = z.infer<typeof carModelFormSchema>;
 
 // Type for safer field names (Keep this type defined locally)
-type ModelFieldPath = FieldPath<CarModelFormData>; // Use imported FieldPath
+// type ModelFieldPath = FieldPath<CarModelFormData>; // Use imported FieldPath (Now using Path directly)
 
 // File upload state type
 interface FileUpload {
   file: File;
   previewUrl: string;
-  fieldName: ModelFieldPath; // Use the local alias
+  fieldName: FieldPath<CarModelFormData>; // Use Path directly
   originalFileName: string; // Store the original filename for naming conventions
 }
 
@@ -1008,7 +1008,7 @@ function CarModelEditorPage() {
 
   // Handle image selection
   const handleImageSelect = (
-    fieldName: string, // Use string as the type for simplicity and compatibility
+    fieldName: FieldPath<CarModelFormData>,
     file: File
   ) => {
     if (!file) return;
@@ -1018,7 +1018,7 @@ function CarModelEditorPage() {
     const originalFileName = file.name; // Store original filename
 
     // Get the current value to store for potential deletion
-    const currentValue = watch(fieldName as any);
+    const currentValue = watch(fieldName);
     if (
       currentValue &&
       typeof currentValue === "string" &&
@@ -1038,7 +1038,12 @@ function CarModelEditorPage() {
     // Add to pending uploads - replace any existing upload for this field
     setFileUploads((prev) => [
       ...prev.filter((upload) => upload.fieldName !== fieldName),
-      { file, previewUrl, fieldName, originalFileName },
+      {
+        file,
+        previewUrl,
+        fieldName: fieldName as FieldPath<CarModelFormData>,
+        originalFileName,
+      },
     ]);
 
     // Set temporary preview URL
@@ -1058,12 +1063,16 @@ function CarModelEditorPage() {
   };
 
   // Helper function to handle image removal
-  const handleRemoveImage = (fieldName: ModelFieldPath) => {
+  const handleRemoveImage = (
+    urlOrFieldName: FieldPath<CarModelFormData> | string
+  ) => {
     // Use the local alias
     // Get the current value to store for potential deletion
-    const currentValue = watch(fieldName);
+    const fieldName =
+      typeof urlOrFieldName === "string" ? null : urlOrFieldName;
+    const currentValue = fieldName ? watch(fieldName) : urlOrFieldName;
     console.log(
-      `handleRemoveImage called for ${fieldName}. Current URL: ${currentValue}`
+      `handleRemoveImage called for ${urlOrFieldName}. Current URL: ${currentValue}`
     );
 
     // Track the URL for deletion only if it's a persistent URL
@@ -1087,23 +1096,10 @@ function CarModelEditorPage() {
     }
 
     // Remove from file uploads if present
-    setFileUploads((prev) =>
-      prev.filter((upload) => upload.fieldName !== fieldName)
-    );
-
-    // Clear the value
-    if (fieldName.includes("colors.")) {
-      setValue(fieldName as `colors.${number}.imageUrl`, "", {
-        shouldValidate: true,
-      });
-    } else if (fieldName.includes("gallery.")) {
-      setValue(fieldName as `gallery.${number}.imageUrl`, "", {
-        shouldValidate: true,
-      });
-    } else {
-      setValue(fieldName as keyof CarModelFormData, "", {
-        shouldValidate: true,
-      });
+    if (fieldName) {
+      setFileUploads((prev) =>
+        prev.filter((upload) => upload.fieldName !== fieldName)
+      );
     }
 
     // Revoke preview URL if it was one
@@ -1465,10 +1461,7 @@ function CarModelEditorPage() {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  // @ts-ignore - Restore: Function expects different type but works correctly
-                  appendFeature("New Feature");
-                }}
+                onClick={() => appendFeature("New Feature")}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -1508,10 +1501,7 @@ function CarModelEditorPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      // @ts-ignore - Restore: Function expects different type but works correctly
-                      appendFeature("New Feature");
-                    }}
+                    onClick={() => appendFeature("New Feature")}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -1565,10 +1555,7 @@ function CarModelEditorPage() {
               <div className="mt-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    // @ts-ignore - Restore: Function expects different type but works correctly
-                    appendFeature("New Feature");
-                  }}
+                  onClick={() => appendFeature("New Feature")}
                   className="inline-flex items-center px-3 py-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
                 >
                   <Plus className="h-4 w-4 mr-1" />

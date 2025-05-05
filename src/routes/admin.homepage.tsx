@@ -1,11 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  useState,
-  useEffect,
-  useCallback,
-  type ComponentPropsWithoutRef,
-  type FC,
-} from "react";
+import { useState, useEffect, useCallback, type FC } from "react";
 import { useAuth } from "@clerk/tanstack-start";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -693,14 +687,15 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   />
                   {errors.featureSections?.[index]?.typeSpecificData
-                    ?.description?.message && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {
-                        errors.featureSections?.[index]?.typeSpecificData
-                          ?.description?.message
-                      }
-                    </p>
-                  )}
+                    ?.description?.message &&
+                    sectionType === "default" && ( // Check type before accessing error
+                      <p className="mt-1 text-sm text-red-600">
+                        {
+                          errors.featureSections?.[index]?.typeSpecificData
+                            ?.description?.message // Access is now safe
+                        }
+                      </p>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 border-t pt-5">
@@ -717,16 +712,19 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       addRemovedUrl={addRemovedUrl}
                       addNewFileMapping={addNewFileMapping}
                       removeNewFileMapping={removeNewFileMapping}
+                      enableCrop={true}
+                      cropAspect={16 / 9}
                     />
                     {errors.featureSections?.[index]?.typeSpecificData
-                      ?.desktopImageUrls?.message && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {
-                          errors.featureSections?.[index]?.typeSpecificData
-                            ?.desktopImageUrls?.message
-                        }
-                      </p>
-                    )}
+                      ?.desktopImageUrls?.message &&
+                      sectionType === "default" && ( // Check type
+                        <p className="mt-1 text-sm text-red-600">
+                          {
+                            errors.featureSections?.[index]?.typeSpecificData
+                              ?.desktopImageUrls?.message // Safe access
+                          }
+                        </p>
+                      )}
                   </div>
                   <div className="md:col-span-1">
                     <MultiImageUploadField<HomepageFormData>
@@ -741,16 +739,19 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       addRemovedUrl={addRemovedUrl}
                       addNewFileMapping={addNewFileMapping}
                       removeNewFileMapping={removeNewFileMapping}
+                      enableCrop={true}
+                      cropAspect={9 / 16}
                     />
                     {errors.featureSections?.[index]?.typeSpecificData
-                      ?.mobileImageUrls?.message && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {
-                          errors.featureSections?.[index]?.typeSpecificData
-                            ?.mobileImageUrls?.message
-                        }
-                      </p>
-                    )}
+                      ?.mobileImageUrls?.message &&
+                      sectionType === "default" && ( // Check type
+                        <p className="mt-1 text-sm text-red-600">
+                          {
+                            errors.featureSections?.[index]?.typeSpecificData
+                              ?.mobileImageUrls?.message // Safe access
+                          }
+                        </p>
+                      )}
                   </div>
 
                   <div className="md:col-span-2 pt-5">
@@ -872,17 +873,18 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                 <h4 className="text-md font-semibold text-gray-600 mb-2">
                   Feature Cards (Max 3)
                 </h4>
-                {errors.featureSections?.[index]?.typeSpecificData?.cards
-                  ?.message ||
-                  (errors.featureSections?.[index]?.typeSpecificData?.cards
-                    ?.root?.message && (
+                {(errors.featureSections?.[index]?.typeSpecificData?.cards
+                  ?.message || // Check type
+                  errors.featureSections?.[index]?.typeSpecificData?.cards?.root
+                    ?.message) &&
+                  sectionType === "feature_cards_grid" && (
                     <p className="mb-2 text-sm text-red-600">
                       {errors.featureSections?.[index]?.typeSpecificData?.cards
                         ?.message ||
                         errors.featureSections?.[index]?.typeSpecificData?.cards
                           ?.root?.message}
                     </p>
-                  ))}
+                  )}
                 <div className="space-y-6">
                   {cardFields.map((cardField, cardIndex) => (
                     <div
@@ -946,9 +948,13 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             }}
                             error={
                               errors.featureSections?.[index]?.typeSpecificData
-                                ?.cards?.[cardIndex]?.imageUrl?.message
+                                ?.cards?.[cardIndex]?.imageUrl?.message // Safe now within type check
                             }
                             altText={`Card ${cardIndex + 1} image`}
+                            // --- Add cropping props ---
+                            enableCrop={true}
+                            cropAspect={21 / 10} // Approx 310/146
+                            addNewFileMapping={addNewFileMapping} // Needed for fallback setValue
                           />
                         </div>
                         {/* Card Title */}
@@ -968,15 +974,16 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                           />
                           {errors.featureSections?.[index]?.typeSpecificData
-                            ?.cards?.[cardIndex]?.title?.message && (
-                            <p className="mt-1 text-sm text-red-600">
-                              {
-                                errors.featureSections?.[index]
-                                  ?.typeSpecificData?.cards?.[cardIndex]?.title
-                                  ?.message
-                              }
-                            </p>
-                          )}
+                            ?.cards?.[cardIndex]?.title?.message &&
+                            sectionType === "feature_cards_grid" && ( // Check type
+                              <p className="mt-1 text-sm text-red-600">
+                                {
+                                  errors.featureSections?.[index]
+                                    ?.typeSpecificData?.cards?.[cardIndex]
+                                    ?.title?.message
+                                }
+                              </p>
+                            )}
                         </div>
                         {/* Card Description */}
                         <div className="md:col-span-2">
@@ -995,15 +1002,16 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                           />
                           {errors.featureSections?.[index]?.typeSpecificData
-                            ?.cards?.[cardIndex]?.description?.message && (
-                            <p className="mt-1 text-sm text-red-600">
-                              {
-                                errors.featureSections?.[index]
-                                  ?.typeSpecificData?.cards?.[cardIndex]
-                                  ?.description?.message
-                              }
-                            </p>
-                          )}
+                            ?.cards?.[cardIndex]?.description?.message &&
+                            sectionType === "feature_cards_grid" && ( // Check type
+                              <p className="mt-1 text-sm text-red-600">
+                                {
+                                  errors.featureSections?.[index]
+                                    ?.typeSpecificData?.cards?.[cardIndex]
+                                    ?.description?.message
+                                }
+                              </p>
+                            )}
                         </div>
                         {/* Card Link */}
                         <div className="md:col-span-2">
@@ -1092,9 +1100,13 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                     }}
                     error={
                       errors.featureSections?.[index]?.typeSpecificData
-                        ?.imageUrl?.message
+                        ?.imageUrl?.message // Safe now within type check
                     }
                     altText={`Banner section ${index + 1} image`}
+                    // --- Add cropping props ---
+                    enableCrop={true}
+                    cropAspect={16 / 4} // 4:1 Aspect ratio for banner
+                    addNewFileMapping={addNewFileMapping} // Needed for fallback setValue
                   />
                 </div>
 
@@ -1963,7 +1975,10 @@ function HomepageEditorPage() {
                     fieldName="heroDesktopImageUrl"
                     watch={watch}
                     setValue={setValue}
-                    handleRemove={addRemovedUrl}
+                    handleRemove={addRemovedUrl} // Passes string (URL or fieldName)
+                    enableCrop={true}
+                    cropAspect={16 / 9} // Keep 16:9 for desktop hero
+                    addNewFileMapping={addNewFileMapping} // Needed for fallback setValue
                     onFileSelected={(fieldName, file) => {
                       const previewUrl = URL.createObjectURL(file);
                       setValue(
@@ -1990,7 +2005,10 @@ function HomepageEditorPage() {
                     fieldName="heroMobileImageUrl"
                     watch={watch}
                     setValue={setValue}
-                    handleRemove={addRemovedUrl}
+                    handleRemove={addRemovedUrl} // Passes string (URL or fieldName)
+                    enableCrop={true}
+                    cropAspect={9 / 16} // Keep 9:16 for mobile hero
+                    addNewFileMapping={addNewFileMapping} // Needed for fallback setValue
                     onFileSelected={(fieldName, file) => {
                       const previewUrl = URL.createObjectURL(file);
                       setValue(
