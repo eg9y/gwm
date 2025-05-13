@@ -1,11 +1,14 @@
 import { defineConfig } from "drizzle-kit";
 import path from "node:path";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default defineConfig({
   out: "./drizzle",
   schema: "./src/db/schema.ts",
   dialect: "sqlite",
   dbCredentials: {
-    url: path.resolve("storage/gwm-database.db"),
+    url: path.resolve(process.env.DATABASE_URL || "storage/gwm-database.db"),
   },
 });

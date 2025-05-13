@@ -176,34 +176,32 @@ export const homepageFeatureSections = sqliteTable(
     id: integer("id").primaryKey({ autoIncrement: true }),
     homepageConfigId: text("homepage_config_id")
       .notNull()
-      .references(() => homepageConfig.id, { onDelete: "cascade" }), // Link to homepageConfig
+      .references(() => homepageConfig.id, { onDelete: "cascade" }),
 
     // New field for section type
     sectionType: text("section_type").notNull().default("default"), // e.g., 'default', 'feature_cards_grid'
 
     order: integer("order").notNull(), // For ordering sections
-    title: text("title").notNull(), // Can be used as main title or section identifier
+    title: text("title").notNull(),
     subtitle: text("subtitle"),
 
-    // Type-specific data stored as JSON
     typeSpecificData: text("type_specific_data", {
       mode: "json",
     }),
 
-    // Keep existing fields for backward compatibility (or potential common fields)
-    description: text("description"), // Make nullable
+    description: text("description"),
     desktopImageUrls: text("desktop_image_urls", { mode: "json" })
-      .$type<string[]>() // Specific to 'default' type now
-      .notNull(), // Keep notNull, handle default [] in application logic
+      .$type<string[]>()
+      .notNull(),
     mobileImageUrls: text("mobile_image_urls", { mode: "json" }).$type<
       string[]
-    >(), // Specific to 'default' type now
-    imageAlt: text("image_alt").default("Feature section image"), // May move into typeSpecificData
-    features: text("features", { mode: "json" }).$type<string[]>(), // Specific to 'default' type now
-    primaryButtonText: text("primary_button_text"), // May move into typeSpecificData
-    primaryButtonLink: text("primary_button_link"), // May move into typeSpecificData
-    secondaryButtonText: text("secondary_button_text"), // May move into typeSpecificData
-    secondaryButtonLink: text("secondary_button_link"), // May move into typeSpecificData
+    >(),
+    imageAlt: text("image_alt").default("Feature section image"),
+    features: text("features", { mode: "json" }).$type<string[]>(),
+    primaryButtonText: text("primary_button_text"),
+    primaryButtonLink: text("primary_button_link"),
+    secondaryButtonText: text("secondary_button_text"),
+    secondaryButtonLink: text("secondary_button_link"),
 
     createdAt: text("created_at")
       .notNull()
