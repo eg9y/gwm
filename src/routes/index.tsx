@@ -7,10 +7,10 @@ import { seo } from "../utils/seo";
 import {
   getHomepageConfig,
   type HomepageConfigWithSections,
-  type HomepageFeatureSectionUnion,
 } from "../server/homepage";
 import FeatureCardsGridSection from "../components/FeatureCardsGridSection";
 import Banner from "../components/Banner";
+import GallerySection from "../components/GallerySection";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -186,7 +186,26 @@ function HomePage() {
               </div>
             );
           }
-          default:
+          case "gallery": {
+            const typeData = section.typeSpecificData;
+            return (
+              <div
+                key={section.id || index}
+                id={`feature-${index}`}
+                className="section-container-auto-height w-full max-w-full p-0 m-0"
+              >
+                <GallerySection
+                  title={section.title}
+                  subtitle={section.subtitle}
+                  images={typeData.images.map((image) => ({
+                    imageUrl: image.imageUrl,
+                    altText: image.altText,
+                  }))}
+                />
+              </div>
+            );
+          }
+          default: {
             // Optional: Handle unknown section types explicitly or return null
             // The switch statement with exhaustive checks might make this less necessary,
             // but it's good practice for future changes.
@@ -196,6 +215,7 @@ function HomePage() {
               `Unknown section type encountered during render: ${(_exhaustiveCheck as any)?.sectionType}`
             );
             return null;
+          }
         }
       })}
 

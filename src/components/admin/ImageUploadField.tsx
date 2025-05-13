@@ -14,7 +14,7 @@ import type {
   PathValue,
 } from "react-hook-form";
 import toast from "react-hot-toast";
-import Cropper from "react-easy-crop";
+import Cropper, { type Area } from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
 
 // Define the props for the ImageUploadField
@@ -105,7 +105,6 @@ export function ImageUploadField<TFormValues extends FieldValues>({
   watch,
   setValue,
   handleRemove,
-  handleUploadClick,
   onFileSelected,
   error,
   altText = "Image preview", // More descriptive default alt text
@@ -116,17 +115,17 @@ export function ImageUploadField<TFormValues extends FieldValues>({
   const imageUrl = watch(fieldName);
   const isUrl = typeof imageUrl === "string";
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showUrlInput, setShowUrlInput] = useState(false);
-  const [inputUrl, setInputUrl] = useState("");
 
   // --- State for cropping ---
   const [imgSrc, setImgSrc] = useState(""); // Source for the cropper modal
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null); // Use Area type
   const [isCropping, setIsCropping] = useState(false); // Control modal visibility
   const [originalFile, setOriginalFile] = useState<File | null>(null); // Store the originally selected file
+  const [isImageLoadingForCrop, setIsImageLoadingForCrop] = useState(false); // New state for loading indicator
+  const cropperDialogRef = useRef<HTMLDialogElement>(null); // Ref for the dialog
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -135,85 +134,35 @@ export function ImageUploadField<TFormValues extends FieldValues>({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // --- Cropping Logic ---
       if (enableCrop && cropAspect) {
-        // Reset crop position
         setCrop({ x: 0, y: 0 });
-        setZoom(1); // Reset zoom
-        setRotation(0); // Reset rotation
-        setOriginalFile(file); // Store the original file
+        setZoom(1);
+        setRotation(0);
+        setOriginalFile(file);
         const reader = new FileReader();
         reader.addEventListener("load", () => {
           setImgSrc(reader.result?.toString() || "");
-          setIsCropping(true); // Open the cropping modal
+          setIsImageLoadingForCrop(false);
+          setIsCropping(true); // Prepare to show modal
+          cropperDialogRef.current?.showModal(); // Show the dialog
         });
+        setIsImageLoadingForCrop(true);
         reader.readAsDataURL(file);
       } else {
-        // --- Original Logic (No Crop) ---
         if (onFileSelected) {
           onFileSelected(fieldName, file);
-        } else if (handleUploadClick) {
-          // Legacy behavior
-          handleUploadClick(fieldName);
         }
       }
 
-      // Reset the file input for future selections
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   };
 
-  const handleUrlSubmit = (e: React.MouseEvent | React.FormEvent) => {
-    e.preventDefault();
-    if (inputUrl.trim()?.startsWith("http")) {
-      const newUrl = inputUrl.trim();
-
-      // Test if URL leads to a valid image
-      const testImage = new Image();
-      testImage.onload = () => {
-        // --- Cropping Logic for URL ---
-        if (enableCrop && cropAspect) {
-          // Reset crop position
-          setCrop({ x: 0, y: 0 });
-          setZoom(1); // Reset zoom
-          setRotation(0); // Reset rotation
-          setOriginalFile(null); // No original file for URL input
-          setImgSrc(newUrl); // Use the URL directly as source
-          setIsCropping(true); // Open the cropping modal
-          setShowUrlInput(false); // Hide URL input field
-          setInputUrl("");
-        } else {
-          // --- Original Logic (No Crop) ---
-          if (setValue) {
-            // Only use setValue if it's provided
-            setValue(
-              fieldName,
-              newUrl as PathValue<TFormValues, typeof fieldName>
-            );
-            toast.success("Image URL added successfully");
-          }
-          setShowUrlInput(false);
-          setInputUrl("");
-        }
-      };
-
-      testImage.onerror = () => {
-        toast.error(
-          "Could not load image from URL. Please check the URL and try again."
-        );
-      };
-
-      // Start loading the image
-      testImage.src = newUrl;
-    } else {
-      toast.error("Please enter a valid URL starting with http:// or https://");
-    }
-  };
-
   // --- Function to handle completed crop ---
-  const onCropComplete = (croppedArea: any, croppedAreaPixelsData: any) => {
+  const onCropComplete = (croppedArea: Area, croppedAreaPixelsData: Area) => {
+    // Use Area type
     setCroppedAreaPixels(croppedAreaPixelsData);
   };
 
@@ -225,12 +174,10 @@ export function ImageUploadField<TFormValues extends FieldValues>({
     }
 
     try {
-      // Get the filename
       const fileName =
         originalFile?.name ||
         `${fieldName.toString().split(".").pop() || "cropped"}.jpg`;
 
-      // Create a cropped file using the helper function
       const croppedFile = await createCroppedFile(
         imgSrc,
         croppedAreaPixels,
@@ -241,7 +188,6 @@ export function ImageUploadField<TFormValues extends FieldValues>({
         if (onFileSelected) {
           onFileSelected(fieldName, croppedFile);
         } else {
-          // Fallback or alternative logic if needed, e.g., using setValue with blob URL
           if (setValue && addNewFileMapping) {
             const newBlobUrl = URL.createObjectURL(croppedFile);
             setValue(
@@ -249,16 +195,12 @@ export function ImageUploadField<TFormValues extends FieldValues>({
               newBlobUrl as PathValue<TFormValues, typeof fieldName>,
               { shouldValidate: true }
             );
-            addNewFileMapping(newBlobUrl, croppedFile); // Important for parent tracking
+            addNewFileMapping(newBlobUrl, croppedFile);
           } else {
             console.warn(
               "setValue or addNewFileMapping not provided for cropped file handling."
             );
           }
-        }
-        // If we cropped an *existing* http url, mark the original for removal
-        if (imgSrc.startsWith("http")) {
-          handleRemove(imgSrc); // Pass the original URL to the remove handler
         }
       }
     } catch (error) {
@@ -266,36 +208,41 @@ export function ImageUploadField<TFormValues extends FieldValues>({
       toast.error("Failed to crop image");
     }
 
-    // Reset cropping state
     setIsCropping(false);
+    cropperDialogRef.current?.close(); // Close the dialog
     setImgSrc("");
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setRotation(0);
     setCroppedAreaPixels(null);
     setOriginalFile(null);
+    setIsImageLoadingForCrop(false);
   };
 
   // --- Handler for canceling the crop ---
   const onCropCancel = () => {
     setIsCropping(false);
+    cropperDialogRef.current?.close(); // Close the dialog
     setImgSrc("");
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setRotation(0);
     setCroppedAreaPixels(null);
     setOriginalFile(null);
+    setIsImageLoadingForCrop(false);
   };
 
   // --- Handler to initiate cropping for an existing image ---
   const handleEditCrop = () => {
     if (isUrl && imageUrl && enableCrop && cropAspect) {
-      setCrop({ x: 0, y: 0 }); // Reset crop
-      setZoom(1); // Reset zoom
-      setRotation(0); // Reset rotation
-      setOriginalFile(null); // No original file
-      setImgSrc(imageUrl); // Set source to existing URL
-      setIsCropping(true); // Open modal
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setRotation(0);
+      setOriginalFile(null);
+      setImgSrc(imageUrl);
+      setIsImageLoadingForCrop(false); // Assuming already loaded or external
+      setIsCropping(true);
+      cropperDialogRef.current?.showModal(); // Show the dialog
     }
   };
 
@@ -364,64 +311,27 @@ export function ImageUploadField<TFormValues extends FieldValues>({
         ) : (
           /* Upload Placeholder */
           <div>
-            {showUrlInput ? (
-              <div className="mb-3">
-                <div className="flex flex-col space-y-2">
-                  <input
-                    type="url"
-                    value={inputUrl}
-                    onChange={(e) => setInputUrl(e.target.value)}
-                    placeholder="Enter image URL"
-                    className="border border-gray-300 rounded-md p-2 text-sm w-full"
-                    required
-                  />
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleUrlSubmit(e);
-                      }}
-                      className="bg-primary text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center"
-                    >
-                      <Link className="h-4 w-4 mr-1" />
-                      Use URL
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowUrlInput(false)}
-                      className="bg-gray-200 text-gray-800 px-3 py-1.5 rounded-md text-sm font-medium shadow-sm hover:bg-gray-300 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-2">
-                <button
-                  type="button"
-                  className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-gray-50 transition-colors w-full h-36 text-center"
-                  onClick={handleFileSelect}
-                >
-                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500 font-medium">
-                    Click to upload image
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Recommended: {cropAspect ? `${cropAspect}:1` : "16:9"}
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowUrlInput(true)}
-                  className="flex items-center justify-center text-sm text-primary hover:text-primary/80 font-medium"
-                >
-                  <Link className="h-4 w-4 mr-1" />
-                  Or use an image URL instead
-                </button>
+            {isImageLoadingForCrop && (
+              <div className="flex items-center justify-center p-4 my-2 text-sm text-gray-600 bg-gray-100 rounded-md">
+                Loading image for cropper...
               </div>
             )}
+            <div className="flex flex-col space-y-2">
+              <button
+                type="button"
+                className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-gray-50 transition-colors w-full h-36 text-center"
+                onClick={handleFileSelect}
+                disabled={isImageLoadingForCrop} // Disable if loading
+              >
+                <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500 font-medium">
+                  Click to upload image
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Recommended: {cropAspect ? `${cropAspect}:1` : "16:9"}
+                </p>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -429,103 +339,105 @@ export function ImageUploadField<TFormValues extends FieldValues>({
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
 
       {/* --- Cropping Modal --- */}
-      {isCropping && imgSrc && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-          aria-labelledby="crop-modal-title"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
-            <h2
-              id="crop-modal-title"
-              className="text-xl font-semibold text-gray-800 mb-4"
-            >
-              Crop Image
-            </h2>
-            <button
-              onClick={onCropCancel}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-              aria-label="Close cropping modal"
-            >
-              <X className="h-6 w-6" />
-            </button>
-
-            <div
-              className="relative"
-              style={{ height: "400px", maxHeight: "60vh" }}
-            >
-              <Cropper
-                image={imgSrc}
-                crop={crop}
-                zoom={zoom}
-                aspect={cropAspect}
-                onCropChange={setCrop}
-                onCropComplete={onCropComplete}
-                onZoomChange={setZoom}
-                rotation={rotation}
-                onRotationChange={setRotation}
-                objectFit="contain"
-              />
-            </div>
-
-            <div className="mt-4">
-              <label
-                htmlFor="zoom"
-                className="block text-sm text-gray-700 mb-1"
+      <dialog
+        ref={cropperDialogRef}
+        className="bg-transparent p-0 border-none max-w-3xl w-full max-h-[95vh] rounded-lg shadow-xl backdrop:bg-black backdrop:bg-opacity-75"
+        onClose={onCropCancel} // Handle ESC key close
+        aria-labelledby="crop-modal-title"
+      >
+        {isCropping &&
+          imgSrc && ( // Conditionally render content
+            <div className="bg-white rounded-lg shadow-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+              <h2
+                id="crop-modal-title"
+                className="text-xl font-semibold text-gray-800 mb-4"
               >
-                Zoom
-              </label>
-              <input
-                type="range"
-                id="zoom"
-                min={1}
-                max={3}
-                step={0.1}
-                value={zoom}
-                onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="w-full"
-              />
-            </div>
-
-            <div className="mt-4">
-              <label
-                htmlFor="rotation"
-                className="block text-sm text-gray-700 mb-1"
-              >
-                Rotation
-              </label>
-              <input
-                type="range"
-                id="rotation"
-                min={0}
-                max={360}
-                step={1}
-                value={rotation}
-                onChange={(e) => setRotation(parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3 mt-5 border-t pt-4">
+                Crop Image
+              </h2>
               <button
-                type="button"
+                type="button" // Added type prop
                 onClick={onCropCancel}
-                className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                aria-label="Close cropping modal"
               >
-                Cancel
+                <X className="h-6 w-6" />
               </button>
-              <button
-                type="button"
-                onClick={onCropConfirm}
-                className="px-4 py-2 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary/90"
+
+              <div
+                className="relative"
+                style={{ height: "400px", maxHeight: "60vh" }}
               >
-                Confirm Crop
-              </button>
+                <Cropper
+                  image={imgSrc}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={cropAspect}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                  rotation={rotation}
+                  onRotationChange={setRotation}
+                  objectFit="contain"
+                />
+              </div>
+
+              <div className="mt-4">
+                <label
+                  htmlFor="zoom"
+                  className="block text-sm text-gray-700 mb-1"
+                >
+                  Zoom
+                </label>
+                <input
+                  type="range"
+                  id="zoom"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number.parseFloat(e.target.value))} // Changed to Number.parseFloat
+                  className="w-full"
+                />
+              </div>
+
+              <div className="mt-4">
+                <label
+                  htmlFor="rotation"
+                  className="block text-sm text-gray-700 mb-1"
+                >
+                  Rotation
+                </label>
+                <input
+                  type="range"
+                  id="rotation"
+                  min={0}
+                  max={360}
+                  step={1}
+                  value={rotation}
+                  onChange={(e) => setRotation(Number.parseInt(e.target.value))} // Changed to Number.parseInt
+                  className="w-full"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-5 border-t pt-4">
+                <button
+                  type="button"
+                  onClick={onCropCancel}
+                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={onCropConfirm}
+                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary/90"
+                >
+                  Confirm Crop
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+      </dialog>
     </div>
   );
 }

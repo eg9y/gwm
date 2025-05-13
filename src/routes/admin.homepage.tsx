@@ -128,11 +128,31 @@ const bannerSectionSchema = baseSectionSchema.extend({
   typeSpecificData: bannerSectionDataSchema,
 });
 
+// Schema for individual gallery images (Frontend)
+const galleryImageSchema = z.object({
+  imageUrl: z.string().min(1, "Image URL or blob is required"), // Allow blob:
+  altText: z.string().optional(),
+});
+
+// Schema for the 'gallery' section type data (Frontend)
+const gallerySectionDataSchema = z.object({
+  images: z
+    .array(galleryImageSchema)
+    .min(1, "At least one image is required")
+    .default([]),
+});
+
+const gallerySectionSchema = baseSectionSchema.extend({
+  sectionType: z.literal("gallery"),
+  typeSpecificData: gallerySectionDataSchema,
+});
+
 // --- Discriminated Union for Section Validation (Frontend) ---
 const sectionUnionSchema = z.discriminatedUnion("sectionType", [
   defaultSectionSchema,
   featureCardsGridSchema,
   bannerSectionSchema, // Add banner schema
+  gallerySectionSchema, // Add gallery schema
   // Add other section type schemas here in the future
 ]);
 
@@ -225,6 +245,22 @@ const defaultBannerSectionValue: z.infer<typeof bannerSectionSchema> = {
     imageUrl: "",
     altText: "",
     link: "",
+  },
+};
+
+// Default value for a single GALLERY IMAGE (used when adding new images)
+const defaultGalleryImageValue: z.infer<typeof galleryImageSchema> = {
+  imageUrl: "",
+  altText: "",
+};
+
+// Default value for a NEW gallery section
+const defaultGallerySectionValue: z.infer<typeof gallerySectionSchema> = {
+  sectionType: "gallery",
+  title: "Gallery Section", // Default title for easy identification
+  subtitle: "",
+  typeSpecificData: {
+    images: [defaultGalleryImageValue], // Default to one empty image
   },
 };
 
@@ -507,6 +543,16 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
     name: `featureSections.${index}.typeSpecificData.cards`,
   });
 
+  // Use useFieldArray for the images within the gallery type
+  const {
+    fields: galleryImageFields, // Renamed to avoid conflict if we had 'imageFields' elsewhere
+    append: appendGalleryImage,
+    remove: removeGalleryImage,
+  } = useFieldArray({
+    control,
+    name: `featureSections.${index}.typeSpecificData.images` as const, // Ensure this path is correct
+  });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -584,6 +630,11 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
               if (imageUrl) {
                 urlsToRemove.push(imageUrl);
               }
+            } else if (currentSectionType === "gallery") {
+              const images = watch(
+                `featureSections.${index}.typeSpecificData.images`
+              );
+              urlsToRemove = images.map((image) => image.imageUrl);
             }
 
             // Keep the rest of the logic (checking http/blob, removing)
@@ -622,6 +673,7 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                 <option value="default">Default (Image Left/Right)</option>
                 <option value="feature_cards_grid">Feature Cards Grid</option>
                 <option value="banner">Banner</option>
+                <option value="gallery">Gallery</option>
                 {/* Add other types here */}
               </select>
             </div>
@@ -686,16 +738,21 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   />
-                  {sectionType === "default" && // <-- Add type guard here
-                    errors.featureSections?.[index]?.typeSpecificData
-                      ?.description?.message && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {
-                          errors.featureSections?.[index]?.typeSpecificData
-                            ?.description?.message // Access is now safe
-                        }
-                      </p>
-                    )}
+                  {sectionType === "default" &&
+                    (() => {
+                      const specificErrors = errors.featureSections?.[index]
+                        ?.typeSpecificData as
+                        | FieldErrors<z.infer<typeof defaultSectionDataSchema>>
+                        | undefined;
+                      if (specificErrors?.description?.message) {
+                        return (
+                          <p className="mt-1 text-sm text-red-600">
+                            {specificErrors.description.message}
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 border-t pt-5">
@@ -715,16 +772,23 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       enableCrop={true}
                       cropAspect={16 / 9}
                     />
-                    {sectionType === "default" && // <-- Add type guard here
-                      errors.featureSections?.[index]?.typeSpecificData
-                        ?.desktopImageUrls?.message && ( // Check type
-                        <p className="mt-1 text-sm text-red-600">
-                          {
-                            errors.featureSections?.[index]?.typeSpecificData
-                              ?.desktopImageUrls?.message // Safe access
-                          }
-                        </p>
-                      )}
+                    {sectionType === "default" &&
+                      (() => {
+                        const specificErrors = errors.featureSections?.[index]
+                          ?.typeSpecificData as
+                          | FieldErrors<
+                              z.infer<typeof defaultSectionDataSchema>
+                            >
+                          | undefined;
+                        if (specificErrors?.desktopImageUrls?.message) {
+                          return (
+                            <p className="mt-1 text-sm text-red-600">
+                              {specificErrors.desktopImageUrls.message}
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
                   </div>
                   <div className="md:col-span-1">
                     <MultiImageUploadField<HomepageFormData>
@@ -742,16 +806,23 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       enableCrop={true}
                       cropAspect={9 / 16}
                     />
-                    {sectionType === "default" && // <-- Add type guard here
-                      errors.featureSections?.[index]?.typeSpecificData
-                        ?.mobileImageUrls?.message && ( // Check type
-                        <p className="mt-1 text-sm text-red-600">
-                          {
-                            errors.featureSections?.[index]?.typeSpecificData
-                              ?.mobileImageUrls?.message // Safe access
-                          }
-                        </p>
-                      )}
+                    {sectionType === "default" &&
+                      (() => {
+                        const specificErrors = errors.featureSections?.[index]
+                          ?.typeSpecificData as
+                          | FieldErrors<
+                              z.infer<typeof defaultSectionDataSchema>
+                            >
+                          | undefined;
+                        if (specificErrors?.mobileImageUrls?.message) {
+                          return (
+                            <p className="mt-1 text-sm text-red-600">
+                              {specificErrors.mobileImageUrls.message}
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
                   </div>
 
                   <div className="md:col-span-2 pt-5">
@@ -873,18 +944,25 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                 <h4 className="text-md font-semibold text-gray-600 mb-2">
                   Feature Cards (Max 3)
                 </h4>
-                {sectionType === "feature_cards_grid" && // <-- Add type guard here
-                  (errors.featureSections?.[index]?.typeSpecificData?.cards
-                    ?.message || // Check type
-                    errors.featureSections?.[index]?.typeSpecificData?.cards
-                      ?.root?.message) && (
-                    <p className="mb-2 text-sm text-red-600">
-                      {errors.featureSections?.[index]?.typeSpecificData?.cards
-                        ?.message ||
-                        errors.featureSections?.[index]?.typeSpecificData?.cards
-                          ?.root?.message}
-                    </p>
-                  )}
+                {sectionType === "feature_cards_grid" &&
+                  (() => {
+                    const specificErrors = errors.featureSections?.[index]
+                      ?.typeSpecificData as
+                      | FieldErrors<z.infer<typeof featureCardsGridDataSchema>>
+                      | undefined;
+                    if (
+                      specificErrors?.cards?.message ||
+                      specificErrors?.cards?.root?.message
+                    ) {
+                      return (
+                        <p className="mb-2 text-sm text-red-600">
+                          {specificErrors.cards.message ||
+                            specificErrors.cards.root?.message}
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
                 <div className="space-y-6">
                   {cardFields.map((cardField, cardIndex) => (
                     <div
@@ -948,9 +1026,22 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             }}
                             error={
                               sectionType === "feature_cards_grid" // <-- Add type guard here
-                                ? errors.featureSections?.[index]
-                                    ?.typeSpecificData?.cards?.[cardIndex]
-                                    ?.imageUrl?.message
+                                ? (
+                                    (
+                                      errors.featureSections?.[index]
+                                        ?.typeSpecificData as
+                                        | FieldErrors<
+                                            z.infer<
+                                              typeof featureCardsGridDataSchema
+                                            >
+                                          >
+                                        | undefined
+                                    )?.cards?.[cardIndex] as
+                                      | FieldErrors<
+                                          z.infer<typeof featureCardSchema>
+                                        >
+                                      | undefined
+                                  )?.imageUrl?.message
                                 : undefined
                             }
                             altText={`Card ${cardIndex + 1} image`}
@@ -976,17 +1067,27 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             )}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                           />
-                          {sectionType === "feature_cards_grid" && // <-- Add type guard here
-                            errors.featureSections?.[index]?.typeSpecificData
-                              ?.cards?.[cardIndex]?.title?.message && ( // Check type
-                              <p className="mt-1 text-sm text-red-600">
-                                {
-                                  errors.featureSections?.[index]
-                                    ?.typeSpecificData?.cards?.[cardIndex]
-                                    ?.title?.message
-                                }
-                              </p>
-                            )}
+                          {sectionType === "feature_cards_grid" &&
+                            (() => {
+                              const specificErrors = (
+                                errors.featureSections?.[index]
+                                  ?.typeSpecificData as
+                                  | FieldErrors<
+                                      z.infer<typeof featureCardsGridDataSchema>
+                                    >
+                                  | undefined
+                              )?.cards?.[cardIndex] as
+                                | FieldErrors<z.infer<typeof featureCardSchema>>
+                                | undefined;
+                              if (specificErrors?.title?.message) {
+                                return (
+                                  <p className="mt-1 text-sm text-red-600">
+                                    {specificErrors.title.message}
+                                  </p>
+                                );
+                              }
+                              return null;
+                            })()}
                         </div>
                         {/* Card Description */}
                         <div className="md:col-span-2">
@@ -1004,17 +1105,27 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                             rows={2}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                           />
-                          {sectionType === "feature_cards_grid" && // <-- Add type guard here
-                            errors.featureSections?.[index]?.typeSpecificData
-                              ?.cards?.[cardIndex]?.description?.message && ( // Check type
-                              <p className="mt-1 text-sm text-red-600">
-                                {
-                                  errors.featureSections?.[index]
-                                    ?.typeSpecificData?.cards?.[cardIndex]
-                                    ?.description?.message
-                                }
-                              </p>
-                            )}
+                          {sectionType === "feature_cards_grid" &&
+                            (() => {
+                              const specificErrors = (
+                                errors.featureSections?.[index]
+                                  ?.typeSpecificData as
+                                  | FieldErrors<
+                                      z.infer<typeof featureCardsGridDataSchema>
+                                    >
+                                  | undefined
+                              )?.cards?.[cardIndex] as
+                                | FieldErrors<z.infer<typeof featureCardSchema>>
+                                | undefined;
+                              if (specificErrors?.description?.message) {
+                                return (
+                                  <p className="mt-1 text-sm text-red-600">
+                                    {specificErrors.description.message}
+                                  </p>
+                                );
+                              }
+                              return null;
+                            })()}
                         </div>
                         {/* Card Link */}
                         <div className="md:col-span-2">
@@ -1102,9 +1213,19 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                       addNewFileMapping(previewUrl, file);
                     }}
                     error={
-                      sectionType === "banner" && // <-- Add type guard here
-                      errors.featureSections?.[index]?.typeSpecificData
-                        ?.imageUrl?.message // Safe now within type check
+                      sectionType === "banner"
+                        ? (() => {
+                            // <-- Add type guard here
+                            const specificErrors = errors.featureSections?.[
+                              index
+                            ]?.typeSpecificData as
+                              | FieldErrors<
+                                  z.infer<typeof bannerSectionDataSchema>
+                                >
+                              | undefined;
+                            return specificErrors?.imageUrl?.message;
+                          })()
+                        : undefined // Ensure undefined is returned if not banner type
                     }
                     altText={`Banner section ${index + 1} image`}
                     // --- Add cropping props ---
@@ -1157,6 +1278,171 @@ const SortableFeatureSection: FC<SortableFeatureSectionProps> = ({
                 </div>
               </div>
             )}
+
+            {/* == Fields for 'gallery' section type == */}
+            {sectionType === "gallery" &&
+              (() => {
+                const galleryImagesErrorObject = (
+                  errors.featureSections?.[index]?.typeSpecificData as
+                    | FieldErrors<z.infer<typeof gallerySectionDataSchema>>
+                    | undefined
+                )?.images;
+
+                return (
+                  <div className="space-y-4">
+                    <h4 className="text-md font-semibold text-gray-600 mb-2">
+                      Gallery Images
+                    </h4>
+                    {galleryImagesErrorObject &&
+                      (galleryImagesErrorObject.message ||
+                        galleryImagesErrorObject.root?.message) && (
+                        <p className="mb-2 text-sm text-red-600">
+                          {galleryImagesErrorObject.message ||
+                            galleryImagesErrorObject.root?.message}
+                        </p>
+                      )}
+                    <div className="space-y-6">
+                      {galleryImageFields.map((imageField, imageIndex) => {
+                        const imageItemErrors = (
+                          galleryImagesErrorObject as
+                            | FieldErrors<z.infer<typeof galleryImageSchema>[]>
+                            | undefined
+                        )?.[imageIndex];
+                        const imageUrlPath =
+                          `featureSections.${index}.typeSpecificData.images.${imageIndex}.imageUrl` as const;
+                        const imageAltTextPath =
+                          `featureSections.${index}.typeSpecificData.images.${imageIndex}.altText` as const;
+
+                        return (
+                          <div
+                            key={imageField.id}
+                            className="p-4 border rounded-md bg-gray-50/50 relative"
+                          >
+                            <button // This button removes the entire image entry from the array
+                              type="button"
+                              onClick={() => {
+                                const currentUrl = watch(imageUrlPath);
+                                if (
+                                  typeof currentUrl === "string" &&
+                                  currentUrl
+                                ) {
+                                  if (currentUrl.startsWith("http"))
+                                    addRemovedUrl(currentUrl);
+                                  else if (currentUrl.startsWith("blob:"))
+                                    removeNewFileMapping(currentUrl);
+                                }
+                                removeGalleryImage(imageIndex); // Call useFieldArray's remove
+                              }}
+                              className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                              aria-label={`Remove Image ${imageIndex + 1}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                            <h5 className="font-medium text-gray-800 mb-3">
+                              Image {imageIndex + 1}
+                            </h5>
+                            <div className="grid grid-cols-1 gap-y-4 gap-x-6">
+                              <div
+                                id={`galleryImageUploadContainer-${index}-${imageIndex}`}
+                              >
+                                <ImageUploadField<HomepageFormData>
+                                  fieldName={imageUrlPath}
+                                  watch={watch}
+                                  setValue={setValue}
+                                  // handleRemove for ImageUploadField clears the URL and queues for deletion
+                                  handleRemove={() => {
+                                    const currentUrl = watch(imageUrlPath);
+                                    if (
+                                      typeof currentUrl === "string" &&
+                                      currentUrl
+                                    ) {
+                                      if (currentUrl.startsWith("http"))
+                                        addRemovedUrl(currentUrl);
+                                      else if (currentUrl.startsWith("blob:"))
+                                        removeNewFileMapping(currentUrl);
+                                    }
+                                    setValue(imageUrlPath, "", {
+                                      shouldValidate: true,
+                                    });
+                                  }}
+                                  onFileSelected={(fieldName, file) => {
+                                    const previewUrl =
+                                      URL.createObjectURL(file);
+                                    setValue(
+                                      fieldName as FieldPath<HomepageFormData>,
+                                      previewUrl,
+                                      { shouldValidate: true }
+                                    );
+                                    addNewFileMapping(previewUrl, file);
+                                  }}
+                                  error={
+                                    (
+                                      imageItemErrors as
+                                        | FieldErrors<
+                                            z.infer<typeof galleryImageSchema>
+                                          >
+                                        | undefined
+                                    )?.imageUrl?.message || undefined
+                                  }
+                                  altText={`Gallery image ${imageIndex + 1}`}
+                                  enableCrop={true}
+                                  cropAspect={1} // Changed from 4/3 to 1 for 1:1 aspect ratio
+                                  addNewFileMapping={addNewFileMapping}
+                                />
+                              </div>
+                              <div>
+                                <label
+                                  htmlFor={imageAltTextPath}
+                                  className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                  Alt Text (Optional)
+                                </label>
+                                <input
+                                  type="text"
+                                  id={imageAltTextPath}
+                                  {...register(imageAltTextPath)}
+                                  placeholder="Describe the image for accessibility"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                                />
+                                {(
+                                  imageItemErrors as
+                                    | FieldErrors<
+                                        z.infer<typeof galleryImageSchema>
+                                      >
+                                    | undefined
+                                )?.altText?.message && (
+                                  <p className="mt-1 text-sm text-red-600">
+                                    {
+                                      (
+                                        imageItemErrors as
+                                          | FieldErrors<
+                                              z.infer<typeof galleryImageSchema>
+                                            >
+                                          | undefined
+                                      )?.altText?.message
+                                    }
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {galleryImageFields.length < 20 && ( // Example: Max 20 images
+                      <button
+                        type="button"
+                        onClick={() =>
+                          appendGalleryImage(defaultGalleryImageValue)
+                        } // Corrected: Was appendImage
+                        className="mt-4 inline-flex items-center px-3 py-1.5 border border-dashed border-gray-400 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> Add Image to Gallery
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
           </div>
         </div>
       )}
@@ -1312,29 +1598,64 @@ function HomepageEditorPage() {
           };
         }
 
+        if (section.sectionType === "gallery") {
+          return {
+            id: section.id,
+            order: section.order,
+            sectionType: "gallery",
+            title: section.title,
+            subtitle: section.subtitle ?? "",
+            typeSpecificData: {
+              images: section.typeSpecificData.images.map(
+                (image: z.infer<typeof galleryImageSchema>) => ({
+                  imageUrl: image.imageUrl,
+                  altText: image.altText ?? "",
+                })
+              ),
+            },
+          };
+        }
+
         // Handle 'default' section
         // Note: The backend already maps legacy fields into typeSpecificData for default type
-        return {
-          id: section.id,
-          order: section.order,
-          sectionType: "default",
-          title: section.title,
-          subtitle: section.subtitle ?? "",
-          typeSpecificData: {
-            description: section.typeSpecificData.description || "",
-            desktopImageUrls: section.typeSpecificData.desktopImageUrls || [],
-            mobileImageUrls: section.typeSpecificData.mobileImageUrls || [],
-            imageAlt: section.typeSpecificData.imageAlt ?? "",
-            // Map features array back to string for textarea
-            features: formatFeaturesArray(section.typeSpecificData.features),
-            primaryButtonText: section.typeSpecificData.primaryButtonText ?? "",
-            primaryButtonLink: section.typeSpecificData.primaryButtonLink ?? "",
-            secondaryButtonText:
-              section.typeSpecificData.secondaryButtonText ?? "",
-            secondaryButtonLink:
-              section.typeSpecificData.secondaryButtonLink ?? "",
-          },
-        };
+        // THIS IS THE LIKELY SPOT FOR THE "default" and "gallery" OVERLAP ERROR
+        // Ensure this block ONLY processes "default" sections.
+        if (section.sectionType === "default") {
+          // Explicitly check for default
+          return {
+            id: section.id,
+            order: section.order,
+            sectionType: "default",
+            title: section.title,
+            subtitle: section.subtitle ?? "",
+            typeSpecificData: {
+              description: section.typeSpecificData.description || "",
+              desktopImageUrls: section.typeSpecificData.desktopImageUrls || [],
+              mobileImageUrls: section.typeSpecificData.mobileImageUrls || [],
+              imageAlt: section.typeSpecificData.imageAlt ?? "",
+              // Map features array back to string for textarea
+              features: formatFeaturesArray(section.typeSpecificData.features),
+              primaryButtonText:
+                section.typeSpecificData.primaryButtonText ?? "",
+              primaryButtonLink:
+                section.typeSpecificData.primaryButtonLink ?? "",
+              secondaryButtonText:
+                section.typeSpecificData.secondaryButtonText ?? "",
+              secondaryButtonLink:
+                section.typeSpecificData.secondaryButtonLink ?? "",
+            },
+          };
+        }
+        // Fallback for unknown or unhandled section types, though ideally caught by union
+        // Or, if it must be one of the existing types, this might need to throw an error
+        // For now, returning a default-like structure to satisfy the return type, but log a warning.
+        console.warn(
+          `Unhandled section type in mapSectionToFormData: ${(section as any).sectionType}`
+        );
+        // This fallback might be problematic if not all fields are optional in `defaultSectionDataSchema`
+        // or if the frontend expects a specific structure for unknown types.
+        // Consider what the safest fallback is, or if an error should be thrown.
+        return defaultFeatureSectionValue; // Or a more specific error/fallback
       };
 
       return {
@@ -1348,9 +1669,9 @@ function HomepageEditorPage() {
         heroSecondaryButtonLink: cfg.heroSecondaryButtonLink || "",
         metaTitle: cfg.metaTitle || "",
         metaDescription: cfg.metaDescription || "",
-        featureSections: cfg.featureSections?.map(mapSectionToFormData) || [
-          defaultFeatureSectionValue,
-        ],
+        featureSections: cfg.featureSections
+          ?.map(mapSectionToFormData)
+          .filter(Boolean) || [defaultFeatureSectionValue],
       };
     },
     []
@@ -1439,6 +1760,7 @@ function HomepageEditorPage() {
         target: "desktop" | "mobile";
         sectionIndex: number | null; // Null for hero images
         cardIndex?: number; // For card images
+        imageIndex?: number; // For gallery images
         originalPath: string; // Original path in form data (e.g., featureSections.0.typeSpecificData.cards.1.imageUrl)
         publicUrl?: string; // Add publicUrl, populated after upload
       }[] = [];
@@ -1537,6 +1859,26 @@ function HomepageEditorPage() {
               sectionIndex,
               originalPath: `featureSections.${sectionIndex}.typeSpecificData.imageUrl`,
             });
+          }
+        } else if (section.sectionType === "gallery") {
+          // Handle 'gallery' type images
+          for (const [
+            imageIndex,
+            image,
+          ] of section.typeSpecificData.images?.entries() || []) {
+            if (
+              image.imageUrl?.startsWith("blob:") &&
+              filesToUploadMap[image.imageUrl]
+            ) {
+              uploadTasks.push({
+                blobUrl: image.imageUrl,
+                file: filesToUploadMap[image.imageUrl],
+                target: "desktop", // Treat gallery images as desktop for optimization
+                sectionIndex,
+                imageIndex, // Add imageIndex for gallery tasks
+                originalPath: `featureSections.${sectionIndex}.typeSpecificData.images.${imageIndex}.imageUrl`,
+              });
+            }
           }
         }
       }
@@ -1708,6 +2050,20 @@ function HomepageEditorPage() {
               if (section.typeSpecificData.imageUrl === task.blobUrl) {
                 section.typeSpecificData.imageUrl = task.publicUrl;
               }
+            } else if (section.sectionType === "gallery") {
+              // Handle gallery image URL update
+              if (
+                task.imageIndex !== undefined &&
+                section.typeSpecificData.images?.[task.imageIndex]
+              ) {
+                if (
+                  section.typeSpecificData.images[task.imageIndex].imageUrl ===
+                  task.blobUrl
+                ) {
+                  section.typeSpecificData.images[task.imageIndex].imageUrl =
+                    task.publicUrl;
+                }
+              }
             }
           }
         }
@@ -1747,78 +2103,88 @@ function HomepageEditorPage() {
               subtitle?: string;
               typeSpecificData: Record<string, any>; // Use Record<string, any> for flexibility
             } = {
-              id: section.id,
+              id: section.id, // section here is (sectionInput as HomepageFeatureSectionUnion)
               order: index,
               sectionType: section.sectionType,
               title: section.title,
               subtitle: section.subtitle,
-              // Initialize with an empty object, specific structure added below
               typeSpecificData: {},
             };
 
-            if (section.sectionType === "default") {
-              // Parse features string back to array for backend
-              // Ensure we access typeSpecificData for features string
-              const featuresArray = parseFeaturesString(
-                section.typeSpecificData?.features
-              );
-              // Use the URLs directly from the processed section data (finalData),
-              // which should contain public URLs if uploads occurred.
-              // No extra filtering needed here as blob URLs should be gone.
-              const desktopUrls =
-                section.typeSpecificData?.desktopImageUrls || [];
-              let mobileUrls = section.typeSpecificData?.mobileImageUrls || [];
+            if (sectionInput.sectionType === "default") {
+              // Check sectionInput for its type
+              const defaultFrontendData = sectionInput.typeSpecificData; // Frontend data
+              const defaultBackendData = section.typeSpecificData; // Backend type data (due to cast of 'section')
 
-              // Fallback logic: if mobile is empty, use desktop
+              const featuresArray = parseFeaturesString(
+                defaultFrontendData.features // Use features from frontend data (string | undefined)
+              );
+
+              const desktopUrls = defaultFrontendData.desktopImageUrls || []; // Use frontend data
+              let mobileUrls = defaultFrontendData.mobileImageUrls || []; // Use frontend data
+
               if (mobileUrls.length === 0) {
                 mobileUrls = desktopUrls;
               }
 
-              // Assign typeSpecificData for 'default' type, accessing nested data correctly
               processedSectionData.typeSpecificData = {
-                description: section.typeSpecificData?.description || "",
+                description: defaultFrontendData.description || "",
                 desktopImageUrls: desktopUrls,
                 mobileImageUrls: mobileUrls,
-                imageAlt: section.typeSpecificData?.imageAlt || "",
-                features: featuresArray,
-                primaryButtonText:
-                  section.typeSpecificData?.primaryButtonText || "",
-                primaryButtonLink:
-                  section.typeSpecificData?.primaryButtonLink || "",
+                imageAlt: defaultFrontendData.imageAlt ?? "",
+                features: featuresArray, // This is string[] for the backend
+                primaryButtonText: defaultFrontendData.primaryButtonText ?? "",
+                primaryButtonLink: defaultFrontendData.primaryButtonLink ?? "",
                 secondaryButtonText:
-                  section.typeSpecificData?.secondaryButtonText || "",
+                  defaultFrontendData.secondaryButtonText ?? "",
                 secondaryButtonLink:
-                  section.typeSpecificData?.secondaryButtonLink || "",
+                  defaultFrontendData.secondaryButtonLink ?? "",
               };
-            } else if (section.sectionType === "feature_cards_grid") {
-              // Process cards, ensuring imageUrl is not a blob URL
+            } else if (sectionInput.sectionType === "feature_cards_grid") {
+              // Check sectionInput
+              const frontendData = sectionInput.typeSpecificData;
               const processedCards =
-                section.typeSpecificData?.cards?.map(
+                frontendData.cards?.map(
                   (card: z.infer<typeof featureCardSchema>) => ({
                     ...card,
-                    // Ensure we use the already replaced public URL if it existed, or original http, or empty string
                     imageUrl: card.imageUrl?.startsWith("blob:")
                       ? ""
                       : card.imageUrl || "",
                   })
                 ) || [];
-              // Assign typeSpecificData for 'feature_cards_grid' type
               processedSectionData.typeSpecificData = {
                 cards: processedCards,
               };
-            } else if (section.sectionType === "banner") {
-              // Assign typeSpecificData for 'banner' type
+            } else if (sectionInput.sectionType === "banner") {
+              // Check sectionInput
+              const frontendData = sectionInput.typeSpecificData;
               processedSectionData.typeSpecificData = {
-                imageUrl: section.typeSpecificData.imageUrl?.startsWith("blob:")
-                  ? "" // Should have been replaced by public URL if upload occurred
-                  : section.typeSpecificData.imageUrl || "",
-                altText: section.typeSpecificData.altText || "",
-                link: section.typeSpecificData.link || "",
+                imageUrl: frontendData.imageUrl?.startsWith("blob:")
+                  ? ""
+                  : frontendData.imageUrl || "",
+                altText: frontendData.altText || "",
+                link: frontendData.link || "",
+              };
+            } else if (sectionInput.sectionType === "gallery") {
+              // Check sectionInput
+              const frontendData = sectionInput.typeSpecificData;
+              processedSectionData.typeSpecificData = {
+                images:
+                  frontendData.images?.map(
+                    (image: z.infer<typeof galleryImageSchema>) => ({
+                      imageUrl: image.imageUrl?.startsWith("blob:")
+                        ? ""
+                        : image.imageUrl || "",
+                      altText: image.altText || "",
+                    })
+                  ) || [],
               };
             } else {
               // Handle unknown section types if necessary
+              // 'section' is (sectionInput as HomepageFeatureSectionUnion)
+              // 'sectionInput' is the one that could be of an unexpected type if not in the frontend union
               console.warn(
-                `Unknown section type encountered: ${section.sectionType}`
+                `Unknown section type encountered: ${(sectionInput as any).sectionType}`
               );
               processedSectionData.typeSpecificData = {}; // Assign empty object
             }

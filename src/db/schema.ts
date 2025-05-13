@@ -4,6 +4,7 @@ import type {
   defaultSectionDataSchema,
   featureCardsGridDataSchema,
   bannerSectionDataSchema,
+  gallerySectionDataServerSchema, // Import new gallery schema
 } from "../server/homepage"; // Import needed schemas
 
 // Define the specific union type for typeSpecificData based on server schemas
@@ -11,7 +12,8 @@ import type {
 type TypeSpecificDataUnion =
   | z.infer<typeof defaultSectionDataSchema>
   | z.infer<typeof featureCardsGridDataSchema>
-  | z.infer<typeof bannerSectionDataSchema>;
+  | z.infer<typeof bannerSectionDataSchema>
+  | z.infer<typeof gallerySectionDataServerSchema>; // Add gallery schema to union
 
 // Define the table for contact form submissions
 export const contactSubmissions = sqliteTable("contact_submissions", {

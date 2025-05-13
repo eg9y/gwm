@@ -75,11 +75,33 @@ const bannerSectionSchema = baseSectionSchema.extend({
   typeSpecificData: bannerSectionDataSchema,
 });
 
+// Schema for individual gallery images (Backend)
+const galleryImageServerSchema = z.object({
+  imageUrl: z
+    .string()
+    .url("Image URL must be valid")
+    .min(1, "Image is required"),
+  altText: z.string().optional(),
+});
+
+// Schema for the 'gallery' section type data (Backend)
+const gallerySectionDataServerSchema = z.object({
+  images: z
+    .array(galleryImageServerSchema)
+    .min(1, "At least one image is required"),
+});
+
+const gallerySectionServerSchema = baseSectionSchema.extend({
+  sectionType: z.literal("gallery"),
+  typeSpecificData: gallerySectionDataServerSchema,
+});
+
 // --- Discriminated Union for Section Validation ---
 const sectionUnionSchema = z.discriminatedUnion("sectionType", [
   defaultSectionSchema,
   featureCardsGridSchema,
   bannerSectionSchema,
+  gallerySectionServerSchema, // Add gallery schema for backend
   // Add other section type schemas here in the future
 ]);
 
@@ -103,6 +125,7 @@ export {
   defaultSectionDataSchema,
   featureCardsGridDataSchema,
   bannerSectionDataSchema,
+  gallerySectionDataServerSchema, // Export gallery schema
 };
 
 // --- Types ---
@@ -132,27 +155,29 @@ function mapDbSectionToUnion(
     subtitle: section.subtitle ?? undefined,
   };
 
-  let parsedData: any = null; // Initialize as null
-  try {
-    // Manually parse the JSON string, handle null/empty string
-    if (
-      section.typeSpecificData &&
-      typeof section.typeSpecificData === "string"
-    ) {
-      parsedData = JSON.parse(section.typeSpecificData);
+  // Initialize parsedData with proper type
+  const parsedData: Record<string, unknown> | null = (() => {
+    try {
+      if (
+        section.typeSpecificData &&
+        typeof section.typeSpecificData === "string"
+      ) {
+        return JSON.parse(section.typeSpecificData);
+      }
+      return null;
+    } catch (error) {
+      console.error(
+        `Error parsing typeSpecificData JSON for section ID ${section.id}:`,
+        section.typeSpecificData, // Log the problematic data
+        error
+      );
+      return null;
     }
-  } catch (error) {
-    console.error(
-      `Error parsing typeSpecificData JSON for section ID ${section.id}:`,
-      section.typeSpecificData, // Log the problematic data
-      error
-    );
-    return null; // Skip this section if JSON is invalid
-  }
+  })();
 
   // Validate sectionType *before* accessing parsedData based on it
   if (
-    !["default", "feature_cards_grid", "banner"].includes(
+    !["default", "feature_cards_grid", "banner", "gallery"].includes(
       section.sectionType || ""
     )
   ) {
@@ -167,7 +192,8 @@ function mapDbSectionToUnion(
     const gridDataResult = featureCardsGridDataSchema.safeParse(parsedData);
     if (!gridDataResult.success) {
       console.warn(
-        `Invalid data structure for feature_cards_grid section ID ${section.id}. Skipping.`
+        `Invalid data structure for feature_cards_grid section ID ${section.id}. Skipping.`,
+        gridDataResult.error.flatten()
       );
       return null;
     }
@@ -183,7 +209,8 @@ function mapDbSectionToUnion(
     const bannerDataResult = bannerSectionDataSchema.safeParse(parsedData);
     if (!bannerDataResult.success) {
       console.warn(
-        `Invalid data structure for banner section ID ${section.id}. Skipping.`
+        `Invalid data structure for banner section ID ${section.id}. Skipping.`,
+        bannerDataResult.error.flatten()
       );
       return null;
     }
@@ -194,44 +221,87 @@ function mapDbSectionToUnion(
     };
   }
 
+  if (section.sectionType === "gallery") {
+    // Validate parsedData against the expected schema for this type
+    const galleryDataResult =
+      gallerySectionDataServerSchema.safeParse(parsedData);
+    if (!galleryDataResult.success) {
+      console.warn(
+        `Invalid data structure for gallery section ID ${section.id}. Skipping.`,
+        galleryDataResult.error.flatten()
+      );
+      return null;
+    }
+    return {
+      ...base,
+      sectionType: "gallery",
+      typeSpecificData: galleryDataResult.data, // Use validated data
+    };
+  }
+
   // Default case: Handle 'default' section type (map legacy fields or use parsed data if valid)
   // Validate parsedData against the expected schema for this type
   const defaultDataResult = defaultSectionDataSchema.safeParse(parsedData);
-  // Even if parsing fails, try to use legacy fields
+
+  // Helper function to safely convert to string array
+  const toSafeStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) {
+      const result: string[] = [];
+      for (const item of value) {
+        if (typeof item === "string") {
+          result.push(item);
+        }
+      }
+      return result;
+    }
+    return typeof value === "string" ? [value] : [];
+  };
+
+  // Create a valid typeSpecificData object with proper defaults
   const typeSpecificData: z.infer<typeof defaultSectionDataSchema> = {
     description: defaultDataResult.success
       ? defaultDataResult.data.description
       : section.description || "",
     desktopImageUrls: defaultDataResult.success
       ? defaultDataResult.data.desktopImageUrls
-      : section.desktopImageUrls || [],
+      : toSafeStringArray(section.desktopImageUrls),
     mobileImageUrls: defaultDataResult.success
       ? defaultDataResult.data.mobileImageUrls
-      : section.mobileImageUrls || [],
+      : toSafeStringArray(section.mobileImageUrls),
     imageAlt: defaultDataResult.success
       ? defaultDataResult.data.imageAlt
-      : (section.imageAlt ?? undefined),
+      : (section.imageAlt ?? "Feature section image"),
     features: defaultDataResult.success
       ? defaultDataResult.data.features
-      : section.features || [],
+      : toSafeStringArray(section.features),
     primaryButtonText: defaultDataResult.success
       ? defaultDataResult.data.primaryButtonText
-      : (section.primaryButtonText ?? undefined),
+      : (section.primaryButtonText ?? ""),
     primaryButtonLink: defaultDataResult.success
       ? defaultDataResult.data.primaryButtonLink
-      : (section.primaryButtonLink ?? undefined),
+      : (section.primaryButtonLink ?? ""),
     secondaryButtonText: defaultDataResult.success
       ? defaultDataResult.data.secondaryButtonText
-      : (section.secondaryButtonText ?? undefined),
+      : (section.secondaryButtonText ?? ""),
     secondaryButtonLink: defaultDataResult.success
       ? defaultDataResult.data.secondaryButtonLink
-      : (section.secondaryButtonLink ?? undefined),
+      : (section.secondaryButtonLink ?? ""),
   };
+
+  // Validate the constructed typeSpecificData
+  const finalValidation = defaultSectionDataSchema.safeParse(typeSpecificData);
+  if (!finalValidation.success) {
+    console.warn(
+      `Invalid data structure for default section ID ${section.id} after mapping. Skipping.`,
+      finalValidation.error.flatten()
+    );
+    return null;
+  }
 
   return {
     ...base,
     sectionType: "default",
-    typeSpecificData: typeSpecificData,
+    typeSpecificData: finalValidation.data,
   };
 }
 
@@ -281,32 +351,25 @@ export const getHomepageConfig = createServerFn({ method: "GET" }).handler(
 export const updateHomepageConfig = createServerFn({ method: "POST" })
   // Use the updated schema with discriminated union for validation
   .validator((data: unknown) => {
-    console.log(
-      `Validating homepage config update: ${JSON.stringify(data, null, 2).substring(0, 500)}...`
-    );
     const result = homepageConfigUpdateSchema.safeParse(data);
     if (!result.success) {
       console.error(
         "Homepage config validation failed:",
         result.error.flatten()
       );
-      // Provide a user-friendly error message based on Zod's error
       throw new Error(
         `Validation failed: ${JSON.stringify(result.error.flatten().fieldErrors)}`
       );
     }
-    console.log("Homepage config validation successful.");
-    return result.data; // Return validated data
+    return result.data;
   })
   .handler(async ({ data }) => {
-    // data is now validated according to homepageConfigUpdateSchema
     const { featureSections = [], ...configData } = data;
     const configId = "main";
     const now = new Date().toISOString();
 
     try {
       const result = await db.transaction(async (tx) => {
-        // 1. Upsert the main homepage configuration
         const upsertedConfig = await tx
           .insert(homepageConfig)
           .values({ ...configData, id: configId, updatedAt: now })
@@ -317,73 +380,65 @@ export const updateHomepageConfig = createServerFn({ method: "POST" })
           .returning()
           .get();
 
-        // 2. Delete existing feature sections for this homepage
         await tx
           .delete(homepageFeatureSections)
           .where(eq(homepageFeatureSections.homepageConfigId, configId));
 
-        // 3. Insert the new/updated feature sections
         if (featureSections.length > 0) {
-          // Explicitly type the mapped array to match Drizzle's expected insert type
           const sectionsToInsert: (typeof homepageFeatureSections.$inferInsert)[] =
             featureSections.map((section, index) => {
-              // Base data structure matching the DB schema (nullable fields)
-              let insertData: typeof homepageFeatureSections.$inferInsert = {
+              const insertData: typeof homepageFeatureSections.$inferInsert = {
                 homepageConfigId: configId,
                 order: index,
                 sectionType: section.sectionType,
                 title: section.title,
                 subtitle: section.subtitle,
-                // Stringify the typeSpecificData before insertion/update
                 typeSpecificData: section.typeSpecificData
                   ? JSON.stringify(section.typeSpecificData)
                   : null,
                 updatedAt: now,
                 createdAt: now,
-                // Initialize legacy fields as null or empty arrays/strings
                 description: null,
-                desktopImageUrls: [],
-                mobileImageUrls: [],
+                desktopImageUrls: [], // Default for DB not null
+                mobileImageUrls: [], // Default for DB not null
                 imageAlt: null,
-                features: [],
+                features: [], // Default for DB not null
                 primaryButtonText: null,
                 primaryButtonLink: null,
                 secondaryButtonText: null,
                 secondaryButtonLink: null,
               };
 
-              // Populate legacy fields only if the section type is 'default'
               if (section.sectionType === "default") {
-                insertData.description = section.typeSpecificData.description;
-                insertData.desktopImageUrls =
-                  section.typeSpecificData.desktopImageUrls;
-                insertData.mobileImageUrls =
-                  section.typeSpecificData.mobileImageUrls;
-                insertData.imageAlt = section.typeSpecificData.imageAlt;
-                insertData.features = section.typeSpecificData.features;
-                insertData.primaryButtonText =
-                  section.typeSpecificData.primaryButtonText;
-                insertData.primaryButtonLink =
-                  section.typeSpecificData.primaryButtonLink;
+                const defaultData = section.typeSpecificData as z.infer<
+                  typeof defaultSectionDataSchema
+                >;
+                insertData.description = defaultData.description;
+                insertData.desktopImageUrls = defaultData.desktopImageUrls;
+                insertData.mobileImageUrls = defaultData.mobileImageUrls ?? []; // Ensure array
+                insertData.imageAlt = defaultData.imageAlt;
+                insertData.features = defaultData.features ?? []; // Ensure array
+                insertData.primaryButtonText = defaultData.primaryButtonText;
+                insertData.primaryButtonLink = defaultData.primaryButtonLink;
                 insertData.secondaryButtonText =
-                  section.typeSpecificData.secondaryButtonText;
+                  defaultData.secondaryButtonText;
                 insertData.secondaryButtonLink =
-                  section.typeSpecificData.secondaryButtonLink;
+                  defaultData.secondaryButtonLink;
               }
+              // No legacy fields for 'feature_cards_grid', 'banner', or 'gallery'
+              // typeSpecificData is already stringified above for all types.
 
-              // Remove undefined values (though defaults above should prevent this)
-              Object.keys(insertData).forEach((key) => {
-                if (insertData[key as keyof typeof insertData] === undefined) {
-                  delete insertData[key as keyof typeof insertData];
-                }
-              });
+              // Remove undefined optional fields before insertion if necessary,
+              // but Drizzle should handle explicit nulls for nullable fields.
+              // Subtitle is already handled by `subtitle: section.subtitle,` which could be undefined.
+              // Drizzle will use default for undefined if the column has one, or insert null.
+              // For our schema, subtitle is nullable.
 
-              return insertData; // Return the correctly typed object
+              return insertData;
             });
           await tx.insert(homepageFeatureSections).values(sectionsToInsert);
         }
 
-        // 4. Fetch the updated sections and map them to the union type for return
         const updatedSectionsDb = await tx
           .select()
           .from(homepageFeatureSections)
@@ -392,15 +447,14 @@ export const updateHomepageConfig = createServerFn({ method: "POST" })
 
         const updatedSectionsUnion = updatedSectionsDb
           .map(mapDbSectionToUnion)
-          .filter(Boolean) as HomepageFeatureSectionUnion[]; // Filter out nulls
+          .filter(Boolean) as HomepageFeatureSectionUnion[];
 
         return { ...upsertedConfig, featureSections: updatedSectionsUnion };
       });
 
-      console.log("Homepage config and sections updated successfully.");
       return {
         success: true,
-        config: result, // Return the config with sections mapped to union types
+        config: result,
         message: "Homepage configuration updated successfully.",
       };
     } catch (error) {

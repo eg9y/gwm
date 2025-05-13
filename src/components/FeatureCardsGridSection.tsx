@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import LazyLoadImage from "react-lazy-load-image-component";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css"; // Optional blur effect
 
 // Define the structure of a single card based on the Zod schema
@@ -44,7 +44,7 @@ const FeatureCardsGridSection: React.FC<FeatureCardsGridSectionProps> = ({
           {cardsToRender.map((card, index) => {
             const content = (
               <div
-                key={index}
+                key={card.title}
                 // Apply base styles and transitions here. Hover effects are applied based on link presence below.
                 className={`bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full transition-all duration-200 ease-in-out ${
                   card.link
