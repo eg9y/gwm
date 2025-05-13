@@ -81,6 +81,9 @@ function InfoPromoPage() {
 
   // Get image URL from article
   const getImageUrl = (article: Article) => {
+    if (article.thumbnail_image) {
+      return article.thumbnail_image;
+    }
     if (article.featuredImageUrl) {
       return article.featuredImageUrl;
     }

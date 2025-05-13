@@ -90,6 +90,7 @@ function Promos() {
               <div className="aspect-w-16 aspect-h-9">
                 <img
                   src={
+                    promo.thumbnail_image ||
                     promo.featuredImageUrl ||
                     "https://source.unsplash.com/random/800x600/?car"
                   }
