@@ -47,7 +47,7 @@ export const getPresignedUploadUrl = createServerFn({ method: "POST" })
     }
 
     // Basic sanitization/validation for filename
-    if (fileName.length > 255 || !/^[a-zA-Z0-9-_./]+$/.test(fileName)) {
+    if (fileName.length > 255 || !/^[a-zA-Z0-9-_./ ()]+$/.test(fileName)) {
       throw new Error("Invalid file name format or length.");
     }
 

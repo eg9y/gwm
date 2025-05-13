@@ -39,6 +39,7 @@ export const articles = sqliteTable("articles", {
   category: text("category").notNull(),
   featuredImageUrl: text("featured_image_url"),
   featuredImageAlt: text("featured_image_alt"),
+  thumbnail_image: text("thumbnail_image"),
   publishedAt: text("published_at"),
   createdAt: text("created_at")
     .notNull()

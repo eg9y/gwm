@@ -292,7 +292,7 @@ function ArticleDetailPage() {
                   <img
                     src={article.featuredImageUrl}
                     alt={article.featuredImageAlt || article.title}
-                    className="rounded-lg w-full h-auto object-cover max-h-[500px] image-load-transition"
+                    className="rounded-lg w-full h-auto object-contain max-h-[500px] image-load-transition"
                     loading="lazy"
                     onLoad={(e) =>
                       e.currentTarget.classList.add("image-loaded")

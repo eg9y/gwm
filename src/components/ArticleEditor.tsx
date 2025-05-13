@@ -25,6 +25,13 @@ import TiptapEditor, {
   type LocalImage,
   type RemovedImage,
 } from "./TiptapEditor";
+import { ImageUploadField } from "./admin/ImageUploadField";
+
+// Simple type for ImageUploadField generic
+interface ArticleFormData {
+  thumbnailImageUrl?: string;
+  // Add other form fields if ImageUploadField were to be used for them with react-hook-form
+}
 
 interface ArticleEditorProps {
   isNew: boolean;
@@ -88,6 +95,14 @@ export default function ArticleEditor({
   const [featuredImageAlt, setFeaturedImageAlt] = useState(
     article?.featuredImageAlt || ""
   );
+  const [thumbnailImageFile, setThumbnailImageFile] = useState<File | null>(
+    null
+  );
+  const [thumbnailImageUrl, setThumbnailImageUrl] = useState<string>(
+    article?.thumbnail_image
+      ? ensureCorrectImageDomain(article.thumbnail_image)
+      : ""
+  );
   const [inlineImages, setInlineImages] = useState<LocalImage[]>([]);
   const [uploadingStatus, setUploadingStatus] = useState<{
     current: number;
@@ -125,6 +140,11 @@ export default function ArticleEditor({
       setFeaturedImagePreview(normalizedFeaturedImageUrl);
       setFeaturedImageAlt(article.featuredImageAlt || "");
       setMetaDescription(article.metaDescription || "");
+      const normalizedThumbnailImageUrl = article.thumbnail_image
+        ? ensureCorrectImageDomain(article.thumbnail_image)
+        : "";
+      setThumbnailImageUrl(normalizedThumbnailImageUrl);
+      setThumbnailImageFile(null);
     }
   }, [article, normalizeImageUrls]);
 
@@ -156,6 +176,19 @@ export default function ArticleEditor({
     if (event.target) {
       event.target.value = "";
     }
+  };
+
+  // Handle thumbnail image selection and upload
+  const handleThumbnailImageSelect = (
+    fieldName: "thumbnailImageUrl",
+    file: File
+  ) => {
+    setThumbnailImageFile(file);
+  };
+
+  const handleRemoveThumbnailImage = () => {
+    setThumbnailImageFile(null);
+    setThumbnailImageUrl("");
   };
 
   // Upload a single file to R2
@@ -220,13 +253,18 @@ export default function ArticleEditor({
   const uploadAllImages = async (): Promise<{
     updatedContent: string;
     featuredImageResult: UploadResult | null;
+    thumbnailImageResult: UploadResult | null;
   }> => {
     let currentContent = content;
     let featuredResult: UploadResult | null = null;
+    let thumbnailResult: UploadResult | null = null;
 
     try {
       // Calculate total uploads
-      const totalUploads = inlineImages.length + (featuredImageFile ? 1 : 0);
+      const totalUploads =
+        inlineImages.length +
+        (featuredImageFile ? 1 : 0) +
+        (thumbnailImageFile ? 1 : 0);
       let completedUploads = 0;
 
       setUploadingStatus({
@@ -249,7 +287,25 @@ export default function ArticleEditor({
         setUploadingStatus({
           current: completedUploads,
           total: totalUploads,
-          message: `Uploaded ${completedUploads} of ${totalUploads} images`,
+          message: `Featured image uploaded. (${completedUploads}/${totalUploads})`,
+        });
+      }
+
+      // Upload thumbnail image if available
+      if (thumbnailImageFile) {
+        setUploadingStatus({
+          current: completedUploads,
+          total: totalUploads,
+          message: "Uploading thumbnail image...",
+        });
+
+        thumbnailResult = await uploadFileToR2(thumbnailImageFile);
+
+        completedUploads++;
+        setUploadingStatus({
+          current: completedUploads,
+          total: totalUploads,
+          message: `Thumbnail image uploaded. (${completedUploads}/${totalUploads})`,
         });
       }
 
@@ -286,6 +342,7 @@ export default function ArticleEditor({
       return {
         updatedContent: currentContent,
         featuredImageResult: featuredResult,
+        thumbnailImageResult: thumbnailResult,
       };
     } catch (error) {
       console.error("Error uploading images:", error);
@@ -333,6 +390,7 @@ export default function ArticleEditor({
 
       let finalContent = content;
       let finalFeaturedImageUrl = featuredImageUrl;
+      let finalThumbnailImageUrl = thumbnailImageUrl;
 
       // Check if featured image was removed and delete it from R2 if needed
       if (article?.featuredImageUrl && !featuredImageUrl) {
@@ -348,11 +406,27 @@ export default function ArticleEditor({
         }
       }
 
+      // Check if thumbnail image was removed and delete it from R2 if needed
+      if (article?.thumbnail_image && !thumbnailImageUrl) {
+        try {
+          // Delete the original thumbnail image from R2
+          const formData = new FormData();
+          formData.append("imageUrl", article.thumbnail_image);
+          await deleteObjectFromR2({ data: formData });
+          console.log("Deleted removed thumbnail image from R2");
+        } catch (error) {
+          console.error("Error deleting image from R2:", error);
+          // Continue with the form submission even if image deletion fails
+        }
+      }
+
       // Upload images if needed
-      const hasImagesToUpload = featuredImageFile || inlineImages.length > 0;
+      const hasImagesToUpload =
+        featuredImageFile || inlineImages.length > 0 || thumbnailImageFile;
 
       if (hasImagesToUpload) {
-        const { updatedContent, featuredImageResult } = await uploadAllImages();
+        const { updatedContent, featuredImageResult, thumbnailImageResult } =
+          await uploadAllImages();
         finalContent = updatedContent;
 
         if (featuredImageResult) {
@@ -373,6 +447,26 @@ export default function ArticleEditor({
           }
 
           finalFeaturedImageUrl = featuredImageResult.publicUrl;
+        }
+
+        if (thumbnailImageResult) {
+          // If we replaced an existing image, delete the old one from R2
+          if (
+            article?.thumbnail_image &&
+            article.thumbnail_image !== finalThumbnailImageUrl
+          ) {
+            try {
+              const formData = new FormData();
+              formData.append("imageUrl", article.thumbnail_image);
+              await deleteObjectFromR2({ data: formData });
+              console.log("Deleted replaced thumbnail image from R2");
+            } catch (error) {
+              console.error("Error deleting replaced image from R2:", error);
+              // Continue with the form submission
+            }
+          }
+
+          finalThumbnailImageUrl = thumbnailImageResult.publicUrl;
         }
 
         // Clear the uploading status
@@ -398,6 +492,10 @@ export default function ArticleEditor({
         "featuredImageAlt",
         finalFeaturedImageUrl ? featuredImageAlt : ""
       );
+
+      // Always include thumbnailImageUrl in form data, even when empty
+      // This ensures it will be explicitly removed on the server if cleared by the user
+      formData.append("thumbnail_image", finalThumbnailImageUrl);
 
       // Add meta description to form data (optional)
       if (metaDescription.trim()) {
@@ -434,6 +532,7 @@ export default function ArticleEditor({
         // Reset image states
         setFeaturedImageFile(null);
         setInlineImages([]);
+        setThumbnailImageFile(null);
 
         // Redirect to article list after a brief delay
         setTimeout(() => {
@@ -685,72 +784,150 @@ export default function ArticleEditor({
               </select>
             </div>
 
-            {/* Featured Image */}
-            <div>
+            {/* Featured Image Upload */}
+            <div className="mb-6">
               <label
                 htmlFor="featuredImage"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Featured Image
+                Featured Image (Recommended: 1200x630px)
               </label>
-              <div className="mb-3">
-                {featuredImagePreview ? (
-                  <div className="relative group">
+              <div className="mt-1 flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  {featuredImagePreview ? (
                     <img
                       src={featuredImagePreview}
-                      alt={featuredImageAlt || "Featured image"}
-                      className="w-full h-44 object-cover rounded-md"
+                      alt="Featured preview"
+                      className="h-20 w-auto object-cover rounded-md border border-gray-200"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-md">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Clean up any object URLs to prevent memory leaks
-                          if (featuredImagePreview !== featuredImageUrl) {
-                            URL.revokeObjectURL(featuredImagePreview);
-                          }
-                          // Clear all image-related states
-                          setFeaturedImageFile(null);
-                          setFeaturedImageUrl("");
-                          setFeaturedImagePreview("");
-                          setFeaturedImageAlt("");
-                        }}
-                        className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
-                      >
-                        Remove
-                      </button>
+                  ) : (
+                    <div className="h-20 w-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                      No Image
                     </div>
-                  </div>
-                ) : (
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <input
+                    type="file"
+                    id="featuredImage"
+                    accept="image/*"
+                    onChange={handleFeatureImageSelect}
+                    ref={fileInputRef}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                  />
+                  {featuredImageUrl && !featuredImageFile && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Current:{" "}
+                      <a
+                        href={featuredImageUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {featuredImageUrl.split("/").pop()}
+                      </a>
+                    </p>
+                  )}
+                </div>
+                {featuredImagePreview && (
                   <button
                     type="button"
-                    className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors w-full"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                      // Clean up any object URLs to prevent memory leaks
+                      if (featuredImagePreview !== featuredImageUrl) {
+                        URL.revokeObjectURL(featuredImagePreview);
+                      }
+                      // Clear all image-related states
+                      setFeaturedImageFile(null);
+                      setFeaturedImageUrl("");
+                      setFeaturedImagePreview("");
+                      setFeaturedImageAlt("");
+                    }}
+                    className="text-red-600 hover:text-red-800 text-sm"
                   >
-                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500">
-                      Click to upload image
-                    </p>
+                    Remove
                   </button>
                 )}
-                <input
-                  type="file"
-                  id="featuredImage"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  onChange={handleFeatureImageSelect}
-                  className="hidden"
-                />
               </div>
+              {featuredImageUrl && (
+                <div className="mt-2">
+                  <label
+                    htmlFor="featuredImageAlt"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Featured Image Alt Text
+                  </label>
+                  <input
+                    type="text"
+                    id="featuredImageAlt"
+                    value={featuredImageAlt}
+                    onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    placeholder="Descriptive alt text for the featured image"
+                  />
+                </div>
+              )}
+            </div>
 
-              <input
-                type="text"
-                value={featuredImageAlt}
-                onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="Image alt text"
-                aria-label="Featured image alt text"
+            {/* Thumbnail Image Upload */}
+            <div className="mb-6">
+              <label
+                htmlFor="thumbnailImageUrlField"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Thumbnail Image (Optional, Recommended Aspect Ratio: 16:9)
+              </label>
+              <ImageUploadField<ArticleFormData>
+                fieldName="thumbnailImageUrl"
+                watch={
+                  ((
+                    name?: keyof ArticleFormData | (keyof ArticleFormData)[],
+                    _options?: unknown
+                  ) => {
+                    if (
+                      typeof name === "string" &&
+                      name === "thumbnailImageUrl"
+                    ) {
+                      return thumbnailImageUrl;
+                    }
+                    return undefined;
+                  }) as any
+                }
+                onFileSelected={(selectedFieldName, file) => {
+                  if (selectedFieldName === "thumbnailImageUrl") {
+                    // If thumbnailImageUrl currently holds a blob URL, revoke it first
+                    if (thumbnailImageUrl?.startsWith("blob:")) {
+                      URL.revokeObjectURL(thumbnailImageUrl);
+                    }
+                    const newBlobUrl = URL.createObjectURL(file);
+                    setThumbnailImageUrl(newBlobUrl);
+                    setThumbnailImageFile(file);
+                  }
+                }}
+                handleRemove={(urlOrFieldName) => {
+                  if (thumbnailImageUrl?.startsWith("blob:")) {
+                    URL.revokeObjectURL(thumbnailImageUrl);
+                  }
+                  setThumbnailImageFile(null);
+                  setThumbnailImageUrl("");
+                }}
+                altText="Thumbnail preview"
+                cropAspect={16 / 9}
+                enableCrop={true}
               />
+              {thumbnailImageUrl && !thumbnailImageFile && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Current:{" "}
+                  <a
+                    href={thumbnailImageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {thumbnailImageUrl.split("/").pop()}
+                  </a>
+                </p>
+              )}
             </div>
 
             {/* Meta Description (Optional) */}
