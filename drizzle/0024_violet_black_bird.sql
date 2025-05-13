@@ -1,0 +1,1 @@
+ALTER TABLE `articles` ADD `thumbnail_image` text;
