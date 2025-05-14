@@ -10,8 +10,13 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
+// Get database path from environment variable or use default
+const dbPath = path.resolve(
+  process.env.DATABASE_URL || "storage/gwm-database.db"
+);
+
 // Connect to SQLite database with optimized configuration to prevent locking
-const sqlite = new Database("storage/gwm-database.db", {
+const sqlite = new Database(dbPath, {
   // WAL mode helps prevent db locks by allowing reads during writes
   // and improves concurrent access
   fileMustExist: false,
