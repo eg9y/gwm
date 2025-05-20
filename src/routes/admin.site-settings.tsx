@@ -243,7 +243,7 @@ function AdminSiteSettingsPage() {
               Leave blank to disable.
               <br />
               <span className="font-semibold">Note:</span> GTM integration is
-              not yet fully implemented in the frontend script injection.
+              now implemented.
             </p>
             {/* Instructions for GTM ID */}
             <details className="mt-2 text-xs text-gray-600">

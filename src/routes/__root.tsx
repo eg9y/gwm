@@ -77,6 +77,7 @@ export const Route = createRootRoute({
     // Access siteSettings from loaderData
     const { siteSettings } = loaderData;
     const gaId = siteSettings?.googleAnalyticsId;
+    const gtmId = siteSettings?.googleTagManagerId; // Extract GTM ID
 
     // Construct the Google Analytics script source URL dynamically
     const gaSrc = gaId
@@ -137,6 +138,15 @@ export const Route = createRootRoute({
               },
             ]
           : []),
+        // Add Google Tag Manager script
+        ...(import.meta.env.PROD && gtmId
+          ? [
+              {
+                // GTM head script (inline)
+                children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`,
+              },
+            ]
+          : []),
       ],
     };
   },
@@ -171,13 +181,14 @@ export const Route = createRootRoute({
     const defaultLogoUrl = "https://gwm.kopimap.com/gwm_logo.webp";
     const defaultLogoWhiteUrl = defaultLogoUrl; // Use main logo as fallback
 
+    // In error scenarios, siteSettings might not be available or reliable.
+    // Pass null and let RootDocument handle it gracefully.
     return (
       <RootDocument
         logoUrl={defaultLogoUrl}
         logoWhiteUrl={defaultLogoWhiteUrl}
         whatsappUrl={defaultWhatsAppUrl}
-        // siteSettings might not be available here, handle appropriately
-        // Or consider passing default/null site settings if needed
+        siteSettings={null} // Pass null for siteSettings in error case
       >
         <DefaultCatchBoundary {...props} />
       </RootDocument>
@@ -199,8 +210,7 @@ function RootComponent() {
       logoUrl={logoUrl}
       logoWhiteUrl={logoWhiteUrl}
       whatsappUrl={whatsappUrl} // Pass whatsappUrl from loader
-      // Pass siteSettings down if RootDocument needs them
-      // siteSettings={siteSettings}
+      siteSettings={siteSettings} // Pass siteSettings down
     >
       <ScrollToTop />
       <Outlet />
@@ -213,15 +223,13 @@ function RootDocument({
   logoUrl,
   logoWhiteUrl,
   whatsappUrl,
-  // Add siteSettings prop if needed
-  // siteSettings?: SiteSettings | null;
+  siteSettings, // Add siteSettings prop
 }: {
   children: React.ReactNode;
   logoUrl: string;
   logoWhiteUrl: string;
   whatsappUrl: string;
-  // Add siteSettings prop if needed
-  // siteSettings?: SiteSettings | null;
+  siteSettings?: { googleTagManagerId?: string | null } | null; // Define type for siteSettings
 }) {
   // Get the router state to detect when routes are loading
   const { isLoading, location } = useRouterState();
@@ -230,12 +238,26 @@ function RootDocument({
     location.pathname.startsWith("/tipe-mobil/") &&
     location.pathname.split("/").length > 2;
 
+  const gtmId = siteSettings?.googleTagManagerId;
+
   return (
     <html lang="id">
       <head>
         <HeadContent />
       </head>
       <body className={isVehicleDetailPage ? "vehicle-detail-page" : ""}>
+        {/* Google Tag Manager (noscript) */}
+        {import.meta.env.PROD && gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager noscript fallback"
+            />
+          </noscript>
+        )}
         <div
           className="relative min-h-screen overflow-y-auto"
           data-react-root="true"
