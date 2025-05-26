@@ -3,6 +3,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Bold,
@@ -23,37 +24,8 @@ import {
   Quote,
   Youtube as YoutubeIcon,
 } from "lucide-react";
-// Import the resizable image extension
-// @ts-ignore - tiptap-extension-resize-image doesn't have TypeScript definitions
-import ResizableImage from "tiptap-extension-resize-image";
 // Import YouTube extension
 import Youtube from "@tiptap/extension-youtube";
-
-// Define the additional types for the resizable image extension
-declare module "@tiptap/core" {
-  interface Commands<ReturnType> {
-    resizableImage: {
-      /**
-       * Add a resizable image
-       */
-      setResizableImage: (options: {
-        src: string;
-        alt?: string;
-        title?: string;
-        width?: number;
-        alignment?: "left" | "center" | "right";
-        resizable?: boolean;
-      }) => ReturnType;
-      /**
-       * Update a resizable image
-       */
-      updateResizableImage: (options: {
-        alignment?: "left" | "center" | "right";
-        width?: number;
-      }) => ReturnType;
-    };
-  }
-}
 
 // Interface for locally stored images before upload
 export interface LocalImage {
@@ -113,16 +85,11 @@ const TiptapEditor = ({
         },
       }),
       // Replace the standard Image extension with ResizableImage
-      // @ts-ignore - ResizableImage has different configuration options than the standard Image extension
-      ResizableImage.configure({
-        // Add inline style for resizing and allow setting alignment
+      Image.configure({
         HTMLAttributes: {
           class: "max-w-full rounded-md my-4 max-h-[600px]",
           loading: "lazy",
         },
-        // @ts-ignore - defaultAlignment is not in the type definitions
-        // Default alignment
-        defaultAlignment: "center",
       }),
       // Add YouTube extension
       Youtube.configure({
@@ -183,22 +150,17 @@ const TiptapEditor = ({
     (url: string, alt = "") => {
       if (!editor) return;
 
-      // Insert the image with standard attributes and current alignment
-      // @ts-ignore - setResizableImage is not in the type definitions
+      // Insert the image with standard attributes
       editor
         .chain()
         .focus()
-        .setResizableImage({
+        .setImage({
           src: url,
           alt,
-          // Apply the currently selected alignment
-          alignment: imageAlignment,
-          // Set a default width that allows text to wrap around
-          width: imageAlignment !== "center" ? 300 : undefined,
         })
         .run();
     },
-    [editor, imageAlignment]
+    [editor]
   );
 
   const handleImageSelection = useCallback(() => {
@@ -240,13 +202,10 @@ const TiptapEditor = ({
     (alignment: "left" | "center" | "right") => {
       setImageAlignment(alignment);
 
-      // If an image is selected, apply the alignment to it
-      if (editor?.isActive("resizableImage")) {
-        // @ts-ignore - updateResizableImage is not in the type definitions
-        editor.chain().focus().updateResizableImage({ alignment }).run();
-      }
+      // If an image is selected, we can't directly update alignment with this extension
+      // The alignment would need to be handled through CSS classes or other means
     },
-    [editor]
+    []
   );
 
   const setLink = useCallback(() => {
@@ -712,12 +671,11 @@ const TiptapEditor = ({
         className="tiptap-editor-content border rounded-b-md border-gray-300 min-h-[400px] prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-ul:list-disc prose-ol:list-decimal"
       />
 
-      {/* Help text for image resizing and YouTube */}
+      {/* Help text for image and YouTube */}
       <div className="mt-2 text-sm text-gray-500">
         <p>
-          💡 Tip: Click on an image to activate resize handles. Drag to resize,
-          and use the alignment buttons to position images. Use the YouTube
-          button to embed videos directly in your content.
+          💡 Tip: Use the image button to add images to your content. Use the
+          YouTube button to embed videos directly in your content.
         </p>
       </div>
 
