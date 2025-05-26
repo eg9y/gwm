@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { articles, carModels } from "~/db/schema";
 import { db } from "~/db";
 
-const BASE_URL = "https://gwmindonesia.com"; // Or fetch from environment variable
+const BASE_URL = process.env.SITE_DOMAIN || "https://gwmindonesia.com"; // Or fetch from environment variable
 
 // Define static paths (adjust as needed)
 const staticPaths: string[] = [

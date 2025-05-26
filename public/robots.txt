@@ -2,6 +2,3 @@ User-agent: *
 Disallow: /admin/
 Disallow: /admin
 Allow: /
-
-# Sitemap location
-Sitemap: https://gwmindonesia.com/api/sitemap 
