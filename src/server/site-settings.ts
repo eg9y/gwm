@@ -12,6 +12,7 @@ export type SiteSettings = typeof siteSettings.$inferSelect;
 // Schema for validating site settings updates
 const siteSettingsSchema = z.object({
   id: z.string().default("main"),
+  brandName: z.string().optional().nullable(), // Optional: Company/brand name
   googleAnalyticsId: z.string().optional().nullable(), // Optional: Allows empty string or null
   googleTagManagerId: z.string().optional().nullable(), // Optional: Allows empty string or null
 });
@@ -28,6 +29,7 @@ export const initSiteSettings = createServerFn().handler(async () => {
     // No settings exist, create default (empty)
     const defaultSettings: NewSiteSettings = {
       id: "main",
+      brandName: "GWM Indonesia", // Default brand name
       googleAnalyticsId: null, // Default to null or an example placeholder if preferred
       googleTagManagerId: null, // Default to null
       updatedAt: new Date().toISOString(),
@@ -83,6 +85,7 @@ export const updateSiteSettings = createServerFn()
       const parsed = siteSettingsSchema.parse(data);
       return {
         ...parsed,
+        brandName: parsed.brandName || null,
         googleAnalyticsId: parsed.googleAnalyticsId || null,
         googleTagManagerId: parsed.googleTagManagerId || null,
       };
@@ -98,6 +101,7 @@ export const updateSiteSettings = createServerFn()
       await db
         .update(siteSettings)
         .set({
+          brandName: data.brandName,
           googleAnalyticsId: data.googleAnalyticsId,
           googleTagManagerId: data.googleTagManagerId,
           updatedAt: new Date().toISOString(),

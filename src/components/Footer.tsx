@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { getContactInfo } from "../server/contact-info";
 import type { ContactInfo } from "../db";
 
-// Update Footer props to accept logoUrl
+// Update Footer props to accept logoUrl and brandName
 interface FooterProps {
   logoUrl: string;
+  brandName?: string; // Optional brand name prop
 }
 
-const Footer = ({ logoUrl }: FooterProps) => {
+const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
   const currentYear = new Date().getFullYear();
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +57,7 @@ const Footer = ({ logoUrl }: FooterProps) => {
         </div>
 
         <div className="col-span-1">
-          <h3 className="text-sm font-medium mb-2 sm:mb-3">GWM Indonesia</h3>
+          <h3 className="text-sm font-medium mb-2 sm:mb-3">{brandName}</h3>
           <ul className="space-y-1 sm:space-y-2">
             <li>
               <a
@@ -204,7 +205,7 @@ const Footer = ({ logoUrl }: FooterProps) => {
       <div className="mt-10 pt-5 border-t border-gray-100 px-10">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-xs text-gray-600 order-2 md:order-1">
-            © {currentYear} GWM Indonesia. All rights reserved.
+            © {currentYear} {brandName}. All rights reserved.
           </p>
 
           <div className="flex space-x-3 items-center order-1 md:order-2">

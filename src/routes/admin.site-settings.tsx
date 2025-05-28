@@ -11,12 +11,20 @@ import toast from "react-hot-toast";
 // Form validation schema
 const siteSettingsSchema = z.object({
   id: z.string().default("main"),
+  brandName: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val: string | null | undefined) => !val || val.trim().length > 0,
+      "Brand name cannot be empty if provided."
+    ),
   googleAnalyticsId: z
     .string()
     .optional()
     .nullable()
     .refine(
-      (val) => !val || /^G-[A-Z0-9]+$/.test(val),
+      (val: string | null | undefined) => !val || /^G-[A-Z0-9]+$/.test(val),
       "Must be a valid Google Analytics Tracking ID (e.g., G-XXXXXXXXXX) or empty."
     ),
   googleTagManagerId: z
@@ -24,7 +32,7 @@ const siteSettingsSchema = z.object({
     .optional()
     .nullable()
     .refine(
-      (val) => !val || /^GTM-[A-Z0-9]+$/.test(val),
+      (val: string | null | undefined) => !val || /^GTM-[A-Z0-9]+$/.test(val),
       "Must be a valid Google Tag Manager ID (e.g., GTM-XXXXXXX) or empty."
     ),
 });
@@ -35,6 +43,7 @@ type SiteSettingsFormData = z.infer<typeof siteSettingsSchema>;
 // Default values (initially empty/null)
 const defaultSiteSettings: SiteSettingsFormData = {
   id: "main",
+  brandName: null,
   googleAnalyticsId: null,
   googleTagManagerId: null,
 };
@@ -92,6 +101,7 @@ function AdminSiteSettingsPage() {
       // Ensure empty strings are sent as null
       const dataToSubmit = {
         ...data,
+        brandName: data.brandName || null,
         googleAnalyticsId: data.googleAnalyticsId || null,
         googleTagManagerId: data.googleTagManagerId || null,
       };
@@ -163,6 +173,31 @@ function AdminSiteSettingsPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Hidden ID field */}
           <input type="hidden" {...register("id")} />
+
+          {/* Brand Name */}
+          <div>
+            <label
+              htmlFor="brandName"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Brand Name
+            </label>
+            <input
+              type="text"
+              id="brandName"
+              {...register("brandName")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              placeholder="Enter your brand name"
+            />
+            {errors.brandName && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.brandName.message}
+              </p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Enter your brand name.
+            </p>
+          </div>
 
           {/* Google Analytics ID */}
           <div>

@@ -229,7 +229,7 @@ function RootDocument({
   logoUrl: string;
   logoWhiteUrl: string;
   whatsappUrl: string;
-  siteSettings?: { googleTagManagerId?: string | null } | null; // Define type for siteSettings
+  siteSettings?: { googleTagManagerId?: string | null; brandName?: string | null } | null; // Define type for siteSettings
 }) {
   // Get the router state to detect when routes are loading
   const { isLoading, location } = useRouterState();
@@ -239,6 +239,7 @@ function RootDocument({
     location.pathname.split("/").length > 2;
 
   const gtmId = siteSettings?.googleTagManagerId;
+  const brandName = siteSettings?.brandName || "GWM Indonesia"; // Default brand name
 
   return (
     <html lang="id">
@@ -282,7 +283,7 @@ function RootDocument({
                 <Scripts />
               </div>
             </main>
-            <Footer logoUrl={logoUrl} /> {/* Pass logoUrl to Footer */}
+            <Footer logoUrl={logoUrl} brandName={brandName} /> {/* Pass logoUrl and brandName to Footer */}
             {!isAdminPage && <WhatsAppButton whatsappUrl={whatsappUrl} />}
           </div>
         </div>
