@@ -62,7 +62,7 @@ export const Route = createFileRoute("/")({
       links: [
         {
           rel: "canonical",
-          href: "https://gwmindonesia.com/", // Updated domain
+          href: `${process.env.SITE_URL}/`, // Updated domain
         },
         // Preload LCP images using fetched URLs
         {

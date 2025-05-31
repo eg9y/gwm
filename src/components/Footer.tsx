@@ -124,7 +124,7 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
                 ([category, models]) => (
                   <li key={category}>
                     <a
-                      href={`/tipe-mobil/${category.toLowerCase()}`}
+                      href={"/tipe-mobile"}
                       className="text-gray-500 hover:text-primary text-xs transition"
                     >
                       {models[0]?.categoryDisplay || category}

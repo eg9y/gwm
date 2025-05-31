@@ -114,7 +114,7 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
       links: [
         {
           rel: "canonical",
-          href: `https://gwmindonesia.com/tipe-mobil/${vehicle.id}`,
+          href: `${process.env.SITE_URL}/tipe-mobil/${vehicle.id}`,
         },
       ],
     };
@@ -697,7 +697,7 @@ function VehicleDetailPage() {
         >
           <h2 className="text-2xl font-bold text-gray-900 text-center mb-12 flex items-center justify-center">
             <span className="h-6 w-1.5 bg-primary rounded-full inline-block mr-3" />
-            Tipe Mobil GWM Lainnya
+            Tipe Mobil {process.env.VITE_BRAND_NAME} Lainnya
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

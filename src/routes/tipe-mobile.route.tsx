@@ -21,7 +21,7 @@ export const Route = createFileRoute("/tipe-mobile")({
       links: [
         {
           rel: "canonical",
-          href: "https://gwmindonesia.com/tipe-mobile",
+          href: `${process.env.SITE_URL}/tipe-mobile`,
         },
       ],
     };

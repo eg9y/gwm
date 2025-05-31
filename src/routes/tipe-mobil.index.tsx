@@ -47,7 +47,7 @@ function TipeMobilPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-            Tipe Mobil GWM
+            Tipe Mobil {process.env.VITE_BRAND_NAME}
           </h1>
           <p className="mt-3 text-xl text-gray-500">
             Temukan berbagai tipe mobil GWM yang sesuai dengan kebutuhan Anda

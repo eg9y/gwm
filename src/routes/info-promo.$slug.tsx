@@ -135,7 +135,7 @@ export const Route = createFileRoute("/info-promo/$slug")({
       links: [
         {
           rel: "canonical",
-          href: `https://gwm.co.id/info-promo/${article.slug}`,
+          href: `${process.env.SITE_URL}/info-promo/${article.slug}`,
         },
       ],
     };

@@ -94,7 +94,7 @@ export const Route = createFileRoute("/kontak")({
       links: [
         {
           rel: "canonical",
-          href: "https://gwmindonesia.com/kontak",
+          href: `${process.env.SITE_URL}/kontak`,
         },
       ],
     };
@@ -466,7 +466,7 @@ function ContactPage() {
                   allowFullScreen={true}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="GWM Jakarta Location"
+                  title={`${process.env.VITE_BRAND_NAME} Jakarta Location`}
                   className="w-full h-full"
                 />
               </div>
@@ -1141,7 +1141,8 @@ function ContactPage() {
               Apa Kata Pelanggan Kami
             </h2>
             <p className="text-sm text-secondary">
-              Pengalaman pelanggan yang telah membeli kendaraan GWM
+              Pengalaman pelanggan yang telah membeli kendaraan{" "}
+              {process.env.VITE_BRAND_NAME}
             </p>
           </div>
 
@@ -1156,7 +1157,9 @@ function ContactPage() {
                   <h4 className="font-medium text-sm text-primary">
                     Andi Budiman
                   </h4>
-                  <p className="text-xs text-secondary">Pemilik GWM Haval</p>
+                  <p className="text-xs text-secondary">
+                    Pemilik {process.env.VITE_BRAND_NAME} Haval
+                  </p>
                 </div>
               </div>
               <div className="flex text-yellow-400 mb-2">
@@ -1217,7 +1220,9 @@ function ContactPage() {
                   <h4 className="font-medium text-sm text-primary">
                     Ratna Sari
                   </h4>
-                  <p className="text-xs text-secondary">Pemilik GWM Tank</p>
+                  <p className="text-xs text-secondary">
+                    Pemilik {process.env.VITE_BRAND_NAME} Tank
+                  </p>
                 </div>
               </div>
               <div className="flex text-yellow-400 mb-2">
@@ -1278,7 +1283,9 @@ function ContactPage() {
                   <h4 className="font-medium text-sm text-primary">
                     Denny Wijaya
                   </h4>
-                  <p className="text-xs text-secondary">Pemilik GWM Ora</p>
+                  <p className="text-xs text-secondary">
+                    Pemilik {process.env.VITE_BRAND_NAME} Ora
+                  </p>
                 </div>
               </div>
               <div className="flex text-yellow-400 mb-2">

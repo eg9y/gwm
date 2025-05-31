@@ -21,7 +21,7 @@ export const Route = createFileRoute("/info-promo/")({
       links: [
         {
           rel: "canonical",
-          href: "https://gwmindonesia.com/info-promo",
+          href: `${process.env.SITE_URL}/info-promo`,
         },
       ],
     };
