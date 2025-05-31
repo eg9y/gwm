@@ -9,6 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Hero from "../components/Hero";
 import type { ContactInfo } from "../db";
+import { Route as RootRoute } from "./__root";
 
 // Define a default WhatsApp URL as a fallback (consistent with root)
 const defaultWhatsAppUrl =
@@ -66,14 +67,21 @@ export const Route = createFileRoute("/kontak")({
       };
     }
   },
-  head: ({ data }) => {
+  head: ({ loaderData }) => {
     // Extract contactInfo from loader data with fallbacks
-    const contactInfo = data?.contactInfo || {};
+    const contactInfo = loaderData?.contactInfo || {};
+    // Get brandName from root route
+    const rootData = RootRoute.useLoaderData();
+    const brandName = rootData?.siteSettings?.brandName || "GWM Indonesia";
+
+    // Use brandName in meta title, fallback to default if not set
+    const metaTitle =
+      contactInfo.metaTitle || `Kontak ${brandName} - Hubungi Kami`;
 
     return {
       meta: [
         ...seo({
-          title: contactInfo.metaTitle || "Kontak GWM Indonesia - Hubungi Kami",
+          title: metaTitle,
           description:
             contactInfo.metaDescription ||
             "Hubungi GWM Indonesia untuk informasi produk, test drive, atau layanan purna jual. Temukan dealer terdekat dan jadwalkan kunjungan Anda.",

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getAllPublishedCarModels } from "../server/frontend-car-models";
-import type { CarModel } from "../server/car-models";
+import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/tipe-mobil/")({
   component: TipeMobilPage,
@@ -14,19 +14,21 @@ export const Route = createFileRoute("/tipe-mobil/")({
       return { models: [], error: "Failed to load models" };
     }
   },
-  head: () => ({
-    meta: [
-      {
-        title:
-          "Tipe Mobil GWM Indonesia - Tank, Haval, ORA | Great Wall Motors",
-      },
-      {
-        name: "description",
-        content:
-          "Temukan berbagai tipe mobil GWM Indonesia - Tank 300, Tank 500, Haval H6, Haval Jolion, dan lainnya. Pilih kendaraan yang sesuai dengan gaya hidup dan kebutuhan Anda.",
-      },
-    ],
-  }),
+  head: () => {
+    const rootData = RootRoute.useLoaderData();
+    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    return {
+      meta: [
+        {
+          title: `Tipe Mobil ${brandName} - Tank, Haval, ORA | Great Wall Motors`,
+        },
+        {
+          name: "description",
+          content: `Temukan berbagai tipe mobil ${brandName} - Tank 300, Tank 500, Haval H6, Haval Jolion, dan lainnya. Pilih kendaraan yang sesuai dengan gaya hidup dan kebutuhan Anda.`,
+        },
+      ],
+    };
+  },
 });
 
 function TipeMobilPage() {

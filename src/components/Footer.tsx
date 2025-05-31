@@ -2,6 +2,8 @@ import type { KeyboardEvent } from "react";
 import { useEffect, useState } from "react";
 import { getContactInfo } from "../server/contact-info";
 import type { ContactInfo } from "../db";
+import { getAllPublishedCarModels } from "../server/frontend-car-models";
+import type { DisplayCarModel } from "../server/frontend-car-models";
 
 // Update Footer props to accept logoUrl and brandName
 interface FooterProps {
@@ -13,6 +15,8 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
   const currentYear = new Date().getFullYear();
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [vehicleModels, setVehicleModels] = useState<DisplayCarModel[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(true);
 
   // Fetch contact info (excluding logo now, as it's passed via props)
   useEffect(() => {
@@ -29,6 +33,36 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
 
     fetchContactInfo();
   }, []);
+
+  // Fetch car models
+  useEffect(() => {
+    const fetchModels = async () => {
+      setIsLoadingModels(true);
+      try {
+        const data = await getAllPublishedCarModels();
+        setVehicleModels(data);
+      } catch (error) {
+        console.error("Failed to load car models for footer:", error);
+      } finally {
+        setIsLoadingModels(false);
+      }
+    };
+
+    fetchModels();
+  }, []);
+
+  // Group vehicle models by category
+  const vehicleModelsByCategory = vehicleModels.reduce(
+    (acc, model) => {
+      const category = model.category || "other";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(model);
+      return acc;
+    },
+    {} as Record<string, DisplayCarModel[]>
+  );
 
   const handleKeyPress = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -81,38 +115,24 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
         <div className="col-span-1">
           <h3 className="text-sm font-medium mb-2 sm:mb-3">Tipe Mobil</h3>
           <ul className="space-y-1 sm:space-y-2">
-            <li>
-              <a
-                href="/tipe-mobil/suv"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                SUV
-              </a>
-            </li>
-            <li>
-              <a
-                href="/tipe-mobil/pickup"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                Pickup
-              </a>
-            </li>
-            <li>
-              <a
-                href="/tipe-mobil/electric"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                Electric
-              </a>
-            </li>
-            <li>
-              <a
-                href="/tipe-mobil/hybrid"
-                className="text-gray-500 hover:text-primary text-xs transition"
-              >
-                Hybrid
-              </a>
-            </li>
+            {isLoadingModels ? (
+              <li className="text-gray-500 text-xs">Loading...</li>
+            ) : Object.entries(vehicleModelsByCategory).length === 0 ? (
+              <li className="text-gray-500 text-xs">No car models available</li>
+            ) : (
+              Object.entries(vehicleModelsByCategory).map(
+                ([category, models]) => (
+                  <li key={category}>
+                    <a
+                      href={`/tipe-mobil/${category.toLowerCase()}`}
+                      className="text-gray-500 hover:text-primary text-xs transition"
+                    >
+                      {models[0]?.categoryDisplay || category}
+                    </a>
+                  </li>
+                )
+              )
+            )}
           </ul>
         </div>
 

@@ -3,26 +3,31 @@ import { useState, useEffect } from "react";
 import { getAllArticles } from "../server/articles";
 import type { Article } from "../db";
 import { seo } from "../utils/seo";
+import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/info-promo/")({
   component: InfoPromoPage,
-  head: () => ({
-    meta: [
-      ...seo({
-        title: "Info & Promo - GWM Indonesia",
-        description:
-          "Berita terbaru dan promo spesial dari GWM Indonesia. Dapatkan informasi tentang peluncuran produk, promo penjualan, dan kegiatan GWM lainnya.",
-        keywords:
-          "GWM Indonesia, promo mobil, berita otomotif, Tank 300, Tank 500, Haval H6, Haval Jolion",
-      }),
-    ],
-    links: [
-      {
-        rel: "canonical",
-        href: "https://gwmindonesia.com/info-promo",
-      },
-    ],
-  }),
+  head: () => {
+    const rootData = RootRoute.useLoaderData();
+    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    return {
+      meta: [
+        ...seo({
+          title: `Info & Promo - ${brandName}`,
+          description:
+            "Berita terbaru dan promo spesial dari GWM Indonesia. Dapatkan informasi tentang peluncuran produk, promo penjualan, dan kegiatan GWM lainnya.",
+          keywords:
+            "GWM Indonesia, promo mobil, berita otomotif, Tank 300, Tank 500, Haval H6, Haval Jolion",
+        }),
+      ],
+      links: [
+        {
+          rel: "canonical",
+          href: "https://gwmindonesia.com/info-promo",
+        },
+      ],
+    };
+  },
 });
 
 function InfoPromoPage() {

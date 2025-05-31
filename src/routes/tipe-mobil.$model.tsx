@@ -1,6 +1,6 @@
 "use client";
 
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { seo } from "../utils/seo";
 import { ModelColorPicker } from "../components/ModelColorPicker";
@@ -12,6 +12,7 @@ import {
 import type { CarModelColor, GalleryImage } from "../db/schema";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { ChevronDown, Info } from "lucide-react";
+import { Route as RootRoute } from "./__root";
 
 // Add custom styles for hiding scrollbars
 const HideScrollbarStyles = () => (
@@ -100,11 +101,13 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
 
   head: ({ loaderData }) => {
     const { vehicle } = loaderData;
+    const rootData = RootRoute.useLoaderData();
+    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
 
     return {
       meta: [
         ...seo({
-          title: `${vehicle.name} - Tipe Mobil GWM Indonesia | Great Wall Motors`,
+          title: `${vehicle.name} - Tipe Mobil ${brandName} | Great Wall Motors`,
           description: `${vehicle.name} - ${vehicle.description} Dapatkan informasi lengkap mengenai spesifikasi, harga, dan fitur ${vehicle.name}.`,
           keywords: `GWM, Great Wall Motors, ${vehicle.name}, ${vehicle.categoryDisplay}, Tipe Mobil GWM, ${vehicle.name} Indonesia, ${vehicle.name} Spesifikasi`,
           image: vehicle.featuredImage,
@@ -795,4 +798,3 @@ function VehicleDetailPage() {
     </div>
   );
 }
-

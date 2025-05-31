@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getArticleBySlug } from "../server/articles";
 import type { Article } from "../db";
+import { Route as RootRoute } from "./__root";
 
 // Add CSS for resizable images and YouTube videos
 const articleStyles = `
@@ -67,12 +68,14 @@ export const Route = createFileRoute("/info-promo/$slug")({
   // Use the loaded data for head metadata
   head: ({ loaderData }) => {
     const { article } = loaderData;
+    const rootData = RootRoute.useLoaderData();
+    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
 
     if (!article) {
       return {
         meta: [
           {
-            title: "Article Not Found - GWM Indonesia",
+            title: `Article Not Found - ${brandName}`,
           },
           {
             name: "description",
@@ -85,7 +88,7 @@ export const Route = createFileRoute("/info-promo/$slug")({
     return {
       meta: [
         {
-          title: `${article.title} - GWM Indonesia`,
+          title: `${article.title} - ${brandName}`,
         },
         {
           name: "description",
@@ -100,7 +103,7 @@ export const Route = createFileRoute("/info-promo/$slug")({
         },
         {
           property: "og:title",
-          content: `${article.title} - GWM Indonesia`,
+          content: `${article.title} - ${brandName}`,
         },
         {
           property: "og:description",

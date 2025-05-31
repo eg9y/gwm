@@ -1,28 +1,33 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { fetchPosts } from "../utils/posts";
 import { seo } from "../utils/seo";
+import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/tipe-mobile")({
   loader: async () => fetchPosts(),
   component: PostsLayoutComponent,
-  head: () => ({
-    meta: [
-      ...seo({
-        title: "Tipe Mobil - GWM Indonesia | Great Wall Motors",
-        description:
-          "Jelajahi berbagai tipe mobil GWM Indonesia - Haval, Tank, dan ORA. Temukan mobil SUV premium yang sesuai dengan kebutuhan Anda.",
-        keywords:
-          "GWM, Great Wall Motors, Tipe Mobil, Haval, Tank, ORA, SUV Premium, Indonesia",
-        image: "https://gwm.co.id/images/types-collection.webp",
-      }),
-    ],
-    links: [
-      {
-        rel: "canonical",
-        href: "https://gwmindonesia.com/tipe-mobile",
-      },
-    ],
-  }),
+  head: () => {
+    const rootData = RootRoute.useLoaderData();
+    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    return {
+      meta: [
+        ...seo({
+          title: `Tipe Mobil - ${brandName} | Great Wall Motors`,
+          description:
+            "Jelajahi berbagai tipe mobil GWM Indonesia - Haval, Tank, dan ORA. Temukan mobil SUV premium yang sesuai dengan kebutuhan Anda.",
+          keywords:
+            "GWM, Great Wall Motors, Tipe Mobil, Haval, Tank, ORA, SUV Premium, Indonesia",
+          image: "https://gwm.co.id/images/types-collection.webp",
+        }),
+      ],
+      links: [
+        {
+          rel: "canonical",
+          href: "https://gwmindonesia.com/tipe-mobile",
+        },
+      ],
+    };
+  },
 });
 
 function PostsLayoutComponent() {

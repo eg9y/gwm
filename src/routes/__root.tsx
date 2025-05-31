@@ -78,6 +78,7 @@ export const Route = createRootRoute({
     const { siteSettings } = loaderData;
     const gaId = siteSettings?.googleAnalyticsId;
     const gtmId = siteSettings?.googleTagManagerId; // Extract GTM ID
+    const brandName = siteSettings?.brandName || "GWM Indonesia";
 
     // Construct the Google Analytics script source URL dynamically
     const gaSrc = gaId
@@ -95,8 +96,7 @@ export const Route = createRootRoute({
         },
         // Base SEO that will be used if child routes don't override
         ...seo({
-          title:
-            "GWM Indonesia - Great Wall Motors | Mobil SUV Premium Terbaik",
+          title: `${brandName} - Great Wall Motors | Mobil SUV Premium Terbaik`,
           description:
             "Great Wall Motors Indonesia - Mobil SUV premium berkualitas tinggi dengan teknologi terkini. Haval, Tank, dan ORA tersedia di Indonesia.",
           keywords:
@@ -229,7 +229,10 @@ function RootDocument({
   logoUrl: string;
   logoWhiteUrl: string;
   whatsappUrl: string;
-  siteSettings?: { googleTagManagerId?: string | null; brandName?: string | null } | null; // Define type for siteSettings
+  siteSettings?: {
+    googleTagManagerId?: string | null;
+    brandName?: string | null;
+  } | null; // Define type for siteSettings
 }) {
   // Get the router state to detect when routes are loading
   const { isLoading, location } = useRouterState();
@@ -283,7 +286,8 @@ function RootDocument({
                 <Scripts />
               </div>
             </main>
-            <Footer logoUrl={logoUrl} brandName={brandName} /> {/* Pass logoUrl and brandName to Footer */}
+            <Footer logoUrl={logoUrl} brandName={brandName} />{" "}
+            {/* Pass logoUrl and brandName to Footer */}
             {!isAdminPage && <WhatsAppButton whatsappUrl={whatsappUrl} />}
           </div>
         </div>

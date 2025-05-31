@@ -31,87 +31,23 @@ async function main() {
       cause?: { code?: string; message?: string };
     };
 
-    // Check if the error is because tables already exist
+    // Check if the error is because of empty SQL statements
     if (
+      err.cause?.message?.includes("contains no statements") ||
+      err.message?.includes("contains no statements")
+    ) {
+      console.log(
+        "Empty migration file detected, applying migrations manually..."
+      );
+      await applyMigrationsManually(sqlite, db);
+    } else if (
       err.cause?.code === "SQLITE_ERROR" &&
       err.cause.message?.includes("already exists")
     ) {
       console.log(
         "Some tables already exist, attempting to apply migrations manually..."
       );
-
-      // Create migration table if it doesn't exist
-      try {
-        db.run(sql`
-          CREATE TABLE IF NOT EXISTS __drizzle_migrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            hash TEXT NOT NULL,
-            created_at NUMERIC
-          )
-        `);
-      } catch (e) {
-        console.log("Migration table already exists or can't be created:", e);
-      }
-
-      // Get all migration files sorted by name (which should be chronological)
-      const migrationsDir = path.resolve("./drizzle");
-      const migrationFiles = fs
-        .readdirSync(migrationsDir)
-        .filter((file) => file.endsWith(".sql"))
-        .sort((a, b) => a.localeCompare(b));
-
-      if (migrationFiles.length === 0) {
-        console.error("No migration files found in ./drizzle directory");
-        throw new Error("No migration files found");
-      }
-
-      console.log(
-        `Found ${migrationFiles.length} migration files. Applying each in sequence...`
-      );
-
-      // Apply each migration file in sequence
-      for (const migrationFile of migrationFiles) {
-        console.log(`Applying migration: ${migrationFile}...`);
-        const migrationSQL = fs.readFileSync(
-          path.resolve(migrationsDir, migrationFile),
-          "utf8"
-        );
-
-        // Split the SQL by statement-breakpoint to run each statement separately
-        const statements = migrationSQL.split("--> statement-breakpoint");
-
-        for (const statement of statements) {
-          const trimmedStatement = statement.trim();
-          if (trimmedStatement.length === 0) continue;
-
-          try {
-            sqlite.exec(trimmedStatement);
-            console.log(
-              `Successfully executed statement from ${migrationFile}`
-            );
-          } catch (statementError: unknown) {
-            const stmtErr = statementError as Error & {
-              code?: string;
-              message?: string;
-            };
-
-            if (
-              stmtErr.code === "SQLITE_ERROR" &&
-              stmtErr.message?.includes("already exists")
-            ) {
-              console.log("Statement skipped (table/index already exists)");
-            } else {
-              console.error(
-                `Error executing statement from ${migrationFile}:`,
-                stmtErr
-              );
-              // Continue with next statement instead of stopping entirely
-            }
-          }
-        }
-      }
-
-      console.log("All migrations applied manually.");
+      await applyMigrationsManually(sqlite, db);
     } else if (
       err.message?.includes("No file") &&
       err.message?.includes("found in ./drizzle folder")
@@ -121,39 +57,7 @@ async function main() {
         "Migration file not found. This might be due to a deleted or renamed migration."
       );
       console.log("Attempting to apply all available migrations...");
-
-      // Try to run all available migrations
-      const migrationsDir = path.resolve("./drizzle");
-      const migrationFiles = fs
-        .readdirSync(migrationsDir)
-        .filter((file) => file.endsWith(".sql"))
-        .sort((a, b) => a.localeCompare(b));
-
-      if (migrationFiles.length === 0) {
-        console.error("No migration files found in ./drizzle directory");
-        throw new Error("No migration files found");
-      }
-
-      // Create a fresh schema from the available migrations
-      for (const migrationFile of migrationFiles) {
-        console.log(`Applying migration: ${migrationFile}...`);
-        const migrationSQL = fs.readFileSync(
-          path.resolve(migrationsDir, migrationFile),
-          "utf8"
-        );
-
-        try {
-          sqlite.exec(migrationSQL);
-          console.log(`Successfully executed migration ${migrationFile}`);
-        } catch (migrationError) {
-          console.error(
-            `Error applying migration ${migrationFile}:`,
-            migrationError
-          );
-        }
-      }
-
-      console.log("All available migrations applied.");
+      await applyMigrationsManually(sqlite, db);
     } else {
       // Some other error occurred
       throw error;
@@ -164,6 +68,87 @@ async function main() {
   console.log("Initializing contact information...");
   await initContactInfo();
   console.log("Contact information initialized!");
+}
+
+async function applyMigrationsManually(
+  sqlite: Database.Database,
+  db: ReturnType<typeof drizzle>
+) {
+  // Create migration table if it doesn't exist
+  try {
+    db.run(sql`
+      CREATE TABLE IF NOT EXISTS __drizzle_migrations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hash TEXT NOT NULL,
+        created_at NUMERIC
+      )
+    `);
+  } catch (e) {
+    console.log("Migration table already exists or can't be created:", e);
+  }
+
+  // Get all migration files sorted by name (which should be chronological)
+  const migrationsDir = path.resolve("./drizzle");
+  const migrationFiles = fs
+    .readdirSync(migrationsDir)
+    .filter((file) => file.endsWith(".sql"))
+    .sort((a, b) => a.localeCompare(b));
+
+  if (migrationFiles.length === 0) {
+    console.error("No migration files found in ./drizzle directory");
+    throw new Error("No migration files found");
+  }
+
+  console.log(
+    `Found ${migrationFiles.length} migration files. Applying each in sequence...`
+  );
+
+  // Apply each migration file in sequence
+  for (const migrationFile of migrationFiles) {
+    console.log(`Processing migration: ${migrationFile}...`);
+    const migrationPath = path.resolve(migrationsDir, migrationFile);
+    const migrationSQL = fs.readFileSync(migrationPath, "utf8");
+
+    // Skip empty migration files
+    const trimmedSQL = migrationSQL.trim();
+    if (trimmedSQL.length === 0) {
+      console.log(`Skipping empty migration file: ${migrationFile}`);
+      continue;
+    }
+
+    // Split the SQL by statement-breakpoint to run each statement separately
+    const statements = migrationSQL.split("--> statement-breakpoint");
+
+    for (const statement of statements) {
+      const trimmedStatement = statement.trim();
+      if (trimmedStatement.length === 0) continue;
+
+      try {
+        sqlite.exec(trimmedStatement);
+        console.log(`Successfully executed statement from ${migrationFile}`);
+      } catch (statementError: unknown) {
+        const stmtErr = statementError as Error & {
+          code?: string;
+          message?: string;
+        };
+
+        if (
+          stmtErr.code === "SQLITE_ERROR" &&
+          stmtErr.message?.includes("already exists")
+        ) {
+          console.log("Statement skipped (table/index already exists)");
+        } else {
+          console.error(
+            `Error executing statement from ${migrationFile}:`,
+            stmtErr
+          );
+          // Continue with next statement instead of stopping entirely
+        }
+      }
+    }
+  }
+
+  console.log("All migrations applied manually.");
 }
 
 main().catch((error) => {
