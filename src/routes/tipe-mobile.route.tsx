@@ -1,14 +1,12 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { fetchPosts } from "../utils/posts";
 import { seo } from "../utils/seo";
-import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/tipe-mobile")({
   loader: async () => fetchPosts(),
   component: PostsLayoutComponent,
   head: () => {
-    const rootData = RootRoute.useLoaderData();
-    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
     return {
       meta: [
         ...seo({

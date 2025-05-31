@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getAllPublishedCarModels } from "../server/frontend-car-models";
-import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/tipe-mobil/")({
   component: TipeMobilPage,
@@ -15,8 +14,7 @@ export const Route = createFileRoute("/tipe-mobil/")({
     }
   },
   head: () => {
-    const rootData = RootRoute.useLoaderData();
-    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
     return {
       meta: [
         {

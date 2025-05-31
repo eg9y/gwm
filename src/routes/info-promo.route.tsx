@@ -1,12 +1,10 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { seo } from "../utils/seo";
-import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/info-promo")({
   component: PostsLayoutComponent,
   head: () => {
-    const rootData = RootRoute.useLoaderData();
-    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
     return {
       meta: [
         ...seo({

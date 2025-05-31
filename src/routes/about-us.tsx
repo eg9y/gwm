@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "@clerk/tanstack-start";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { getAboutUs } from "../server/about-us";
 import { ResponsiveLazyImage } from "../components/ResponsiveImage";
 import WhatsAppButton from "../components/WhatsAppButton";
-import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/about-us")({
   component: AboutUsPage,
@@ -24,8 +22,7 @@ export const Route = createFileRoute("/about-us")({
 
 function AboutUsPage() {
   const { aboutUsContent, error } = Route.useLoaderData();
-  const rootData = RootRoute.useLoaderData();
-  const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+  const brandName = process.env.BRAND_NAME || "GWM Indonesia";
 
   useEffect(() => {
     // Scroll to top when component mounts

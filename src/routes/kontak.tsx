@@ -9,7 +9,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Hero from "../components/Hero";
 import type { ContactInfo } from "../db";
-import { Route as RootRoute } from "./__root";
 
 // Define a default WhatsApp URL as a fallback (consistent with root)
 const defaultWhatsAppUrl =
@@ -70,9 +69,8 @@ export const Route = createFileRoute("/kontak")({
   head: ({ loaderData }) => {
     // Extract contactInfo from loader data with fallbacks
     const contactInfo = loaderData?.contactInfo || {};
-    // Get brandName from root route
-    const rootData = RootRoute.useLoaderData();
-    const brandName = rootData?.siteSettings?.brandName || "GWM Indonesia";
+    // Get brandName from environment variable
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
 
     // Use brandName in meta title, fallback to default if not set
     const metaTitle =

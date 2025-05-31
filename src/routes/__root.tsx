@@ -78,7 +78,7 @@ export const Route = createRootRoute({
     const { siteSettings } = loaderData;
     const gaId = siteSettings?.googleAnalyticsId;
     const gtmId = siteSettings?.googleTagManagerId; // Extract GTM ID
-    const brandName = siteSettings?.brandName || "GWM Indonesia";
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
 
     // Construct the Google Analytics script source URL dynamically
     const gaSrc = gaId

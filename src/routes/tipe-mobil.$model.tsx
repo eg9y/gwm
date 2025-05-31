@@ -12,7 +12,6 @@ import {
 import type { CarModelColor, GalleryImage } from "../db/schema";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { ChevronDown, Info } from "lucide-react";
-import { Route as RootRoute } from "./__root";
 
 // Add custom styles for hiding scrollbars
 const HideScrollbarStyles = () => (
@@ -101,8 +100,7 @@ export const Route = createFileRoute("/tipe-mobil/$model")({
 
   head: ({ loaderData }) => {
     const { vehicle } = loaderData;
-    const rootData = RootRoute.useLoaderData();
-    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
 
     return {
       meta: [

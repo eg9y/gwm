@@ -3,13 +3,11 @@ import { useState, useEffect } from "react";
 import { getAllArticles } from "../server/articles";
 import type { Article } from "../db";
 import { seo } from "../utils/seo";
-import { Route as RootRoute } from "./__root";
 
 export const Route = createFileRoute("/info-promo/")({
   component: InfoPromoPage,
   head: () => {
-    const rootData = RootRoute.useLoaderData();
-    const brandName = rootData.siteSettings?.brandName || "GWM Indonesia";
+    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
     return {
       meta: [
         ...seo({
