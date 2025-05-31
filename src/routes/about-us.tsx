@@ -22,7 +22,7 @@ export const Route = createFileRoute("/about-us")({
 
 function AboutUsPage() {
   const { aboutUsContent, error } = Route.useLoaderData();
-  const brandName = process.env.BRAND_NAME || "GWM Indonesia";
+  const brandName = process.env.VITE_BRAND_NAME || "GWM Indonesia";
 
   useEffect(() => {
     // Scroll to top when component mounts

@@ -60,6 +60,7 @@ const carModelSchema = z.object({
   specifications: z.array(specCategorySchema).optional().default([]),
   category: z.string().min(1, "Category is required"),
   categoryDisplay: z.string().min(1, "Category display name is required"),
+  tipeMobilPageMetaTitle: z.string().optional(),
   published: z.coerce.number().default(0),
 });
 
@@ -79,6 +80,7 @@ export interface CarModel {
   specifications?: CarModelSpecificationCategory[];
   category: string;
   categoryDisplay: string;
+  tipeMobilPageMetaTitle?: string;
   published: number;
   createdAt: string;
   updatedAt: string;
@@ -203,6 +205,7 @@ export const createCarModel = createServerFn()
         specifications: data.specifications,
         category: data.category,
         categoryDisplay: data.categoryDisplay,
+        tipeMobilPageMetaTitle: data.tipeMobilPageMetaTitle,
         published: data.published,
         createdAt: currentTime,
         updatedAt: currentTime,
@@ -272,6 +275,7 @@ export const updateCarModel = createServerFn()
           specifications: data.specifications,
           category: data.category,
           categoryDisplay: data.categoryDisplay,
+          tipeMobilPageMetaTitle: data.tipeMobilPageMetaTitle,
           published: data.published,
           updatedAt: new Date().toISOString(),
         })

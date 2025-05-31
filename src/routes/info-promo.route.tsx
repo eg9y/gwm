@@ -4,11 +4,12 @@ import { seo } from "../utils/seo";
 export const Route = createFileRoute("/info-promo")({
   component: PostsLayoutComponent,
   head: () => {
-    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
+    const brandName =
+      process.env.VITE_BRAND_NAME || "GWM Indonesia | Great Wall Motors";
     return {
       meta: [
         ...seo({
-          title: `Info Promo - ${brandName} | Great Wall Motors`,
+          title: `Info Promo - ${brandName}`,
           description:
             "Jelajahi berbagai info promo GWM Indonesia - Haval, Tank, dan ORA. Temukan promo mobil SUV premium yang sesuai dengan kebutuhan Anda.",
           keywords:

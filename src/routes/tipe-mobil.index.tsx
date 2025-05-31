@@ -13,12 +13,25 @@ export const Route = createFileRoute("/tipe-mobil/")({
       return { models: [], error: "Failed to load models" };
     }
   },
-  head: () => {
-    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
+  head: ({ loaderData }) => {
+    const { models } = loaderData;
+    const brandName =
+      process.env.VITE_BRAND_NAME || "GWM Indonesia | Great Wall Motors";
+
+    // Check if any published model has a custom meta title for the tipe-mobil page
+    const customMetaTitle = models?.find(
+      (model) => model.tipeMobilPageMetaTitle
+    )?.tipeMobilPageMetaTitle;
+
+    // Use custom meta title if available, otherwise use default
+    const pageTitle =
+      customMetaTitle ||
+      `Tipe Mobil ${brandName} - Tank, Haval, ORA | Great Wall Motors`;
+
     return {
       meta: [
         {
-          title: `Tipe Mobil ${brandName} - Tank, Haval, ORA | Great Wall Motors`,
+          title: pageTitle,
         },
         {
           name: "description",

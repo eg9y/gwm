@@ -95,7 +95,7 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
           <ul className="space-y-1 sm:space-y-2">
             <li>
               <a
-                href="/tentang-kami"
+                href="/about-us"
                 className="text-gray-500 hover:text-primary text-xs transition"
               >
                 Tentang Kami
@@ -103,7 +103,7 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
             </li>
             <li>
               <a
-                href="/berita"
+                href="/info-promo"
                 className="text-gray-500 hover:text-primary text-xs transition"
               >
                 Berita
@@ -124,7 +124,7 @@ const Footer = ({ logoUrl, brandName = "GWM Indonesia" }: FooterProps) => {
                 ([category, models]) => (
                   <li key={category}>
                     <a
-                      href={"/tipe-mobile"}
+                      href={"/tipe-mobil"}
                       className="text-gray-500 hover:text-primary text-xs transition"
                     >
                       {models[0]?.categoryDisplay || category}

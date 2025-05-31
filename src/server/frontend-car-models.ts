@@ -26,6 +26,7 @@ export type DisplayCarModel = {
   gallery?: GalleryImage[];
   category: string;
   categoryDisplay: string;
+  tipeMobilPageMetaTitle?: string;
   has180View?: number; // Mark as optional as it might be removed
   published: number;
   createdAt: string;

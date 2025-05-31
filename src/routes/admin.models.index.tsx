@@ -35,7 +35,6 @@ export const Route = createFileRoute("/admin/models/")({
 
 function AdminModelsPage() {
   const { models, error } = Route.useLoaderData();
-  const { isSignedIn } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);

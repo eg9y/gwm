@@ -133,6 +133,7 @@ export const carModels = sqliteTable("car_models", {
   >(), // JSON array of specification categories
   category: text("category").notNull(), // e.g. SUV, Sedan, etc.
   categoryDisplay: text("category_display").notNull(), // Display name for category
+  tipeMobilPageMetaTitle: text("tipe_mobil_page_meta_title"), // Meta title for the /tipe-mobil route
   published: integer("published").notNull().default(0), // Published status
   createdAt: text("created_at")
     .notNull()
