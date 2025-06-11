@@ -1,31 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getAllPublishedCarModels } from "../server/frontend-car-models";
+import { getSiteSettings } from "../server/site-settings";
 
 export const Route = createFileRoute("/tipe-mobil/")({
   component: TipeMobilPage,
   loader: async () => {
     try {
-      const models = await getAllPublishedCarModels();
-      return { models, error: null };
+      const [models, siteSettings] = await Promise.all([
+        getAllPublishedCarModels(),
+        getSiteSettings(),
+      ]);
+      return { models, siteSettings, error: null };
     } catch (error) {
-      console.error("Error loading car models:", error);
-      return { models: [], error: "Failed to load models" };
+      console.error("Error loading data:", error);
+      return { models: [], siteSettings: null, error: "Failed to load data" };
     }
   },
   head: ({ loaderData }) => {
-    const { models } = loaderData;
+    const { siteSettings } = loaderData;
     const brandName =
       process.env.VITE_BRAND_NAME || "GWM Indonesia | Great Wall Motors";
 
-    // Check if any published model has a custom meta title for the tipe-mobil page
-    const customMetaTitle = models?.find(
-      (model) => model.tipeMobilPageMetaTitle
-    )?.tipeMobilPageMetaTitle;
-
-    // Use custom meta title if available, otherwise use default
+    // Use custom meta title from site settings if available, otherwise use default
     const pageTitle =
-      customMetaTitle ||
+      siteSettings?.tipeMobilPageMetaTitle ||
       `Tipe Mobil ${brandName} - Tank, Haval, ORA | Great Wall Motors`;
 
     return {
@@ -63,7 +62,8 @@ function TipeMobilPage() {
             Tipe Mobil {process.env.VITE_BRAND_NAME}
           </h1>
           <p className="mt-3 text-xl text-gray-500">
-            Temukan berbagai tipe mobil GWM yang sesuai dengan kebutuhan Anda
+            Temukan berbagai tipe mobil {process.env.VITE_BRAND_NAME || "GWM"}{" "}
+            yang sesuai dengan kebutuhan Anda
           </p>
         </div>
 
@@ -75,13 +75,13 @@ function TipeMobilPage() {
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <div
+            <output
               className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
-              aria-label="Loading"
-              role="status"
+              aria-live="polite"
+              aria-label="Loading vehicle models"
             >
               <span className="sr-only">Loading vehicle models...</span>
-            </div>
+            </output>
           </div>
         ) : models.length === 0 && !error ? (
           <div className="bg-gray-50 rounded-lg p-8 text-center">
