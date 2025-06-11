@@ -1,12 +1,27 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { fetchPosts } from "../utils/posts";
 import { seo } from "../utils/seo";
+import { getSiteSettings } from "../server/site-settings";
 
 export const Route = createFileRoute("/tipe-mobile")({
-  loader: async () => fetchPosts(),
+  loader: async () => {
+    try {
+      const [posts, siteSettings] = await Promise.all([
+        fetchPosts(),
+        getSiteSettings(),
+      ]);
+      return { posts, siteSettings };
+    } catch (error) {
+      console.error("Error loading data:", error);
+      const posts = await fetchPosts(); // Fallback to just posts
+      return { posts, siteSettings: null };
+    }
+  },
   component: PostsLayoutComponent,
-  head: () => {
-    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
+  head: ({ loaderData }) => {
+    const { siteSettings } = loaderData;
+    const brandName = siteSettings?.brandName || "GWM Indonesia";
+
     return {
       meta: [
         ...seo({
@@ -29,7 +44,7 @@ export const Route = createFileRoute("/tipe-mobile")({
 });
 
 function PostsLayoutComponent() {
-  const posts = Route.useLoaderData();
+  const { posts } = Route.useLoaderData();
 
   return (
     <div className="p-2 flex gap-2">

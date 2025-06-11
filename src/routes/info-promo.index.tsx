@@ -3,11 +3,23 @@ import { useState, useEffect } from "react";
 import { getAllArticles } from "../server/articles";
 import type { Article } from "../db";
 import { seo } from "../utils/seo";
+import { getSiteSettings } from "../server/site-settings";
 
 export const Route = createFileRoute("/info-promo/")({
   component: InfoPromoPage,
-  head: () => {
-    const brandName = process.env.BRAND_NAME || "GWM Indonesia";
+  loader: async () => {
+    try {
+      const siteSettings = await getSiteSettings();
+      return { siteSettings };
+    } catch (error) {
+      console.error("Error loading site settings:", error);
+      return { siteSettings: null };
+    }
+  },
+  head: ({ loaderData }) => {
+    const { siteSettings } = loaderData;
+    const brandName = siteSettings?.brandName || "GWM Indonesia";
+
     return {
       meta: [
         ...seo({

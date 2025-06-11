@@ -1,11 +1,23 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { seo } from "../utils/seo";
+import { getSiteSettings } from "../server/site-settings";
 
 export const Route = createFileRoute("/info-promo")({
   component: PostsLayoutComponent,
-  head: () => {
+  loader: async () => {
+    try {
+      const siteSettings = await getSiteSettings();
+      return { siteSettings };
+    } catch (error) {
+      console.error("Error loading site settings:", error);
+      return { siteSettings: null };
+    }
+  },
+  head: ({ loaderData }) => {
+    const { siteSettings } = loaderData;
     const brandName =
-      process.env.VITE_BRAND_NAME || "GWM Indonesia | Great Wall Motors";
+      siteSettings?.brandName || "GWM Indonesia | Great Wall Motors";
+
     return {
       meta: [
         ...seo({

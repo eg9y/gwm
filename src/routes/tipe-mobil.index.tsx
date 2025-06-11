@@ -20,7 +20,7 @@ export const Route = createFileRoute("/tipe-mobil/")({
   head: ({ loaderData }) => {
     const { siteSettings } = loaderData;
     const brandName =
-      process.env.VITE_BRAND_NAME || "GWM Indonesia | Great Wall Motors";
+      siteSettings?.brandName || "GWM Indonesia | Great Wall Motors";
 
     // Use custom meta title from site settings if available, otherwise use default
     const pageTitle =
@@ -42,8 +42,10 @@ export const Route = createFileRoute("/tipe-mobil/")({
 });
 
 function TipeMobilPage() {
-  const { models, error } = Route.useLoaderData();
+  const { models, siteSettings, error } = Route.useLoaderData();
   const [isLoading, setIsLoading] = useState(true);
+
+  const brandName = siteSettings?.brandName || "GWM Indonesia";
 
   // Add a small delay for smooth loading transition
   useEffect(() => {
@@ -59,11 +61,11 @@ function TipeMobilPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-            Tipe Mobil {process.env.VITE_BRAND_NAME}
+            Tipe Mobil {brandName}
           </h1>
           <p className="mt-3 text-xl text-gray-500">
-            Temukan berbagai tipe mobil {process.env.VITE_BRAND_NAME || "GWM"}{" "}
-            yang sesuai dengan kebutuhan Anda
+            Temukan berbagai tipe mobil {brandName} yang sesuai dengan kebutuhan
+            Anda
           </p>
         </div>
 
