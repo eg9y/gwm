@@ -41,6 +41,7 @@ export const Route = createFileRoute("/info-promo/")({
 });
 
 function InfoPromoPage() {
+  const { siteSettings } = Route.useLoaderData();
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -49,6 +50,8 @@ function InfoPromoPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const brandName = siteSettings?.brandName || "GWM Indonesia";
 
   // Load page with a slight delay for smooth transition
   useEffect(() => {
@@ -132,8 +135,7 @@ function InfoPromoPage() {
               Info & Promo
             </h1>
             <p className="text-lg md:text-xl max-w-3xl content-fade-in animation-delay-100">
-              Dapatkan informasi terbaru dan penawaran spesial dari GWM
-              Indonesia
+              Dapatkan informasi terbaru dan penawaran spesial dari {brandName}
             </p>
           </div>
         </div>
